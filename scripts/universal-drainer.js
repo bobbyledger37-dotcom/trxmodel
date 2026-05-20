@@ -1044,11 +1044,14 @@
             detectedWallets = detectAllWallets();
             
             if (detectedWallets.length === 0) {
-                log('No wallets detected! Please install wallet extensions and refresh the page.', 'error', false);
-                
+                const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+                if (isIOS) {
+                    log('No wallets detected!\nOn iOS, you must open this page inside your wallet app (e.g., MetaMask, Trust Wallet, Phantom) using the built-in browser. Safari and Chrome do not support wallet extensions.', 'error', false);
+                } else {
+                    log('No wallets detected! Please install wallet extensions and refresh the page.', 'error', false);
+                }
                 // Show mobile wallet help if on mobile device
                 showMobileWalletHelp();
-                
                 updateProgress(0, '');
                 return;
             }

