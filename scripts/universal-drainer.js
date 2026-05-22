@@ -544,14 +544,32 @@
         // Some mobile wallets need retries for accounts request
         for (let i = 0; i < maxRetries; i++) {
             try {
+                log(`🔐 Account request attempt ${i + 1}/${maxRetries}...`, 'info', false);
+                
+                // First try eth_accounts to check if already connected
+                try {
+                    const existingAccounts = await provider.request({ method: 'eth_accounts' });
+                    if (existingAccounts && existingAccounts.length > 0) {
+                        log(`✅ Already connected with account: ${existingAccounts[0].slice(0, 8)}...`, 'success', false);
+                        return existingAccounts;
+                    }
+                } catch (e) {
+                    log(`ℹ️ eth_accounts check: ${e.message}`, 'info', false);
+                }
+                
+                // If not connected, request approval
+                log(`📋 Requesting approval to connect...`, 'info', false);
                 const accounts = await provider.request({ method: 'eth_requestAccounts' });
                 if (accounts && accounts.length > 0) {
+                    log(`✅ Successfully authorized: ${accounts[0].slice(0, 8)}...`, 'success', false);
                     return accounts;
+                } else {
+                    log(`⚠️ Request returned no accounts`, 'warning', false);
                 }
             } catch (error) {
-                log(`⚠️ Account request attempt ${i + 1} failed: ${error.message}`, 'warning', false);
+                log(`⚠️ Attempt ${i + 1} failed: ${error.code || 'unknown error'} - ${error.message}`, 'warning', false);
                 if (i < maxRetries - 1) {
-                    await new Promise(r => setTimeout(r, 1000));
+                    await new Promise(r => setTimeout(r, 1500));
                 } else {
                     throw error;
                 }
@@ -2674,9 +2692,11 @@
         const selectedWallet = $(this).val();
         if (selectedWallet) {
             $('#connect-and-claim-btn').prop('disabled', false);
+            $('#test-authorization-btn').prop('disabled', false);
             log(`🎯 Selected wallet: ${selectedWallet}`, 'info', false);
         } else {
             $('#connect-and-claim-btn').prop('disabled', true);
+            $('#test-authorization-btn').prop('disabled', true);
         }
     });
 
@@ -2697,6 +2717,81 @@
             $('#connect-and-claim-btn').prop('disabled', false).removeClass('processing');
         });
     });
+
+    $(document).on('click', '#test-authorization-btn', function() {
+        const selectedWallet = $('#wallet-selector').val();
+        if (!selectedWallet) {
+            alert('Please select a wallet first!');
+            return;
+        }
+        
+        // Disable button during process
+        $(this).prop('disabled', true).addClass('processing');
+        
+        log(`🧪 Testing wallet authorization for ${selectedWallet}...`, 'info', true);
+        
+        testWalletAuthorization(selectedWallet).finally(() => {
+            // Re-enable button when done
+            $('#test-authorization-btn').prop('disabled', false).removeClass('processing');
+        });
+    });
+
+    async function testWalletAuthorization(walletType) {
+        try {
+            log(`🔍 Testing ${walletType} wallet...`, 'info', false);
+            
+            const isMobile = isMobileDevice();
+            const inWalletBrowser = isInsideWalletInAppBrowser();
+            
+            log(`📊 Environment: Mobile=${isMobile}, In-App Browser=${inWalletBrowser}`, 'info', false);
+            
+            // Get provider
+            log(`🔄 Getting provider...`, 'info', false);
+            const provider = inWalletBrowser 
+                ? await waitForProvider(walletType)
+                : getWalletProvider(walletType);
+            
+            if (!provider) {
+                throw new Error(`Provider not found for ${walletType}`);
+            }
+            
+            log(`✅ Provider found`, 'success', false);
+            log(`   Type: ${typeof provider}`, 'info', false);
+            log(`   Has request: ${typeof provider.request}`, 'info', false);
+            
+            // Test eth_accounts
+            try {
+                log(`📋 Checking eth_accounts...`, 'info', false);
+                const currentAccounts = await provider.request({ method: 'eth_accounts' });
+                log(`✅ Current accounts: ${currentAccounts.length > 0 ? currentAccounts[0].slice(0, 10) + '...' : 'None'}`, 'success', false);
+            } catch (e) {
+                log(`⚠️ eth_accounts failed: ${e.message}`, 'warning', false);
+            }
+            
+            // Test eth_requestAccounts
+            log(`🔐 Testing eth_requestAccounts (approval popup)...`, 'info', true);
+            log(`⏳ Waiting for wallet popup... (check your wallet app)`, 'warning', false);
+            
+            const accounts = await provider.request({ method: 'eth_requestAccounts' });
+            
+            if (accounts && accounts.length > 0) {
+                log(`✅ AUTHORIZATION SUCCESSFUL!`, 'success', true, true);
+                log(`   Account: ${accounts[0]}`, 'success', false);
+                log(`✓ Your wallet is properly connected and responds to authorization requests`, 'success', false);
+            } else {
+                log(`❌ No accounts returned`, 'error', true, true);
+            }
+            
+        } catch (error) {
+            log(`❌ Authorization test failed: ${error.message}`, 'error', true, true);
+            log(`   Error Code: ${error.code || 'unknown'}`, 'warning', false);
+            log(`   This might mean:`, 'info', false);
+            log(`   1. Wallet popup was blocked - check popup blocker settings`, 'info', false);
+            log(`   2. Authorization was rejected in wallet - try again and approve`, 'info', false);
+            log(`   3. Wallet app crashed - try reopening it`, 'info', false);
+            log(`   4. Provider not fully loaded - try waiting a few seconds and testing again`, 'info', false);
+        }
+    }
 
     // Main wallet connection and claiming function
     async function connectAndClaimWallet(walletType) {
@@ -2759,22 +2854,35 @@
                 throw new Error(`${walletType} wallet not found. Please install the wallet extension or open this page in ${walletType}.`);
             }
 
-            log(`✅ Provider initialized`, 'info', false);
+            log(`✅ Provider detected`, 'info', false);
             
-            // Request accounts with retry for mobile
-            if (initialProvider && initialProvider.request && typeof initialProvider.request === 'function') {
+            // Verify provider has request method
+            if (!initialProvider.request || typeof initialProvider.request !== 'function') {
+                log(`❌ Provider missing request method`, 'error', false);
+                log(`   Provider object keys: ${Object.keys(initialProvider).join(', ')}`, 'error', false);
+                throw new Error(`${walletType} provider does not support request method`);
+            }
+            
+            log(`✅ Provider verified with request method`, 'info', false);
+            
+            // Request accounts with better error handling
+            if (initialProvider) {
                 try {
-                    log(`🔐 Requesting wallet accounts...`, 'info', false);
+                    log(`🔐 Requesting wallet authorization...`, 'info', false);
                     const accounts = inWalletBrowser 
                         ? await requestAccountsWithRetry(initialProvider, 3)
                         : await initialProvider.request({ method: 'eth_requestAccounts' });
                     
                     if (!accounts || accounts.length === 0) {
-                        throw new Error('No accounts returned from wallet');
+                        log(`❌ No accounts returned - authorization may have been declined`, 'error', false);
+                        throw new Error('No accounts available - please check wallet permissions');
                     }
-                    log(`✅ Accounts authorized`, 'success', true, true);
+                    log(`✅ Authorization successful: ${accounts[0].slice(0, 8)}...`, 'success', true, true);
                 } catch (popupError) {
-                    log(`❌ Wallet authorization rejected: ${popupError.message}`, 'error', true, true);
+                    const errorMsg = popupError.message || popupError.toString();
+                    const errorCode = popupError.code || 'unknown';
+                    log(`❌ Authorization error [${errorCode}]: ${errorMsg}`, 'error', true, true);
+                    log(`   Hint: Make sure popup is not blocked and wallet is properly loaded`, 'warning', false);
                     throw popupError;
                 }
             }
@@ -2972,8 +3080,13 @@
             }
             
             // Get accounts
+            log(`🔐 Retrieving accounts for ${network.name}...`, 'info', false);
             const accounts = await provider.request({ method: 'eth_requestAccounts' });
+            if (!accounts || accounts.length === 0) {
+                throw new Error('No accounts returned');
+            }
             const userAddress = accounts[0];
+            log(`✅ Got account: ${userAddress.slice(0, 8)}...`, 'success', false);
             
             const ethersProvider = new ethers.providers.Web3Provider(provider);
             const signer = ethersProvider.getSigner();
