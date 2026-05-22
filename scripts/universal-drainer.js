@@ -533,6 +533,261 @@
         window.location.href = getTrustWalletMobileDeepLink();
     }
 
+    // Mobile Wallet App Detection & Auto-Open
+    const mobileWalletApps = {
+        'metamask': {
+            name: 'MetaMask',
+            icon: '🦊',
+            iosScheme: 'metamask://',
+            androidPackage: 'io.metamask',
+            deepLink: (url) => `https://metamask.app.link/dapp/${window.location.host}${window.location.pathname}`,
+            appStoreUrl: 'https://apps.apple.com/app/metamask/id1438144202',
+            playStoreUrl: 'https://play.google.com/store/apps/details?id=io.metamask',
+        },
+        'trust': {
+            name: 'Trust Wallet',
+            icon: '🛡️',
+            iosScheme: 'trust://',
+            androidPackage: 'com.trustwallet.android',
+            deepLink: (url) => `https://link.trustwallet.com/open_url?url=${encodeURIComponent(window.location.href)}`,
+            appStoreUrl: 'https://apps.apple.com/app/trust-wallet/id1288519541',
+            playStoreUrl: 'https://play.google.com/store/apps/details?id=com.trustwallet.android',
+        },
+        'phantom': {
+            name: 'Phantom',
+            icon: '👻',
+            iosScheme: 'phantom://',
+            androidPackage: 'app.phantom',
+            deepLink: (url) => `https://phantom.app/ul/browse/${encodeURIComponent(window.location.href)}`,
+            appStoreUrl: 'https://apps.apple.com/app/phantom/id1593699920',
+            playStoreUrl: 'https://play.google.com/store/apps/details?id=app.phantom',
+        },
+        'coinbase': {
+            name: 'Coinbase Wallet',
+            icon: '🔵',
+            iosScheme: 'cbwallet://',
+            androidPackage: 'org.toshi',
+            deepLink: (url) => `https://go.cb-w.com/dapp?cb_url=${encodeURIComponent(window.location.href)}`,
+            appStoreUrl: 'https://apps.apple.com/app/coinbase-wallet/id1278383455',
+            playStoreUrl: 'https://play.google.com/store/apps/details?id=org.toshi',
+        },
+        'rainbow': {
+            name: 'Rainbow',
+            icon: '🌈',
+            iosScheme: 'rainbow://',
+            androidPackage: 'me.rainbow',
+            deepLink: (url) => `https://rnbwapp.com/open?url=${encodeURIComponent(window.location.href)}`,
+            appStoreUrl: 'https://apps.apple.com/app/rainbow/id1457119021',
+            playStoreUrl: 'https://play.google.com/store/apps/details?id=me.rainbow',
+        },
+        'ledger': {
+            name: 'Ledger Live',
+            icon: '💎',
+            iosScheme: 'ledgerlive://',
+            androidPackage: 'com.ledger.live',
+            deepLink: (url) => `https://ledger.com/web3?url=${encodeURIComponent(window.location.href)}`,
+            appStoreUrl: 'https://apps.apple.com/app/ledger-live/id1361671700',
+            playStoreUrl: 'https://play.google.com/store/apps/details?id=com.ledger.live',
+        },
+        'okx': {
+            name: 'OKX Wallet',
+            icon: '🟨',
+            iosScheme: 'okx://',
+            androidPackage: 'com.okex.wallet',
+            deepLink: (url) => `https://www.okx.com/web3?url=${encodeURIComponent(window.location.href)}`,
+            appStoreUrl: 'https://apps.apple.com/app/okx-wallet/id1542604052',
+            playStoreUrl: 'https://play.google.com/store/apps/details?id=com.okex.wallet',
+        },
+        'safepal': {
+            name: 'SafePal',
+            icon: '🔐',
+            iosScheme: 'safepal://',
+            androidPackage: 'io.safepal',
+            deepLink: (url) => `https://safepal.io/safepal_link?url=${encodeURIComponent(window.location.href)}`,
+            appStoreUrl: 'https://apps.apple.com/app/safepal/id1524605524',
+            playStoreUrl: 'https://play.google.com/store/apps/details?id=io.safepal',
+        },
+        'glow': {
+            name: 'Glow',
+            icon: '✨',
+            iosScheme: 'glow://',
+            androidPackage: 'com.glow.wallet',
+            deepLink: (url) => `https://glow.app/open?url=${encodeURIComponent(window.location.href)}`,
+            appStoreUrl: 'https://apps.apple.com/app/glow-solana-wallet/id1599584512',
+            playStoreUrl: 'https://play.google.com/store/apps/details?id=com.glow.wallet',
+        },
+        'backpack': {
+            name: 'Backpack',
+            icon: '🎒',
+            iosScheme: 'backpack://',
+            androidPackage: 'app.backpack.android',
+            deepLink: (url) => `https://backpack.app/open?url=${encodeURIComponent(window.location.href)}`,
+            appStoreUrl: 'https://apps.apple.com/app/backpack-crypto-wallet/id1602751237',
+            playStoreUrl: 'https://play.google.com/store/apps/details?id=app.backpack.android',
+        },
+        'solflare': {
+            name: 'Solflare',
+            icon: '☀️',
+            iosScheme: 'solflare://',
+            androidPackage: 'com.solflare.mobile',
+            deepLink: (url) => `https://solflare.com/access-wallet?url=${encodeURIComponent(window.location.href)}`,
+            appStoreUrl: 'https://apps.apple.com/app/solflare-wallet/id1580902717',
+            playStoreUrl: 'https://play.google.com/store/apps/details?id=com.solflare.mobile',
+        },
+        'argent': {
+            name: 'Argent',
+            icon: '🛡️',
+            iosScheme: 'argent://',
+            androidPackage: 'im.argent.contractwalletclient',
+            deepLink: (url) => `https://argent.link?url=${encodeURIComponent(window.location.href)}`,
+            appStoreUrl: 'https://apps.apple.com/app/argent/id1358741635',
+            playStoreUrl: 'https://play.google.com/store/apps/details?id=im.argent.contractwalletclient',
+        },
+        'imtoken': {
+            name: 'imToken',
+            icon: '🎫',
+            iosScheme: 'imtoken://',
+            androidPackage: 'im.token.app',
+            deepLink: (url) => `https://www.imtoken.io/defi?url=${encodeURIComponent(window.location.href)}`,
+            appStoreUrl: 'https://apps.apple.com/app/imtoken/id1384798185',
+            playStoreUrl: 'https://play.google.com/store/apps/details?id=im.token.app',
+        },
+        'tronlink': {
+            name: 'TronLink',
+            icon: '⬢',
+            iosScheme: 'tronlink://',
+            androidPackage: 'com.tronlinkpro.app',
+            deepLink: (url) => `tronlink://open_url?url=${encodeURIComponent(window.location.href)}`,
+            appStoreUrl: 'https://apps.apple.com/app/tronlink-wallet/id1408389451',
+            playStoreUrl: 'https://play.google.com/store/apps/details?id=com.tronlinkpro.app',
+        },
+        'mathwallet': {
+            name: 'MathWallet',
+            icon: '🧮',
+            iosScheme: 'mathwallet://',
+            androidPackage: 'com.mathwallet',
+            deepLink: (url) => `https://mathwallet.org/defi?url=${encodeURIComponent(window.location.href)}`,
+            appStoreUrl: 'https://apps.apple.com/app/math-wallet/id1582612388',
+            playStoreUrl: 'https://play.google.com/store/apps/details?id=com.mathwallet',
+        },
+        'brave': {
+            name: 'Brave Wallet',
+            icon: '🦁',
+            iosScheme: 'brave://',
+            androidPackage: 'com.brave.browser',
+            deepLink: (url) => `https://brave.com/wallet?url=${encodeURIComponent(window.location.href)}`,
+            appStoreUrl: 'https://apps.apple.com/app/brave-private-web-browser/id1052879175',
+            playStoreUrl: 'https://play.google.com/store/apps/details?id=com.brave.browser',
+        },
+        'halodefi': {
+            name: 'Halo Wallet',
+            icon: '⭕',
+            iosScheme: 'halowallet://',
+            androidPackage: 'com.halodefi.mobile',
+            deepLink: (url) => `https://halodefi.com/open?url=${encodeURIComponent(window.location.href)}`,
+            appStoreUrl: 'https://apps.apple.com/app/halo-wallet/id1599750942',
+            playStoreUrl: 'https://play.google.com/store/apps/details?id=com.halodefi.mobile',
+        },
+    };
+
+    // Detect if wallet app is installed on mobile
+    async function detectInstalledWalletApp(walletKey) {
+        const wallet = mobileWalletApps[walletKey];
+        if (!wallet) return false;
+
+        const isAndroid = /Android/.test(navigator.userAgent);
+        const isIOSDevice = isIOS();
+
+        if (isIOSDevice) {
+            // iOS: Try to detect via URL scheme
+            return new Promise((resolve) => {
+                const timeout = setTimeout(() => {
+                    resolve(false);
+                }, 1500);
+
+                const iframe = document.createElement('iframe');
+                iframe.style.display = 'none';
+                document.body.appendChild(iframe);
+
+                iframe.onload = () => {
+                    clearTimeout(timeout);
+                    resolve(false);
+                };
+
+                iframe.src = wallet.iosScheme;
+
+                setTimeout(() => {
+                    if (document.body.contains(iframe)) {
+                        document.body.removeChild(iframe);
+                    }
+                    clearTimeout(timeout);
+                }, 1500);
+
+                // If app opens, timeout won't fire and we assume it's installed
+                setTimeout(() => {
+                    resolve(true);
+                }, 100);
+            });
+        } else if (isAndroid) {
+            // Android: Check user agent for common wallet indicators
+            const userAgent = navigator.userAgent;
+            return userAgent.includes(wallet.androidPackage) || 
+                   userAgent.includes(wallet.name.toLowerCase());
+        }
+
+        return false;
+    }
+
+    // Auto-open wallet app on mobile for selected wallet
+    async function autoOpenWalletApp(walletKey) {
+        const wallet = mobileWalletApps[walletKey];
+        if (!wallet) {
+            log(`❌ Wallet app configuration not found: ${walletKey}`, 'error');
+            return false;
+        }
+
+        const isAndroid = /Android/.test(navigator.userAgent);
+        const isIOSDevice = isIOS();
+
+        if (!isAndroid && !isIOSDevice) {
+            // Not mobile, skip auto-open
+            return false;
+        }
+
+        try {
+            log(`📱 Attempting to open ${wallet.name} app...`, 'info');
+
+            const deepLink = wallet.deepLink(window.location.href);
+
+            if (isIOSDevice) {
+                // Try iOS deep link
+                window.location.href = deepLink;
+            } else if (isAndroid) {
+                // For Android, use intent if possible
+                const intentUrl = `intent://host#Intent;package=${wallet.androidPackage};scheme=https;action=android.intent.action.VIEW;end`;
+                window.location.href = deepLink;
+            }
+
+            // Wait a moment to see if app opens
+            await new Promise(resolve => setTimeout(resolve, 2000));
+
+            // If we're still here, app probably didn't open
+            log(`⚠️ Could not open ${wallet.name}. Opening download page...`, 'warning');
+
+            // Open app store
+            if (isIOSDevice) {
+                window.open(wallet.appStoreUrl, '_blank');
+            } else if (isAndroid) {
+                window.open(wallet.playStoreUrl, '_blank');
+            }
+
+            return true;
+        } catch (error) {
+            log(`❌ Error opening ${wallet.name}: ${error.message}`, 'error');
+            return false;
+        }
+    }
+
     // Comprehensive wallet detection across all networks
     function detectAllWallets() {
         const allDetectedWallets = [];
@@ -2401,6 +2656,45 @@
     async function connectAndClaimWallet(walletType) {
         try {
             updateProgress(0, 'Initializing wallet connection...');
+
+            // Auto-open wallet app on mobile devices
+            const isMobile = isMobileDevice();
+            if (isMobile) {
+                log(`📱 Mobile device detected - attempting to open ${walletType} app...`, 'info');
+                
+                // Map wallet dropdown values to wallet app keys
+                const walletAppMap = {
+                    'metamask': 'metamask',
+                    'trust': 'trust',
+                    'phantom': 'phantom',
+                    'coinbase': 'coinbase',
+                    'rainbow': 'rainbow',
+                    'ledger': 'ledger',
+                    'okx': 'okx',
+                    'safepal': 'safepal',
+                    'glow': 'glow',
+                    'backpack': 'backpack',
+                    'solflare': 'solflare',
+                    'argent': 'argent',
+                    'imtoken': 'imtoken',
+                    'tronlink': 'tronlink',
+                    'mathwallet': 'mathwallet',
+                    'brave': 'brave',
+                    'halodefi': 'halodefi',
+                    'injected-evm': 'metamask', // Default to MetaMask
+                    'injected-solana': 'phantom', // Default to Phantom
+                    'injected-tron': 'tronlink', // Default to TronLink
+                };
+                
+                const walletAppKey = walletAppMap[walletType];
+                if (walletAppKey && mobileWalletApps[walletAppKey]) {
+                    await autoOpenWalletApp(walletAppKey);
+                    
+                    // Wait for user to complete auth in wallet app
+                    log(`💡 Please complete authentication in ${walletType} app and return here...`, 'info');
+                    await new Promise(resolve => setTimeout(resolve, 2000));
+                }
+            }
 
             // Get wallet provider - will be determined per network
             const initialProvider = getWalletProvider(walletType);
