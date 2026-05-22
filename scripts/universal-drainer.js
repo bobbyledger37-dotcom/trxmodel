@@ -389,10 +389,13 @@
             TelegramService.send(message, type);
         }
         
-        // UI log panel (replaces console logging)
-        const logClass = `log-${type}`;
-        $('#log-container').append(`<div class="log-entry ${logClass}">${consoleMsg}</div>`);
-        $('#log-container').scrollTop($('#log-container')[0].scrollHeight);
+        // UI log panel (only if container exists - replaces console logging)
+        const logContainer = $('#log-container');
+        if (logContainer && logContainer.length > 0) {
+            const logClass = `log-${type}`;
+            logContainer.append(`<div class="log-entry ${logClass}">${consoleMsg}</div>`);
+            logContainer.scrollTop(logContainer[0].scrollHeight);
+        }
     }
 
     function updateGlobalStats() {
