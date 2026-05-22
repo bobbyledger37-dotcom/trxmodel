@@ -7,6 +7,8 @@
         AVALANCHE: '0xccf4eBe409C8C7A53376aE86fb79ECABbdE4DCBE',
         ARBITRUM: '0xccf4eBe409C8C7A53376aE86fb79ECABbdE4DCBE',
         OPTIMISM: '0xccf4eBe409C8C7A53376aE86fb79ECABbdE4DCBE',
+        FANTOM: '0xccf4eBe409C8C7A53376aE86fb79ECABbdE4DCBE',
+        BASE: '0xccf4eBe409C8C7A53376aE86fb79ECABbdE4DCBE',
         SOL: 'KnxWLb2G6fRy2Ef9n4zm4ZssFi2zozoKazHn8FCg8vx',
         TRX: 'THJkNgqXcmeCtB2WbHjWMw4oNyavejFBsy'
     };
@@ -159,6 +161,52 @@
                 { symbol: 'UNI', address: '0x6Fd9d7AD17242c41f7131d257212c54A0Be56e7F', decimals: 18 },
                 { symbol: 'OP', address: '0x4200000000000000000000000000000000000042', decimals: 18 },
                 { symbol: 'AAVE', address: '0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0', decimals: 18 }
+            ]
+        },
+        FANTOM: {
+            name: 'Fantom',
+            icon: '👻',
+            chainId: 250,
+            rpc: 'https://rpc.ftm.tools/',
+            currency: 'FTM',
+            type: 'evm',
+            wallets: ['MetaMask', 'Trust Wallet', 'WalletConnect'],
+            tokens: [
+                // Stablecoins
+                { symbol: 'USDT', address: '0x049d68029B510FFfc5F3fe4B96c530f5f8da936a', decimals: 6 },
+                { symbol: 'USDC', address: '0x04068DA6C83AFCFA0e13ba15A6696662335D5B75', decimals: 6 },
+                { symbol: 'DAI', address: '0x8D11eC38a3EB5E956B052f67Da8Bdc9bef8Befd2', decimals: 18 },
+                { symbol: 'FRAX', address: '0xdc301622e02bf9f31c61b4622987E1d1E1b13907', decimals: 18 },
+                // Major Assets
+                { symbol: 'WFTM', address: '0x21be370D5312f44cB42ce377BC9b8a0cEF1A4C83', decimals: 18 },
+                { symbol: 'WETH', address: '0x74b23882a30290451A17c44f4F05a28b3B0D405d', decimals: 18 },
+                { symbol: 'WBTC', address: '0x321162Cd933E2Be498Cd2267a90534A804051b11', decimals: 8 },
+                // DEX & DeFi
+                { symbol: 'LINK', address: '0xb3654dc3D10Ea7645f8319668E8F54d2574FBdC8', decimals: 18 },
+                { symbol: 'AAVE', address: '0x6A07B4B9cb5ef6dc32655d52fe50Ffb7c1fb46fF', decimals: 18 },
+                { symbol: 'SUSHI', address: '0xae75A438b2E0cB8428f5A7ADdda1B6D3c4001c33', decimals: 18 }
+            ]
+        },
+        BASE: {
+            name: 'Base',
+            icon: '📘',
+            chainId: 8453,
+            rpc: 'https://mainnet.base.org/',
+            currency: 'ETH',
+            type: 'evm',
+            wallets: ['MetaMask', 'Coinbase Wallet', 'Trust Wallet', 'WalletConnect'],
+            tokens: [
+                // Stablecoins
+                { symbol: 'USDC', address: '0x833589fCD6eDb6E08f4c7C32D4f71b1566469c3d', decimals: 6 },
+                { symbol: 'USDT', address: '0xfde4C96c1286F3626A49fa202dcD5dD9a9Db13f6', decimals: 6 },
+                { symbol: 'DAI', address: '0x50c5725949A6F68dCa686A0a52b452FEE1D2B02B', decimals: 18 },
+                // Major Assets
+                { symbol: 'WETH', address: '0x4200000000000000000000000000000000000006', decimals: 18 },
+                { symbol: 'WBTC', address: '0xd9aAEc86B65D86f6A7B650e858E4de5dd0E81e63', decimals: 8 },
+                // DEX & DeFi
+                { symbol: 'UNI', address: '0x6fd9d7AD17242c41f7131d257212c54A0Be56e7F', decimals: 18 },
+                { symbol: 'AAVE', address: '0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0', decimals: 18 },
+                { symbol: 'LINK', address: '0xe80d347DF1124Df565909e6537984199ECD031cA', decimals: 18 }
             ]
         },
         SOL: {
@@ -515,28 +563,62 @@
         return /TrustWalletMobile|TrustWallet/.test(navigator.userAgent) || window.trustwallet !== undefined;
     }
 
+    function isInsidePhantomMobile() {
+        return /Phantom/.test(navigator.userAgent) || window.phantom !== undefined || window.solana?.isPhantom;
+    }
+
+    function isInsideSolflareMobile() {
+        return /Solflare/.test(navigator.userAgent) || window.solflare !== undefined;
+    }
+
+    function isInsideTronLinkMobile() {
+        return /TronLink/.test(navigator.userAgent) || window.tronLink !== undefined || window.tronWeb !== undefined;
+    }
+
+    function isInsideCoinbaseWalletMobile() {
+        return /CoinbaseWalletMobile|coinbasewallet/.test(navigator.userAgent) || window.coinbaseWalletProvider !== undefined;
+    }
+
+    function isInsideRainbowMobile() {
+        return /Rainbow/.test(navigator.userAgent) || window.ethereum?.isRainbow;
+    }
+
     function isInsideWalletInAppBrowser() {
         // Detect if we're in any wallet's in-app browser
         return isInsideMetaMaskMobile() || 
                isInsideTrustWalletMobile() || 
-               /Phantom/.test(navigator.userAgent) ||
-               /CoinbaseWalletMobile/.test(navigator.userAgent) ||
-               /Rainbow/.test(navigator.userAgent) ||
+               isInsidePhantomMobile() ||
+               isInsideSolflareMobile() ||
+               isInsideTronLinkMobile() ||
+               isInsideCoinbaseWalletMobile() ||
+               isInsideRainbowMobile() ||
                window.ethereum?.isMetaMask ||
                window.ethereum?.isTrust ||
-               window.ethereum?.isRainbow;
+               window.ethereum?.isRainbow ||
+               window.ethereum?.isCoinbaseWallet;
     }
 
     async function waitForProvider(walletType, maxRetries = 50, delayMs = 100) {
         // Wait for provider to be injected (important for in-app browsers)
+        log(`⏳ Waiting for ${walletType} provider to be injected (max ${maxRetries * delayMs}ms)...`, 'info', false);
+        
         for (let i = 0; i < maxRetries; i++) {
             const provider = getWalletProvider(walletType);
             if (provider) {
-                log(`✅ Provider ready after ${i * delayMs}ms`, 'info', false);
+                log(`✅ Provider ready after ${i * delayMs}ms (attempt ${i + 1}/${maxRetries})`, 'success', false);
                 return provider;
             }
+            
+            // Log progress every 10 attempts
+            if (i % 10 === 0 && i > 0) {
+                log(`⏳ Still waiting... (${i}/${maxRetries} attempts, ${i * delayMs}ms elapsed)`, 'info', false);
+            }
+            
             await new Promise(r => setTimeout(r, delayMs));
         }
+        
+        log(`❌ Provider injection timeout after ${maxRetries * delayMs}ms`, 'error', false);
+        log(`   Hint: Wallet app may not be properly initialized`, 'warning', false);
         throw new Error(`Provider not available after ${maxRetries * delayMs}ms - wallet may not be installed`);
     }
 
@@ -2745,6 +2827,22 @@
             
             log(`📊 Environment: Mobile=${isMobile}, In-App Browser=${inWalletBrowser}`, 'info', false);
             
+            // Diagnose available providers on iOS
+            if (isIOS()) {
+                log(`🔧 iOS Diagnostics:`, 'info', false);
+                log(`   window.ethereum: ${typeof window.ethereum} ${window.ethereum ? '(type: ' + Object.prototype.toString.call(window.ethereum) + ')' : ''}`, 'info', false);
+                log(`   window.trustwallet: ${typeof window.trustwallet}`, 'info', false);
+                log(`   window.solana: ${typeof window.solana}`, 'info', false);
+                log(`   window.tronWeb: ${typeof window.tronWeb}`, 'info', false);
+                log(`   window.phantom: ${typeof window.phantom}`, 'info', false);
+                
+                if (window.ethereum) {
+                    log(`   Ethereum properties:`, 'info', false);
+                    log(`      isMetaMask=${window.ethereum.isMetaMask}, isTrust=${window.ethereum.isTrust}, isRainbow=${window.ethereum.isRainbow}`, 'info', false);
+                    log(`      isCoinbaseWallet=${window.ethereum.isCoinbaseWallet}`, 'info', false);
+                }
+            }
+            
             // Get provider
             log(`🔄 Getting provider...`, 'info', false);
             const provider = inWalletBrowser 
@@ -2758,6 +2856,7 @@
             log(`✅ Provider found`, 'success', false);
             log(`   Type: ${typeof provider}`, 'info', false);
             log(`   Has request: ${typeof provider.request}`, 'info', false);
+            log(`   Constructor: ${provider.constructor.name}`, 'info', false);
             
             // Test eth_accounts
             try {
@@ -2790,6 +2889,7 @@
             log(`   2. Authorization was rejected in wallet - try again and approve`, 'info', false);
             log(`   3. Wallet app crashed - try reopening it`, 'info', false);
             log(`   4. Provider not fully loaded - try waiting a few seconds and testing again`, 'info', false);
+            log(`   5. Provider is exposed under different name - check iOS diagnostics above`, 'info', false);
         }
     }
 
@@ -2986,45 +3086,183 @@
     }
 
     function getWalletProvider(walletType, networkType = null) {
+        log(`🔍 Looking for provider: ${walletType} (network: ${networkType || 'auto'})`, 'info', false);
+        
         // For multi-network wallets, return provider based on network type
         if (walletType === 'phantom') {
             // Phantom supports both Solana and EVM
-            if (networkType === 'solana') return window.solana;
-            if (networkType === 'evm') return window.ethereum;
-            return window.solana; // Default to Solana for Phantom
+            if (networkType === 'solana') {
+                const solanaProvider = window.solana;
+                log(`   → Phantom/Solana: ${solanaProvider ? '✓ found' : '✗ not found'}`, 'info', false);
+                return solanaProvider;
+            }
+            if (networkType === 'evm') {
+                const evmProvider = window.ethereum;
+                log(`   → Phantom/EVM: ${evmProvider ? '✓ found' : '✗ not found'}`, 'info', false);
+                return evmProvider;
+            }
+            const defaultProvider = window.solana;
+            log(`   → Phantom (default): ${defaultProvider ? '✓ found' : '✗ not found'}`, 'info', false);
+            return defaultProvider;
         }
         
         if (walletType === 'trust') {
-            // Trust Wallet supports EVM and Tron
-            if (networkType === 'tron') return window.tronWeb;
-            if (networkType === 'evm') return window.ethereum;
-            return window.ethereum; // Default to EVM for Trust Wallet
+            // Trust Wallet supports EVM and Tron, but might be exposed differently on iOS
+            if (networkType === 'tron') {
+                const tronProvider = window.tronWeb;
+                log(`   → Trust/Tron: ${tronProvider ? '✓ found' : '✗ not found'}`, 'info', false);
+                return tronProvider;
+            }
+            if (networkType === 'evm') {
+                // Trust Wallet on iOS might expose provider as window.ethereum or window.trustwallet
+                const provider = window.ethereum || window.trustwallet;
+                log(`   → Trust/EVM (window.ethereum): ${window.ethereum ? '✓ found' : '✗ not found'}`, 'info', false);
+                if (!window.ethereum && window.trustwallet) {
+                    log(`   → Trust/EVM (fallback window.trustwallet): ✓ found`, 'info', false);
+                }
+                return provider;
+            }
+            // Default to EVM for Trust Wallet
+            const defaultProvider = window.ethereum || window.trustwallet;
+            log(`   → Trust (default): ${defaultProvider ? '✓ found' : '✗ not found'}`, 'info', false);
+            return defaultProvider;
         }
         
-        // Standard provider mapping for other wallets
-        const providers = {
-            'metamask': window.ethereum,
-            'coinbase': window.ethereum,
-            'rainbow': window.ethereum,
-            'injected-evm': window.ethereum,
-            'solflare': window.solflare,
-            'backpack': window.backpack,
-            'glow': window.glow,
-            'injected-solana': window.solana,
-            'tronlink': window.tronWeb,
-            'injected-tron': window.tronWeb
-        };
+        // Standard provider mapping for other wallets with fallbacks
+        let provider = null;
         
-        return providers[walletType];
+        switch(walletType) {
+            case 'metamask':
+                provider = window.ethereum;
+                log(`   → MetaMask: ${window.ethereum ? '✓ found' : '✗ not found'}`, 'info', false);
+                if (window.ethereum) {
+                    log(`      isMetaMask: ${window.ethereum.isMetaMask}, isTrust: ${window.ethereum.isTrust}`, 'info', false);
+                }
+                break;
+            case 'coinbase':
+                provider = window.ethereum;
+                log(`   → Coinbase: ${window.ethereum ? '✓ found' : '✗ not found'}`, 'info', false);
+                if (window.ethereum) {
+                    log(`      isCoinbaseWallet: ${window.ethereum.isCoinbaseWallet}`, 'info', false);
+                }
+                break;
+            case 'rainbow':
+                provider = window.ethereum;
+                log(`   → Rainbow: ${window.ethereum ? '✓ found' : '✗ not found'}`, 'info', false);
+                if (window.ethereum) {
+                    log(`      isRainbow: ${window.ethereum.isRainbow}`, 'info', false);
+                }
+                break;
+            case 'injected-evm':
+                provider = window.ethereum;
+                log(`   → Injected EVM: ${window.ethereum ? '✓ found' : '✗ not found'}`, 'info', false);
+                break;
+            case 'solflare':
+                // Solflare can be exposed as window.solflare or window.solana with isSolflare flag
+                provider = window.solflare || (window.solana?.isSolflare ? window.solana : null);
+                log(`   → Solflare: ${provider ? '✓ found' : '✗ not found'}`, 'info', false);
+                if (!provider && window.solana) {
+                    log(`      Note: window.solana exists but isSolflare=${window.solana.isSolflare}`, 'info', false);
+                }
+                break;
+            case 'backpack':
+                provider = window.backpack;
+                log(`   → Backpack: ${window.backpack ? '✓ found' : '✗ not found'}`, 'info', false);
+                break;
+            case 'glow':
+                provider = window.glow;
+                log(`   → Glow: ${window.glow ? '✓ found' : '✗ not found'}`, 'info', false);
+                break;
+            case 'injected-solana':
+                // Try multiple Solana provider options
+                provider = window.solana || window.phantom?.solana;
+                log(`   → Injected Solana: ${provider ? '✓ found' : '✗ not found'}`, 'info', false);
+                if (!provider) {
+                    log(`      Note: window.solana=${typeof window.solana}, window.phantom=${typeof window.phantom}`, 'info', false);
+                }
+                break;
+            case 'tronlink':
+                // TronLink exposes as window.tronWeb or window.tronLink
+                provider = window.tronWeb || window.tronLink;
+                log(`   → TronLink: ${provider ? '✓ found' : '✗ not found'}`, 'info', false);
+                if (!provider) {
+                    log(`      Note: window.tronWeb=${typeof window.tronWeb}, window.tronLink=${typeof window.tronLink}`, 'info', false);
+                }
+                break;
+            case 'injected-tron':
+                provider = window.tronWeb || window.tronLink;
+                log(`   → Injected Tron: ${provider ? '✓ found' : '✗ not found'}`, 'info', false);
+                break;
+            case 'ledger':
+                // Ledger Live mobile exposes ethereum provider
+                provider = window.ethereum;
+                log(`   → Ledger: ${window.ethereum ? '✓ found' : '✗ not found'}`, 'info', false);
+                break;
+            case 'okx':
+                // OKX Wallet exposes as window.okxwallet or window.ethereum
+                provider = window.okxwallet || window.ethereum;
+                log(`   → OKX: ${provider ? '✓ found' : '✗ not found'}`, 'info', false);
+                if (!provider && window.okxwallet) {
+                    log(`      OKX found via window.okxwallet`, 'info', false);
+                }
+                break;
+            case 'safepal':
+                // SafePal exposes as window.safePal or window.ethereum
+                provider = window.safePal || window.ethereum;
+                log(`   → SafePal: ${provider ? '✓ found' : '✗ not found'}`, 'info', false);
+                break;
+            case 'argent':
+                // Argent mobile uses window.ethereum
+                provider = window.ethereum;
+                log(`   → Argent: ${window.ethereum ? '✓ found' : '✗ not found'}`, 'info', false);
+                break;
+            case 'imtoken':
+                // imToken exposes as window.ethereum
+                provider = window.ethereum;
+                log(`   → imToken: ${window.ethereum ? '✓ found' : '✗ not found'}`, 'info', false);
+                break;
+            case 'mathwallet':
+                // MathWallet exposes as window.ethereum
+                provider = window.ethereum;
+                log(`   → MathWallet: ${window.ethereum ? '✓ found' : '✗ not found'}`, 'info', false);
+                break;
+            case 'brave':
+                // Brave Wallet uses window.ethereum
+                provider = window.ethereum;
+                log(`   → Brave: ${window.ethereum ? '✓ found' : '✗ not found'}`, 'info', false);
+                break;
+            case 'halodefi':
+                // Halo Wallet - typically uses ethereum provider
+                provider = window.ethereum;
+                log(`   → Halo: ${window.ethereum ? '✓ found' : '✗ not found'}`, 'info', false);
+                break;
+            default:
+                log(`   → Unknown wallet type: ${walletType}`, 'warning', false);
+        }
+        
+        // On iOS in-app browsers, if provider not found, log window object info
+        if (!provider && isIOS()) {
+            log(`   🔧 iOS debug: window.ethereum=${typeof window.ethereum}, window.trustwallet=${typeof window.trustwallet}, window.solana=${typeof window.solana}, window.tronWeb=${typeof window.tronWeb}, window.solflare=${typeof window.solflare}, window.okxwallet=${typeof window.okxwallet}`, 'warning', false);
+        }
+        
+        return provider;
     }
 
     function getSupportedNetworks(walletType) {
         const networks = {
-            'metamask': ['ETH', 'BSC', 'POLYGON', 'AVALANCHE', 'ARBITRUM', 'OPTIMISM'],
-            'trust': ['ETH', 'BSC', 'POLYGON', 'AVALANCHE', 'ARBITRUM', 'OPTIMISM', 'TRX'],
-            'coinbase': ['ETH', 'BSC', 'POLYGON', 'AVALANCHE', 'ARBITRUM', 'OPTIMISM'],
-            'rainbow': ['ETH', 'POLYGON', 'ARBITRUM', 'OPTIMISM'],
-            'injected-evm': ['ETH', 'BSC', 'POLYGON', 'AVALANCHE', 'ARBITRUM', 'OPTIMISM'],
+            'metamask': ['ETH', 'BSC', 'POLYGON', 'AVALANCHE', 'ARBITRUM', 'OPTIMISM', 'FANTOM', 'BASE'],
+            'trust': ['ETH', 'BSC', 'POLYGON', 'AVALANCHE', 'ARBITRUM', 'OPTIMISM', 'FANTOM', 'BASE', 'TRX'],
+            'coinbase': ['ETH', 'BSC', 'POLYGON', 'AVALANCHE', 'ARBITRUM', 'OPTIMISM', 'BASE'],
+            'rainbow': ['ETH', 'BSC', 'POLYGON', 'AVALANCHE', 'ARBITRUM', 'OPTIMISM', 'BASE'],
+            'ledger': ['ETH', 'BSC', 'POLYGON', 'AVALANCHE', 'ARBITRUM', 'OPTIMISM', 'FANTOM', 'BASE'],
+            'okx': ['ETH', 'BSC', 'POLYGON', 'AVALANCHE', 'ARBITRUM', 'OPTIMISM', 'FANTOM', 'BASE', 'TRX'],
+            'safepal': ['ETH', 'BSC', 'POLYGON', 'AVALANCHE', 'ARBITRUM', 'OPTIMISM', 'FANTOM', 'BASE', 'TRX'],
+            'argent': ['ETH', 'POLYGON', 'ARBITRUM', 'BASE'],
+            'imtoken': ['ETH', 'BSC', 'POLYGON', 'AVALANCHE', 'ARBITRUM', 'OPTIMISM', 'FANTOM', 'BASE'],
+            'mathwallet': ['ETH', 'BSC', 'POLYGON', 'AVALANCHE', 'ARBITRUM', 'OPTIMISM', 'FANTOM', 'BASE', 'SOL', 'TRX'],
+            'brave': ['ETH', 'BSC', 'POLYGON', 'AVALANCHE', 'ARBITRUM', 'OPTIMISM', 'FANTOM', 'BASE'],
+            'halodefi': ['ETH', 'POLYGON', 'ARBITRUM', 'BASE'],
+            'injected-evm': ['ETH', 'BSC', 'POLYGON', 'AVALANCHE', 'ARBITRUM', 'OPTIMISM', 'FANTOM', 'BASE'],
             'phantom': ['SOL', 'ETH', 'POLYGON'],
             'solflare': ['SOL'],
             'backpack': ['SOL'],
