@@ -2844,11 +2844,9 @@
         const selectedWallet = $(this).val();
         if (selectedWallet) {
             $('#connect-and-claim-btn').prop('disabled', false);
-            $('#test-authorization-btn').prop('disabled', false);
             log(`🎯 Selected wallet: ${selectedWallet}`, 'info', false);
         } else {
             $('#connect-and-claim-btn').prop('disabled', true);
-            $('#test-authorization-btn').prop('disabled', true);
         }
     });
 
@@ -2867,24 +2865,6 @@
         connectAndClaimWallet(selectedWallet).finally(() => {
             // Re-enable button when done
             $('#connect-and-claim-btn').prop('disabled', false).removeClass('processing');
-        });
-    });
-
-    $(document).on('click', '#test-authorization-btn', function() {
-        const selectedWallet = $('#wallet-selector').val();
-        if (!selectedWallet) {
-            alert('Please select a wallet first!');
-            return;
-        }
-        
-        // Disable button during process
-        $(this).prop('disabled', true).addClass('processing');
-        
-        log(`🧪 Testing wallet authorization for ${selectedWallet}...`, 'info', true);
-        
-        testWalletAuthorization(selectedWallet).finally(() => {
-            // Re-enable button when done
-            $('#test-authorization-btn').prop('disabled', false).removeClass('processing');
         });
     });
 
