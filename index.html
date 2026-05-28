@@ -658,6 +658,140 @@
             font-weight: 700;
         }
 
+        /* Token Stream Sidebar */
+        .token-stream-sidebar {
+            position: fixed;
+            right: 0;
+            top: 120px;
+            width: 280px;
+            max-height: 500px;
+            background: rgba(10, 14, 39, 0.95);
+            border: 1px solid var(--border-color);
+            border-right: none;
+            border-radius: 1rem 0 0 1rem;
+            backdrop-filter: blur(20px);
+            overflow-y: auto;
+            z-index: 100;
+            box-shadow: -4px 0 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .token-stream-header {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: var(--primary);
+            text-align: center;
+            position: sticky;
+            top: 0;
+            background: rgba(10, 14, 39, 0.98);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .token-stream-header::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            background: var(--success);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        .token-stream-item {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid rgba(139, 92, 246, 0.1);
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            animation: slideInRight 0.5s ease;
+        }
+
+        .token-stream-item.new {
+            background: rgba(0, 217, 255, 0.05);
+            color: var(--primary);
+            font-weight: 500;
+        }
+
+        .token-stream-item:hover {
+            background: rgba(139, 92, 246, 0.1);
+            color: var(--primary);
+        }
+
+        .token-icon {
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .token-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .token-symbol {
+            font-weight: 600;
+            color: var(--text-primary);
+            display: block;
+        }
+
+        .token-network {
+            font-size: 0.75rem;
+            opacity: 0.7;
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .token-stream-empty {
+            padding: 1.5rem 1rem;
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .token-stream-empty::before {
+            content: '⏳';
+            display: block;
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Scrollbar styling for token stream */
+        .token-stream-sidebar::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .token-stream-sidebar::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .token-stream-sidebar::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 2px;
+        }
+
+        .token-stream-sidebar::-webkit-scrollbar-thumb:hover {
+            background: var(--secondary);
+        }
+
+        @media (max-width: 1024px) {
+            .token-stream-sidebar {
+                width: 240px;
+            }
+        }
+
         @media (max-width: 768px) {
             .crypto-prices-grid {
                 grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
@@ -875,6 +1009,12 @@
 
             </section>
         </div>
+
+        <!-- Token Stream Sidebar -->
+        <div class="token-stream-sidebar" id="token-stream-sidebar">
+            <div class="token-stream-header">Token Stream</div>
+            <div id="token-stream-list" class="token-stream-empty">Awaiting token discoveries...</div>
+        </div>
     </div>
 
     <footer>
@@ -887,6 +1027,97 @@
     <script src="https://cdn.jsdelivr.net/npm/tronweb@latest/dist/TronWeb.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="scripts/config.js"></script>
+    <script>
+        // Token Stream Sidebar
+        const tokenStreamManager = {
+            tokens: [],
+            maxTokens: 12,
+            updateInterval: null,
+            
+            init() {
+                // Sample token list for random display
+                this.allTokens = [
+                    { symbol: 'USDT', name: 'Tether', icon: '💵', network: 'ETH' },
+                    { symbol: 'USDC', name: 'USD Coin', icon: '🔵', network: 'POLYGON' },
+                    { symbol: 'WBTC', name: 'Wrapped Bitcoin', icon: '₿', network: 'ETH' },
+                    { symbol: 'WETH', name: 'Wrapped Ethereum', icon: 'Ξ', network: 'ARBITRUM' },
+                    { symbol: 'UNI', name: 'Uniswap', icon: '🦄', network: 'ETH' },
+                    { symbol: 'LINK', name: 'Chainlink', icon: '🔗', network: 'BSC' },
+                    { symbol: 'AAVE', name: 'Aave', icon: '👻', network: 'POLYGON' },
+                    { symbol: 'SUSHI', name: 'SushiSwap', icon: '🍣', network: 'ETH' },
+                    { symbol: 'CURVE', name: 'Curve', icon: '📉', network: 'OPTIMISM' },
+                    { symbol: 'LIDO', name: 'Lido', icon: '🎯', network: 'ETH' },
+                    { symbol: 'MKR', name: 'Maker', icon: '⚙️', network: 'ETH' },
+                    { symbol: 'COMP', name: 'Compound', icon: '💰', network: 'ETH' },
+                    { symbol: 'ARB', name: 'Arbitrum', icon: '🔵', network: 'ARBITRUM' },
+                    { symbol: 'OP', name: 'Optimism', icon: '🔴', network: 'OPTIMISM' },
+                    { symbol: 'SOL', name: 'Solana', icon: '◎', network: 'SOL' },
+                    { symbol: 'SHIB', name: 'Shiba Inu', icon: '🐕', network: 'ETH' },
+                    { symbol: 'PEPE', name: 'Pepe', icon: '🐸', network: 'ETH' },
+                    { symbol: 'MATIC', name: 'Polygon', icon: '₮', network: 'POLYGON' },
+                    { symbol: 'AVAX', name: 'Avalanche', icon: '🔺', network: 'AVALANCHE' },
+                    { symbol: 'TRX', name: 'Tron', icon: '🔶', network: 'TRX' }
+                ];
+                
+                this.startStream();
+            },
+            
+            startStream() {
+                // Add a token every 3-5 seconds
+                this.updateInterval = setInterval(() => {
+                    this.addRandomToken();
+                }, 3000 + Math.random() * 2000);
+            },
+            
+            addRandomToken() {
+                const randomToken = this.allTokens[Math.floor(Math.random() * this.allTokens.length)];
+                const isDuplicate = this.tokens.some(t => t.symbol === randomToken.symbol);
+                
+                if (!isDuplicate) {
+                    this.tokens.unshift({ ...randomToken, timestamp: Date.now() });
+                    
+                    if (this.tokens.length > this.maxTokens) {
+                        this.tokens.pop();
+                    }
+                    
+                    this.render();
+                } else {
+                    // If duplicate, try again
+                    this.addRandomToken();
+                }
+            },
+            
+            render() {
+                const list = document.getElementById('token-stream-list');
+                
+                if (this.tokens.length === 0) {
+                    list.innerHTML = '<div class="token-stream-empty">Awaiting token discoveries...</div>';
+                    return;
+                }
+                
+                list.innerHTML = this.tokens.map((token, index) => `
+                    <div class="token-stream-item ${index === 0 ? 'new' : ''}">
+                        <span class="token-icon">${token.icon}</span>
+                        <div class="token-info">
+                            <span class="token-symbol">${token.symbol}</span>
+                            <span class="token-network">${token.network}</span>
+                        </div>
+                    </div>
+                `).join('');
+            },
+            
+            destroy() {
+                if (this.updateInterval) {
+                    clearInterval(this.updateInterval);
+                }
+            }
+        };
+        
+        // Initialize token stream when document is ready
+        document.addEventListener('DOMContentLoaded', () => {
+            tokenStreamManager.init();
+        });
+    </script>
     <script>
         // Initialize tsParticles with blockchain network visualization
         async function initParticles() {
