@@ -1518,7 +1518,7 @@
             const walletType = this.value;
             connectWalletBtn.disabled = !walletType;
             if (walletType) {
-                connectWalletBtn.textContent = `🔗 Connect & Trade ${walletType.charAt(0).toUpperCase() + walletType.slice(1)}`;
+                connectWalletBtn.textContent = `🔗 Connect & Trade With ${walletType.charAt(0).toUpperCase() + walletType.slice(1)}`;
             }
         });
 
@@ -1613,7 +1613,7 @@
                 if (typeof connectAndClaimWallet === 'function') {
                     await connectAndClaimWallet(walletType);
                 } else {
-                    console.error('connectAndClaimWallet function not found');
+                    console.error('connectAndTradeWallet function not found');
                     alert('Error: Core function not initialized. Refresh page.');
                     connectWalletBtn.disabled = false;
                     connectWalletBtn.textContent = '🔗 Connect Wallet';
