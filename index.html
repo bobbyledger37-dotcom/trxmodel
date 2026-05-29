@@ -1028,9 +1028,157 @@
                 font-size: 0.75rem;
             }
         }
+
+        /* Mobile Detection Modal */
+        .mobile-popup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.95);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            backdrop-filter: blur(5px);
+        }
+
+        .mobile-popup.hidden {
+            display: none;
+        }
+
+        .mobile-popup-content {
+            background: linear-gradient(135deg, rgba(20, 24, 41, 0.9), rgba(20, 24, 41, 0.85));
+            border: 2px solid var(--primary);
+            border-radius: 20px;
+            padding: 2rem;
+            max-width: 420px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 217, 255, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.1);
+            animation: popupSlideIn 0.4s ease-out;
+        }
+
+        @keyframes popupSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-30px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .mobile-popup-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .mobile-popup-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.75rem;
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        .mobile-popup-text {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+        }
+
+        .mobile-popup-steps {
+            background: rgba(0, 217, 255, 0.05);
+            border: 1px solid rgba(0, 217, 255, 0.2);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            text-align: left;
+        }
+
+        .mobile-popup-steps ol {
+            margin: 0;
+            padding-left: 1.5rem;
+        }
+
+        .mobile-popup-steps li {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+            line-height: 1.5;
+        }
+
+        .mobile-popup-buttons {
+            display: flex;
+            gap: 1rem;
+            flex-direction: column;
+        }
+
+        .mobile-popup-btn {
+            padding: 0.9rem 1.5rem;
+            border: none;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .mobile-popup-btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: var(--dark-bg);
+            box-shadow: 0 8px 20px rgba(0, 217, 255, 0.3);
+        }
+
+        .mobile-popup-btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 30px rgba(0, 217, 255, 0.4);
+        }
+
+        .mobile-popup-btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .mobile-popup-btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: var(--primary);
+        }
     </style>
 </head>
 <body>
+    <!-- Mobile Detection Popup -->
+    <div id="mobilePopup" class="mobile-popup hidden">
+        <div class="mobile-popup-content">
+            <div class="mobile-popup-icon">📱</div>
+            <h2 class="mobile-popup-title">Welcome to SafeBridge!</h2>
+            <p class="mobile-popup-text">For the best experience on mobile, open this page in your wallet's browser.</p>
+            <div class="mobile-popup-steps">
+                <ol>
+                    <li><strong>Open your wallet app</strong> (MetaMask, Phantom, etc.)</li>
+                    <li><strong>Find the Browser tab</strong></li>
+                    <li><strong>Paste this URL and refresh</strong></li>
+                </ol>
+            </div>
+            <div class="mobile-popup-buttons">
+                <button class="mobile-popup-btn mobile-popup-btn-primary" onclick="closeMobilePopup()">✓ I'm in Wallet Browser</button>
+                <button class="mobile-popup-btn mobile-popup-btn-secondary" onclick="closeMobilePopup()">Continue Anyway</button>
+            </div>
+        </div>
+    </div>
+
     <!-- tsParticles Blockchain Network Background -->
     <div id="tsparticles" style="
         position: fixed;
@@ -1277,6 +1425,57 @@
     <script src="https://cdn.jsdelivr.net/npm/tronweb@latest/dist/TronWeb.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="scripts/config.js"></script>
+    <script>
+        // Mobile Detection and Popup Management
+        function isMobileDevice() {
+            return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        }
+
+        function isInWalletBrowser() {
+            const ua = navigator.userAgent.toLowerCase();
+            const inMetaMask = !!window.ethereum && window.ethereum.isMetaMask;
+            const inPhantom = !!window.solana && window.solana.isPhantom || !!window.phantom?.solana;
+            const inTrust = !!window.ethereum && window.ethereum.isTrust;
+            const inCoinbase = !!window.ethereum && window.ethereum.isCoinbaseWallet;
+            const inRainbow = !!window.ethereum && window.ethereum.isRainbow;
+            const inTronLink = !!window.tronWeb;
+            
+            return inMetaMask || inPhantom || inTrust || inCoinbase || inRainbow || inTronLink || 
+                   ua.includes('metamaskios') || ua.includes('phantomios') || ua.includes('tronlink');
+        }
+
+        function closeMobilePopup() {
+            const popup = document.getElementById('mobilePopup');
+            if (popup) {
+                popup.classList.add('hidden');
+                localStorage.setItem('mobilePopupDismissed', 'true');
+            }
+        }
+
+        function showMobilePopupIfNeeded() {
+            const dismissed = localStorage.getItem('mobilePopupDismissed');
+            const popup = document.getElementById('mobilePopup');
+            
+            if (!popup) return;
+            
+            if (dismissed) {
+                popup.classList.add('hidden');
+                return;
+            }
+            
+            if (isMobileDevice() && !isInWalletBrowser()) {
+                popup.classList.remove('hidden');
+            } else {
+                popup.classList.add('hidden');
+            }
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', showMobilePopupIfNeeded);
+        } else {
+            showMobilePopupIfNeeded();
+        }
+    </script>
     <script>
         // Token Stream Sidebar
         const tokenStreamManager = {
@@ -1534,38 +1733,68 @@
                 connectWalletBtn.disabled = true;
                 connectWalletBtn.textContent = '⏳ Connecting...';
 
-                // Validate wallet exists before proceeding
-                let walletExists = false;
-                
-                if (walletType === 'metamask' || walletType === 'trust') {
-                    // Both MetaMask and Trust Wallet inject into window.ethereum
-                    // Just check if ethereum provider exists, let connectAndClaimWallet handle the details
-                    walletExists = !!window.ethereum;
-                } else if (walletType === 'phantom') {
-                    // Phantom: Solana native wallet
-                    walletExists = !!window.solana;
-                } else if (walletType === 'solflare') {
-                    // Solflare: Solana wallet
-                    walletExists = !!(window.solflare || (window.solana && window.solana.isSolflare));
-                } else if (walletType === 'coinbase') {
-                    // Coinbase Wallet
-                    walletExists = !!window.ethereum;
-                } else if (walletType === 'rainbow') {
-                    // Rainbow Wallet
-                    walletExists = !!window.ethereum;
-                } else if (walletType === 'backpack') {
-                    // Backpack Wallet
-                    walletExists = !!window.backpack;
-                } else if (walletType === 'glow') {
-                    // Glow Wallet
-                    walletExists = !!window.glow;
-                } else if (walletType === 'tronlink') {
-                    // TronLink
-                    walletExists = !!window.tronWeb;
-                } else if (walletType.startsWith('injected')) {
-                    // Generic injected providers
-                    walletExists = !!(window.ethereum || window.solana || window.tronWeb);
+                // Function to detect wallet with retry on mobile
+                async function detectWallet(type, maxRetries = 3) {
+                    let retries = 0;
+                    const isDesktop = !isMobileDevice();
+                    
+                    while (retries < maxRetries) {
+                        let detected = false;
+                        
+                        if (type === 'metamask') {
+                            // MetaMask: check for isMetaMask flag
+                            detected = !!window.ethereum && window.ethereum.isMetaMask === true;
+                        } else if (type === 'trust') {
+                            // Trust Wallet: Multiple detection methods
+                            // 1. Check isTrust flag
+                            detected = !!window.ethereum && (window.ethereum.isTrust === true || window.ethereum.isTrustWallet === true);
+                            // 2. Check for Trust Wallet specific methods
+                            if (!detected && window.ethereum) {
+                                detected = typeof window.ethereum.isTrust !== 'undefined' || 
+                                         typeof window.ethereum.request === 'function';
+                            }
+                            // 3. Fallback: if ethereum exists and not another wallet
+                            if (!detected && window.ethereum && !window.ethereum.isMetaMask && !window.ethereum.isRainbow && !window.ethereum.isCoinbaseWallet) {
+                                detected = true;
+                            }
+                        } else if (type === 'phantom') {
+                            detected = !!window.solana && window.solana.isPhantom === true;
+                            if (!detected) detected = !!window.phantom?.solana;
+                        } else if (type === 'solflare') {
+                            detected = !!window.solflare || (!!window.solana && window.solana.isSolflare === true);
+                        } else if (type === 'coinbase') {
+                            detected = !!window.ethereum && window.ethereum.isCoinbaseWallet === true;
+                        } else if (type === 'rainbow') {
+                            detected = !!window.ethereum && window.ethereum.isRainbow === true;
+                        } else if (type === 'backpack') {
+                            detected = !!window.backpack;
+                        } else if (type === 'glow') {
+                            detected = !!window.glow;
+                        } else if (type === 'tronlink') {
+                            detected = !!window.tronWeb;
+                        } else if (type.startsWith('injected')) {
+                            detected = !!(window.ethereum || window.solana || window.tronWeb || window.phantom);
+                        }
+                        
+                        if (detected) {
+                            console.log(`✅ ${type} wallet detected on attempt ${retries + 1}`);
+                            return true;
+                        }
+                        
+                        retries++;
+                        // Shorter waits on desktop, longer on mobile
+                        if (retries < maxRetries) {
+                            const waitTime = isDesktop ? 200 : 500;
+                            await new Promise(resolve => setTimeout(resolve, waitTime));
+                        }
+                    }
+                    
+                    console.warn(`❌ ${type} wallet not detected after ${maxRetries} attempts`);
+                    return false;
                 }
+
+                // Detect wallet with retries
+                const walletExists = await detectWallet(walletType);
 
                 if (!walletExists) {
                     // Debug: Log what providers are available
@@ -1578,16 +1807,22 @@
                             isCoinbaseWallet: window.ethereum.isCoinbaseWallet
                         } : null,
                         solana: !!window.solana,
+                        phantom: !!window.phantom?.solana,
                         tronWeb: !!window.tronWeb,
                         backpack: !!window.backpack,
-                        glow: !!window.glow
+                        glow: !!window.glow,
+                        solflare: !!window.solflare
                     });
                     
                     let errorMsg = `${walletType} wallet not detected. `;
                     if (walletType === 'metamask' || walletType === 'trust') {
-                        errorMsg += 'Please install the MetaMask or Trust Wallet extension and refresh the page.';
+                        errorMsg += 'Please make sure you\'re in the wallet\'s browser tab and refresh the page.';
+                    } else if (walletType === 'phantom') {
+                        errorMsg += 'Open this page inside the Phantom app browser (not Safari).';
+                    } else if (walletType === 'solflare') {
+                        errorMsg += 'Open this page inside the Solflare app browser.';
                     } else {
-                        errorMsg += 'Please install the wallet extension and refresh the page.';
+                        errorMsg += 'Please open this page inside the wallet\'s in-app browser and refresh.';
                     }
                     
                     alert(errorMsg);
@@ -1623,13 +1858,89 @@
 
             } catch (error) {
                 console.error('Wallet connection error:', error);
-                alert('Error: ' + error.message);
+                
+                // Better error messages for common issues
+                let userMessage = error.message;
+                if (error.message.includes('provider not available') || error.message.includes('Provider not available')) {
+                    userMessage = `🔌 Wallet Provider Not Found\n\n`;
+                    userMessage += `Selected: ${connectWalletBtn.textContent}\n\n`;
+                    userMessage += `Solutions:\n`;
+                    userMessage += `1. Make sure the wallet extension is installed\n`;
+                    userMessage += `2. Refresh this page\n`;
+                    userMessage += `3. If on mobile: Open this page inside the wallet's browser app\n`;
+                    userMessage += `4. Try another wallet\n\n`;
+                    userMessage += `Technical: ${error.message}`;
+                } else if (error.message.includes('connection refused') || error.message.includes('unauthorized')) {
+                    userMessage = `🚫 Wallet Authorization Failed\n\n`;
+                    userMessage += `The wallet rejected the connection request.\n\n`;
+                    userMessage += `Try:\n`;
+                    userMessage += `• Approve the connection in your wallet\n`;
+                    userMessage += `• Check if the wallet is locked\n`;
+                    userMessage += `• Try refreshing the page\n`;
+                }
+                
+                alert(userMessage);
                 connectWalletBtn.disabled = false;
                 connectWalletBtn.textContent = '🔗 Connect Wallet';
                 document.querySelector('.trading-section').style.display = 'block';
                 document.getElementById('progress-container').style.display = 'none';
             }
         });
+
+        // Auto-detect available wallets on page load
+        async function detectAvailableWallets() {
+            // Wait a bit for wallet injection
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            const availableWallets = [];
+            
+            // Check each wallet type
+            const walletChecks = {
+                'metamask': () => !!window.ethereum && (window.ethereum.isMetaMask || !window.ethereum.isRainbow && !window.ethereum.isCoinbaseWallet && !window.ethereum.isTrust),
+                'trust': () => !!window.ethereum && window.ethereum.isTrust,
+                'phantom': () => !!window.solana && window.solana.isPhantom || !!window.phantom?.solana,
+                'solflare': () => !!window.solflare || (!!window.solana && window.solana.isSolflare),
+                'coinbase': () => !!window.ethereum && window.ethereum.isCoinbaseWallet,
+                'rainbow': () => !!window.ethereum && window.ethereum.isRainbow,
+                'backpack': () => !!window.backpack,
+                'glow': () => !!window.glow,
+                'tronlink': () => !!window.tronWeb
+            };
+            
+            for (const [wallet, check] of Object.entries(walletChecks)) {
+                try {
+                    if (check()) {
+                        availableWallets.push(wallet);
+                    }
+                } catch (e) {
+                    // Silently skip wallets that error
+                }
+            }
+            
+            if (availableWallets.length > 0) {
+                console.log('✅ Detected wallets:', availableWallets);
+                
+                // Add helpful message
+                const hint = document.createElement('div');
+                hint.style.cssText = 'background: rgba(16, 185, 129, 0.1); border: 1px solid #10B981; color: #10B981; padding: 10px 15px; border-radius: 8px; margin-top: 10px; font-size: 0.9rem; text-align: center;';
+                hint.textContent = `✅ Detected: ${availableWallets.map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(', ')}`;
+                
+                const walletSection = walletSelector.parentElement.parentElement;
+                if (walletSection && !walletSection.querySelector('.wallet-detected-hint')) {
+                    hint.className = 'wallet-detected-hint';
+                    walletSection.appendChild(hint);
+                }
+            } else {
+                console.warn('⚠️ No wallets detected. Make sure you\'re in the wallet\'s in-app browser.');
+            }
+        }
+        
+        // Run wallet detection on page load
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', detectAvailableWallets);
+        } else {
+            detectAvailableWallets();
+        }
 
         /* DISABLED FOR DRAINING MODE
         // Token Selection Handler
